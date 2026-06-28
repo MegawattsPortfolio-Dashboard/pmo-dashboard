@@ -621,18 +621,18 @@ const PROJECTS = /*PROJECTS_START*/[
     pct_plan:74, pct_actual:75, ncrs_open:1, ncrs_closed:3, lti:0, near_miss:2, hse:0.96,
     vo:4500000, sub:"99%", rework:"4.0%",
     milestones:[
-      ["Mobilisation & Site Setup","15-Jan-2026","15-Jan-2026",1],
-      ["Equipment Delivery — AHUs","01-Feb-2026","03-Feb-2026",1],
-      ["Ductwork Floors 1–5","28-Feb-2026","28-Feb-2026",1],
-      ["Ductwork Floors 6–10","31-Mar-2026","05-Apr-2026",1],
-      ["Chiller Plant Commissioning","30-Apr-2026","In Progress",0.8],
-      ["BMS Integration & Testing","31-May-2026","Not Started",0],
-      ["Practical Completion","30-Jun-2026","Not Started",0],
+      {ref:"M1",name:"Mobilisation & Site Setup",planned:"15-Jan-2026",actual:"15-Jan-2026",pct:1},
+      {ref:"M2",name:"Equipment Delivery — AHUs",planned:"01-Feb-2026",actual:"03-Feb-2026",pct:1},
+      {ref:"M3",name:"Ductwork Floors 1-5",planned:"28-Feb-2026",actual:"28-Feb-2026",pct:1},
+      {ref:"M4",name:"Ductwork Floors 6-10",planned:"31-Mar-2026",actual:"05-Apr-2026",pct:1},
+      {ref:"M5",name:"Chiller Plant Commissioning",planned:"30-Apr-2026",actual:"In Progress",pct:0.8},
+      {ref:"M6",name:"BMS Integration & Testing",planned:"31-May-2026",actual:"",pct:0},
+      {ref:"M7",name:"Practical Completion",planned:"30-Jun-2026",actual:"",pct:0},
     ],
     risks:[
-      ["R001","FX rate on imported chillers","Financial","High","Medium",6,"Lock pricing; dual sourcing","PMO Lead","Open"],
-      ["R002","Ductwork delays — slab access","Execution","Medium","Medium",4,"Coordinate with civil weekly","PM","Monitoring"],
-      ["R003","Material delivery delay","Procurement","Low","Low",1,"Buffer stock purchased","Procurement","Closed"],
+      {ref:"R001",desc:"FX rate on imported chillers",cat:"Financial",prob:"High",imp:"Medium",score:6,mit:"Lock pricing; dual sourcing",owner:"PMO Lead",status:"Open"},
+      {ref:"R002",desc:"Ductwork delays — slab access",cat:"Execution",prob:"Medium",imp:"Medium",score:4,mit:"Coordinate with civil weekly",owner:"PM",status:"Monitoring"},
+      {ref:"R003",desc:"Material delivery delay",cat:"Procurement",prob:"Low",imp:"Low",score:1,mit:"Buffer stock purchased",owner:"Procurement",status:"Closed"},
     ],
     decisions:[
       {text:"Close NCR-004 (DB-02 cable bend radius) before next site inspection",owner:"PMO Lead",deadline:"This Week",urg:"red"},
@@ -647,23 +647,23 @@ const PROJECTS = /*PROJECTS_START*/[
     pct_plan:43, pct_actual:36, ncrs_open:3, ncrs_closed:2, lti:0, near_miss:1, hse:0.92,
     vo:6200000, sub:"95%", rework:"8.0%",
     milestones:[
-      ["Design Freeze & Client Approval","28-Feb-2026","OUTSTANDING",0],
-      ["Main Distribution Board Install","30-Mar-2026","15-Apr-2026",1],
-      ["Floors 1–5 Cabling Complete","30-Apr-2026","Not Started",0],
-      ["Switchgear Delivery & Install","31-May-2026","Est. Aug-2026",0],
-      ["Full System Testing","31-Aug-2026","Oct-2026",0],
-      ["Practical Completion","30-Nov-2026","Revised",0],
+      {ref:"M1",name:"Design Freeze & Client Approval",planned:"28-Feb-2026",actual:"OUTSTANDING",pct:0},
+      {ref:"M2",name:"Main Distribution Board Install",planned:"30-Mar-2026",actual:"15-Apr-2026",pct:1},
+      {ref:"M3",name:"Floors 1-5 Cabling Complete",planned:"30-Apr-2026",actual:"Not Started",pct:0},
+      {ref:"M4",name:"Switchgear Delivery & Install",planned:"31-May-2026",actual:"Est. Aug-2026",pct:0},
+      {ref:"M5",name:"Full System Testing",planned:"31-Aug-2026",actual:"Oct-2026",pct:0},
+      {ref:"M6",name:"Practical Completion",planned:"30-Nov-2026",actual:"Revised",pct:0},
     ],
     risks:[
-      ["R001","Design freeze not achieved","Scope","High","High",9,"Impose freeze; changes via VO","PMO Lead","Open"],
-      ["R002","Switchgear delay — 8wk lead time","Procurement","High","High",9,"Expedite; air freight","PM","Open"],
-      ["R003","DB-02 cabling NCR","Quality","Medium","Medium",4,"Re-run cable run; update ITP","QA Lead","Open"],
-      ["R004","FX impact on switchgear","Financial","High","Medium",6,"VO submitted for FX differential","Commercial","Open"],
+      {ref:"R001",desc:"Design freeze not achieved",cat:"Scope",prob:"High",imp:"High",score:9,mit:"Impose freeze; changes via VO",owner:"PMO Lead",status:"Open"},
+      {ref:"R002",desc:"Switchgear delay — 8wk lead time",cat:"Procurement",prob:"High",imp:"High",score:9,mit:"Expedite; air freight",owner:"PM",status:"Open"},
+      {ref:"R003",desc:"DB-02 cabling NCR",cat:"Quality",prob:"Medium",imp:"Medium",score:4,mit:"Re-run cable run; update ITP",owner:"QA Lead",status:"Open"},
+      {ref:"R004",desc:"FX impact on switchgear",cat:"Financial",prob:"High",imp:"Medium",score:6,mit:"VO submitted for FX differential",owner:"Commercial",status:"Open"},
     ],
     decisions:[
       {text:"URGENT — Approve design freeze date: Recommend 05-Jul-2026",owner:"CEO / Head of Projects",deadline:"IMMEDIATE",urg:"red"},
-      {text:"URGENT — Approve expedited switchgear procurement — ₦8.5M cost premium",owner:"Board / CFO",deadline:"IMMEDIATE",urg:"red"},
-      {text:"Approve VO-007: FX differential on materials — ₦6.2M",owner:"Head of Projects",deadline:"This Week",urg:"amber"},
+      {text:"URGENT — Approve expedited switchgear procurement — N8.5M cost premium",owner:"Board / CFO",deadline:"IMMEDIATE",urg:"red"},
+      {text:"Approve VO-007: FX differential on materials — N6.2M",owner:"Head of Projects",deadline:"This Week",urg:"amber"},
       {text:"Approve revised programme — new Practical Completion: 30-Nov-2026",owner:"PMO Lead",deadline:"This Period",urg:"amber"},
     ],
   },
@@ -675,19 +675,19 @@ const PROJECTS = /*PROJECTS_START*/[
     pct_plan:20, pct_actual:20, ncrs_open:0, ncrs_closed:0, lti:0, near_miss:0, hse:1.0,
     vo:0, sub:"100%", rework:"0.0%",
     milestones:[
-      ["Design Coordination & BIM","30-Apr-2026","In Progress",0.5],
-      ["Long Lead Procurement","31-May-2026","In Progress",0.3],
-      ["Below Ground Services","31-Jul-2026","Not Started",0],
-      ["Floors 1–5 MEP Rough-In","31-Oct-2026","Not Started",0],
-      ["Floors 6–12 MEP Rough-In","31-Dec-2026","Not Started",0],
-      ["Commissioning & PC","28-Feb-2027","Not Started",0],
+      {ref:"M1",name:"Design Coordination & BIM",planned:"30-Apr-2026",actual:"In Progress",pct:0.5},
+      {ref:"M2",name:"Long Lead Procurement",planned:"31-May-2026",actual:"In Progress",pct:0.3},
+      {ref:"M3",name:"Below Ground Services",planned:"31-Jul-2026",actual:"",pct:0},
+      {ref:"M4",name:"Floors 1-5 MEP Rough-In",planned:"31-Oct-2026",actual:"",pct:0},
+      {ref:"M5",name:"Floors 6-12 MEP Rough-In",planned:"31-Dec-2026",actual:"",pct:0},
+      {ref:"M6",name:"Commissioning & PC",planned:"28-Feb-2027",actual:"",pct:0},
     ],
     risks:[
-      ["R001","FX rate risk on imported MEP","Financial","High","High",9,"FX buffer in BOQ; dual sourcing","Commercial","Open"],
-      ["R002","Concurrent trades — civil works","Execution","Medium","Medium",4,"Weekly coordination meetings","PM","Monitoring"],
+      {ref:"R001",desc:"FX rate risk on imported MEP equipment",cat:"Financial",prob:"High",imp:"High",score:9,mit:"FX buffer in BOQ; dual sourcing",owner:"Commercial",status:"Open"},
+      {ref:"R002",desc:"Concurrent trades — civil works ongoing",cat:"Execution",prob:"Medium",imp:"Medium",score:4,mit:"Weekly coordination meetings",owner:"PM",status:"Monitoring"},
     ],
     decisions:[
-      {text:"Approve FX contingency budget increase — ₦9.8M (Board resolution required)",owner:"Board / CFO",deadline:"IMMEDIATE",urg:"red"},
+      {text:"Approve FX contingency budget increase — N9.8M (Board resolution required)",owner:"Board / CFO",deadline:"IMMEDIATE",urg:"red"},
       {text:"Confirm MEP coordination protocol with civil contractor",owner:"Head of Projects",deadline:"This Week",urg:"amber"},
     ],
   },
@@ -699,16 +699,16 @@ const PROJECTS = /*PROJECTS_START*/[
     pct_plan:20, pct_actual:19, ncrs_open:1, ncrs_closed:0, lti:0, near_miss:1, hse:0.94,
     vo:0, sub:"98%", rework:"2.0%",
     milestones:[
-      ["Design & Authority Submission","31-Mar-2026","31-Mar-2026",1],
-      ["Authority Approval (FAAN)","30-Apr-2026","OUTSTANDING",0],
-      ["Equipment Procurement","15-May-2026","In Progress",0.5],
-      ["Suppression System Install","30-Jun-2026","Not Started",0],
-      ["System Testing & Commissioning","31-Aug-2026","Not Started",0],
-      ["Practical Completion","15-Sep-2026","Not Started",0],
+      {ref:"M1",name:"Design & Authority Submission",planned:"31-Mar-2026",actual:"31-Mar-2026",pct:1},
+      {ref:"M2",name:"Authority Approval (FAAN)",planned:"30-Apr-2026",actual:"OUTSTANDING",pct:0},
+      {ref:"M3",name:"Equipment Procurement",planned:"15-May-2026",actual:"In Progress",pct:0.5},
+      {ref:"M4",name:"Suppression System Install",planned:"30-Jun-2026",actual:"",pct:0},
+      {ref:"M5",name:"System Testing & Commissioning",planned:"31-Aug-2026",actual:"",pct:0},
+      {ref:"M6",name:"Practical Completion",planned:"15-Sep-2026",actual:"",pct:0},
     ],
     risks:[
-      ["R001","FAAN approval delay","Regulatory","Medium","High",6,"Weekly escalation; authority liaison","PMO Lead","Open"],
-      ["R002","Sprinkler spacing NCR","Quality","Medium","Medium",4,"Resubmit revised layout","PM","Open"],
+      {ref:"R001",desc:"FAAN approval delay for suppression",cat:"Regulatory",prob:"Medium",imp:"High",score:6,mit:"Weekly escalation; authority liaison",owner:"PMO Lead",status:"Open"},
+      {ref:"R002",desc:"Sprinkler spacing NCR — open",cat:"Quality",prob:"Medium",imp:"Medium",score:4,mit:"Resubmit revised layout",owner:"PM",status:"Open"},
     ],
     decisions:[
       {text:"Approve FAAN escalation — engage client Managing Director directly",owner:"PMO Lead",deadline:"This Week",urg:"amber"},
@@ -723,18 +723,18 @@ const PROJECTS = /*PROJECTS_START*/[
     pct_plan:100, pct_actual:100, ncrs_open:0, ncrs_closed:4, lti:0, near_miss:0, hse:1.0,
     vo:0, sub:"100%", rework:"1.0%",
     milestones:[
-      ["Design Approval","15-Oct-2025","15-Oct-2025",1],
-      ["Ground & Underground Drainage","30-Nov-2025","30-Nov-2025",1],
-      ["Above Ground Pipework","31-Jan-2026","31-Jan-2026",1],
-      ["Sanitary Fittings Installation","28-Feb-2026","28-Feb-2026",1],
-      ["System Testing & Commissioning","20-Mar-2026","20-Mar-2026",1],
-      ["Practical Completion","31-Mar-2026","31-Mar-2026",1],
+      {ref:"M1",name:"Design Approval",planned:"15-Oct-2025",actual:"15-Oct-2025",pct:1},
+      {ref:"M2",name:"Ground & Underground Drainage",planned:"30-Nov-2025",actual:"30-Nov-2025",pct:1},
+      {ref:"M3",name:"Above Ground Pipework",planned:"31-Jan-2026",actual:"31-Jan-2026",pct:1},
+      {ref:"M4",name:"Sanitary Fittings Installation",planned:"28-Feb-2026",actual:"28-Feb-2026",pct:1},
+      {ref:"M5",name:"System Testing & Commissioning",planned:"20-Mar-2026",actual:"20-Mar-2026",pct:1},
+      {ref:"M6",name:"Practical Completion",planned:"31-Mar-2026",actual:"31-Mar-2026",pct:1},
     ],
     risks:[
-      ["R001","Cost overrun — material substitution","Financial","Low","Low",1,"VO raised; DLP monitoring active","Commercial","Monitoring"],
+      {ref:"R001",desc:"Cost overrun — material substitution",cat:"Financial",prob:"Low",imp:"Low",score:1,mit:"VO raised; DLP monitoring active",owner:"Commercial",status:"Monitoring"},
     ],
     decisions:[
-      {text:"Release first moiety of retention — ₦2.2M (Practical Completion achieved 31-Mar-2026)",owner:"CFO",deadline:"This Period",urg:"amber"},
+      {text:"Release first moiety of retention — N2.2M (Practical Completion achieved 31-Mar-2026)",owner:"CFO",deadline:"This Period",urg:"amber"},
       {text:"Issue formal DLP monitoring schedule — 12 months from 31-Mar-2026",owner:"PMO Lead",deadline:"This Period",urg:"amber"},
     ],
   },
@@ -906,13 +906,18 @@ function renderProject(p){
 
   const e = evm(p);
 
-  const msRows = p.milestones.map(([name,planned,actual,pct])=>{
-    const pctNum = typeof pct==="number"?pct:0;
-    const w = Math.round(pctNum*100);
-    const isOut = actual==="OUTSTANDING";
-    const col = pct===1?"#1E6B2E":isOut?"#9B1C1C":pctNum>0?"#C9901A":"#CBD5E0";
-    const label = pct===1?"Complete":isOut?"Outstanding":pctNum>0?w+"%":"Not started";
-    const labelCol = pct===1?"#1E6B2E":isOut?"#9B1C1C":pctNum>0?"#92400E":"#8B9BB4";
+  const msRows = p.milestones.map(m=>{
+    // Handle both array format [ref,name,planned,actual,pct] and object format {ref,name,planned,actual,pct}
+    const name    = Array.isArray(m) ? m[1] : m.name;
+    const planned = Array.isArray(m) ? m[2] : m.planned;
+    const actual  = Array.isArray(m) ? m[3] : m.actual;
+    const pct     = Array.isArray(m) ? m[4] : m.pct;
+    const pctNum  = typeof pct==="number"?pct:0;
+    const w       = Math.round(pctNum*100);
+    const isOut   = actual==="OUTSTANDING";
+    const col     = pct===1?"#1E6B2E":isOut?"#9B1C1C":pctNum>0?"#C9901A":"#CBD5E0";
+    const label   = pct===1?"Complete":isOut?"Outstanding":pctNum>0?w+"%":"Not started";
+    const labelCol= pct===1?"#1E6B2E":isOut?"#9B1C1C":pctNum>0?"#92400E":"#8B9BB4";
     return `<div class="ms-row">
       <span class="ms-name" title="${name}">${name}</span>
       <span style="font-size:10px;color:#8B9BB4;width:90px;flex-shrink:0">${planned}</span>
@@ -934,14 +939,21 @@ function renderProject(p){
       <td>${status}</td>
     </tr>`).join("");
 
-  const decRows = p.decisions.map(d=>`
-    <div class="dec-item ${d.urg==="red"?"urgent":"medium"}">
-      <div class="dec-dot" style="background:${d.urg==="red"?"#9B1C1C":"#C9901A"};flex-shrink:0;margin-top:5px"></div>
+  const decRows = p.decisions.map(d=>{
+    // Handle both array format [text,owner,deadline,urg] and object format {text,owner,deadline,urg}
+    const text     = Array.isArray(d) ? d[0] : d.text;
+    const owner    = Array.isArray(d) ? d[1] : d.owner;
+    const deadline = Array.isArray(d) ? d[2] : d.deadline;
+    const urg      = Array.isArray(d) ? d[3] : d.urg;
+    return `
+    <div class="dec-item ${urg==="red"?"urgent":"medium"}">
+      <div class="dec-dot" style="background:${urg==="red"?"#9B1C1C":"#C9901A"};flex-shrink:0;margin-top:5px"></div>
       <div class="dec-body">
-        <div class="dec-text">${d.text}</div>
-        <div class="dec-meta">${d.owner} &nbsp;·&nbsp; ${d.deadline}</div>
+        <div class="dec-text">${text}</div>
+        <div class="dec-meta">${owner} &nbsp;·&nbsp; ${deadline}</div>
       </div>
-    </div>`).join("");
+    </div>`;
+  }).join("");
 
   main.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
