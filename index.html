@@ -295,7 +295,7 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
   </div>
   <div style="display:flex;align-items:center;gap:16px;">
     <div class="topbar-right">PMO Lead: Toyib Salam Olanrewaju, PMP &nbsp;|&nbsp; <span class="topbar-date" id="topdate"></span></div>
-    <button onclick="saveDashboard()" id="save-local-btn" style="padding:7px 16px;background:#C9901A;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+    <button onclick="saveDashboard()" id="save-local-btn" style="padding:7px 16px;background:#C9901A;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;display:none;align-items:center;gap:6px;white-space:nowrap;">
       &#8681; Save File
     </button>
     <button class="topbar-admin-btn" id="admin-login-btn" onclick="openLogin()">🔐 Admin Login</button>
@@ -312,7 +312,7 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
     <div class="search-bar">
       <input class="search-input" id="search-input" type="text" placeholder="Search projects..." oninput="filterNav(this.value)">
     </div>
-    <button class="add-proj-btn" onclick="openModal()">+ Add New Project</button>
+    <button class="add-proj-btn" id="add-proj-btn" onclick="openModal()" style="display:none;">+ Add New Project</button>
     <div id="sidebar-nav"></div>
   </nav>
   <main class="main" id="main-content"></main>
@@ -952,7 +952,7 @@ function renderProject(p){
         <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current">${p.id} — ${p.name}</span>
       </div>
-      <button class="edit-proj-btn" onclick="openEditPanel('${p.id}')">
+      <button class="edit-proj-btn" id="edit-btn-${p.id}" onclick="openEditPanel('${p.id}')" style="display:${_isAdmin?'':'none'};">
         ✏️ Edit / Re-baseline
       </button>
     </div>
@@ -1392,6 +1392,18 @@ function doLogout() {
     _isAdmin = false; _currentUser = null;
     document.getElementById('admin-bar').classList.remove('visible');
     document.getElementById('admin-login-btn').style.display = '';
+
+    // Hide admin-only controls
+    const addBtn  = document.getElementById('add-proj-btn');
+    const saveBtn = document.getElementById('save-local-btn');
+    if (addBtn)  addBtn.style.display  = 'none';
+    if (saveBtn) saveBtn.style.display = 'none';
+
+    // Hide all edit buttons
+    document.querySelectorAll('.edit-proj-btn').forEach(btn => btn.style.display = 'none');
+
+    buildSidebar();
+    renderMain();
     _toast('Signed out of admin mode.');
   });
 }
@@ -1399,6 +1411,16 @@ function doLogout() {
 function onAdminLoggedIn() {
   document.getElementById('admin-bar').classList.add('visible');
   document.getElementById('admin-login-btn').style.display = 'none';
+
+  // Show admin-only controls
+  const addBtn      = document.getElementById('add-proj-btn');
+  const saveBtn     = document.getElementById('save-local-btn');
+  if (addBtn)  addBtn.style.display  = '';
+  if (saveBtn) saveBtn.style.display = 'flex';
+
+  // Show all edit buttons currently in the DOM
+  document.querySelectorAll('.edit-proj-btn').forEach(btn => btn.style.display = '');
+
   // Load latest data from Firebase
   loadFromFirebase();
 }
