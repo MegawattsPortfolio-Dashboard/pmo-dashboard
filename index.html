@@ -1411,10 +1411,28 @@ async function loadFromFirebase() {
     const snap = await getDocs(collection(window._fbDb, 'projects'));
     if (!snap.empty) {
       const loaded = [];
-      snap.forEach(docSnap => loaded.push(docSnap.data()));
-      // Sort by id
+      snap.forEach(docSnap => {
+        const p = docSnap.data();
+        // Restore milestone arrays for rendering compatibility
+        if (Array.isArray(p.milestones) && p.milestones.length > 0 && typeof p.milestones[0] === 'object') {
+          p.milestones = p.milestones.map(m =>
+            Array.isArray(m) ? m : [m.ref||'', m.name||'', m.planned||'', m.actual||'', m.pct||0]
+          );
+        }
+        if (Array.isArray(p.risks) && p.risks.length > 0 && typeof p.risks[0] === 'object') {
+          p.risks = p.risks.map(r =>
+            Array.isArray(r) ? r : [r.ref||'', r.desc||'', r.cat||'', r.prob||'',
+                                     r.imp||'', r.score||0, r.mit||'', r.owner||'', r.status||'']
+          );
+        }
+        if (Array.isArray(p.decisions) && p.decisions.length > 0 && typeof p.decisions[0] === 'object' && !p.decisions[0].text) {
+          // Already in correct object format with .text property — leave as is
+        } else if (Array.isArray(p.decisions) && p.decisions.length > 0 && typeof p.decisions[0] === 'object' && p.decisions[0].text) {
+          // Object format from Firestore — keep as is, render handles both
+        }
+        loaded.push(p);
+      });
       loaded.sort((a,b) => a.id.localeCompare(b.id));
-      // Replace PROJECTS array
       PROJECTS.length = 0;
       loaded.forEach(p => PROJECTS.push(p));
       buildSidebar();
@@ -1422,7 +1440,7 @@ async function loadFromFirebase() {
       setCloudStatus('saved', '● Cloud synced');
       _toast('✅ Portfolio loaded from Firebase — ' + loaded.length + ' projects');
     } else {
-      // No data yet — push current PROJECTS to Firebase
+      // No data in Firebase yet — save current projects
       await saveAllToFirebase();
       setCloudStatus('saved', '● Initialised');
       _toast('✅ Projects saved to Firebase for the first time');
@@ -1434,12 +1452,73 @@ async function loadFromFirebase() {
 }
 
 // ── FIRESTORE: Save one project ───────────────────────────────────────────────
+// Firestore does not support nested arrays — convert them to objects first
+function flattenForFirestore(p) {
+  const flat = Object.assign({}, p);
+
+  // Convert milestones array-of-arrays to array-of-objects
+  if (Array.isArray(flat.milestones)) {
+    flat.milestones = flat.milestones.map(m => {
+      if (Array.isArray(m)) {
+        return { ref: m[0]||'', name: m[1]||'', planned: m[2]||'', actual: m[3]||'', pct: m[4]||0 };
+      }
+      return m; // already an object
+    });
+  }
+
+  // Convert risks array-of-arrays to array-of-objects
+  if (Array.isArray(flat.risks)) {
+    flat.risks = flat.risks.map(r => {
+      if (Array.isArray(r)) {
+        return { ref: r[0]||'', desc: r[1]||'', cat: r[2]||'', prob: r[3]||'',
+                 imp: r[4]||'', score: r[5]||0, mit: r[6]||'', owner: r[7]||'', status: r[8]||'' };
+      }
+      return r;
+    });
+  }
+
+  // Convert decisions array-of-arrays to array-of-objects
+  if (Array.isArray(flat.decisions)) {
+    flat.decisions = flat.decisions.map(d => {
+      if (Array.isArray(d)) {
+        return { text: d[0]||'', owner: d[1]||'', deadline: d[2]||'', urg: d[3]||'amber' };
+      }
+      return d;
+    });
+  }
+
+  // Convert baselines if present
+  if (Array.isArray(flat.baselines)) {
+    flat.baselines = flat.baselines.map(b => {
+      if (Array.isArray(b)) {
+        return { date: b[0]||'', isRebaseline: b[1]||false, note: b[2]||'',
+                 bac: b[3]||0, pv: b[4]||0, ev: b[5]||0, ac: b[6]||0 };
+      }
+      return b;
+    });
+  }
+
+  return flat;
+}
+
+// Restore project from Firestore format back to dashboard format
+function restoreFromFirestore(p) {
+  const restored = Object.assign({}, p);
+
+  // Milestones — keep as objects (dashboard handles both arrays and objects)
+  // Decisions — keep as objects
+  // Risks — keep as objects
+  // The render functions need to handle object format too
+  return restored;
+}
+
 async function saveProjectToFirebase(p) {
   if (!_isAdmin) return;
   setCloudStatus('saving', '● Saving...');
   try {
     const { doc, setDoc } = window._fbFns;
-    await setDoc(doc(window._fbDb, 'projects', p.id), p);
+    const flat = flattenForFirestore(p);
+    await setDoc(doc(window._fbDb, 'projects', p.id), flat);
     setCloudStatus('saved', '● Saved to cloud');
   } catch(e) {
     setCloudStatus('error', '● Save failed');
