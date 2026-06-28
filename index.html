@@ -1409,45 +1409,69 @@ async function loadFromFirebase() {
   try {
     const { collection, getDocs } = window._fbFns;
     const snap = await getDocs(collection(window._fbDb, 'projects'));
-    if (!snap.empty) {
-      const loaded = [];
-      snap.forEach(docSnap => {
-        const p = docSnap.data();
-        // Restore milestone arrays for rendering compatibility
-        if (Array.isArray(p.milestones) && p.milestones.length > 0 && typeof p.milestones[0] === 'object') {
-          p.milestones = p.milestones.map(m =>
-            Array.isArray(m) ? m : [m.ref||'', m.name||'', m.planned||'', m.actual||'', m.pct||0]
-          );
-        }
-        if (Array.isArray(p.risks) && p.risks.length > 0 && typeof p.risks[0] === 'object') {
-          p.risks = p.risks.map(r =>
-            Array.isArray(r) ? r : [r.ref||'', r.desc||'', r.cat||'', r.prob||'',
-                                     r.imp||'', r.score||0, r.mit||'', r.owner||'', r.status||'']
-          );
-        }
-        if (Array.isArray(p.decisions) && p.decisions.length > 0 && typeof p.decisions[0] === 'object' && !p.decisions[0].text) {
-          // Already in correct object format with .text property — leave as is
-        } else if (Array.isArray(p.decisions) && p.decisions.length > 0 && typeof p.decisions[0] === 'object' && p.decisions[0].text) {
-          // Object format from Firestore — keep as is, render handles both
-        }
-        loaded.push(p);
-      });
-      loaded.sort((a,b) => a.id.localeCompare(b.id));
+
+    // Keep track of any LOCAL-ONLY projects added before login
+    const localOnlyProjects = PROJECTS.filter(lp => true); // snapshot of current local state
+
+    const cloudProjects = [];
+    snap.forEach(docSnap => {
+      const p = docSnap.data();
+
+      // Restore nested arrays from Firestore object format
+      if (Array.isArray(p.milestones)) {
+        p.milestones = p.milestones.map(m =>
+          Array.isArray(m) ? m : [m.ref||'', m.name||'', m.planned||'', m.actual||'', m.pct||0]
+        );
+      }
+      if (Array.isArray(p.risks)) {
+        p.risks = p.risks.map(r =>
+          Array.isArray(r) ? r : [r.ref||'', r.desc||'', r.cat||'', r.prob||'',
+                                   r.imp||'', r.score||0, r.mit||'', r.owner||'', r.status||'']
+        );
+      }
+      if (Array.isArray(p.decisions)) {
+        p.decisions = p.decisions.map(d =>
+          Array.isArray(d) ? d :
+          { text: d.text||'', owner: d.owner||'', deadline: d.deadline||'', urg: d.urg||'amber' }
+        );
+      }
+      cloudProjects.push(p);
+    });
+
+    if (cloudProjects.length > 0) {
+      // Start with cloud projects as the base
       PROJECTS.length = 0;
-      loaded.forEach(p => PROJECTS.push(p));
-      buildSidebar();
-      renderMain();
-      setCloudStatus('saved', '● Cloud synced');
-      _toast('✅ Portfolio loaded from Firebase — ' + loaded.length + ' projects');
+      cloudProjects.forEach(p => PROJECTS.push(p));
+
+      // Find local-only projects not yet in Firebase and add + sync them
+      const cloudIds = new Set(cloudProjects.map(p => p.id));
+      const localOnly = localOnlyProjects.filter(p => !cloudIds.has(p.id));
+      if (localOnly.length > 0) {
+        localOnly.forEach(p => PROJECTS.push(p));
+        // Save local-only projects to Firebase
+        for (const p of localOnly) {
+          await saveProjectToFirebase(p);
+        }
+        _toast('✅ Synced ' + cloudProjects.length + ' cloud projects + ' + localOnly.length + ' local project(s) uploaded to Firebase');
+      } else {
+        _toast('✅ Portfolio loaded from Firebase — ' + cloudProjects.length + ' projects');
+      }
     } else {
-      // No data in Firebase yet — save current projects
+      // Firebase empty — push all current local projects up
       await saveAllToFirebase();
-      setCloudStatus('saved', '● Initialised');
-      _toast('✅ Projects saved to Firebase for the first time');
+      _toast('✅ ' + PROJECTS.length + ' projects saved to Firebase for the first time');
     }
+
+    // Sort and re-render
+    PROJECTS.sort((a,b) => a.id.localeCompare(b.id));
+    buildSidebar();
+    renderMain();
+    setCloudStatus('saved', '● Cloud synced');
+
   } catch(e) {
     setCloudStatus('error', '● Sync error');
     _toast('⚠️ Firebase sync error: ' + e.message);
+    console.error('Firebase load error:', e);
   }
 }
 
@@ -1558,7 +1582,22 @@ window.saveProject = function(autoSave) {
   // Also save to Firebase if admin
   if (_isAdmin) {
     const newP = PROJECTS.find(p=>p.id===id);
-    if (newP) saveProjectToFirebase(newP);
+    if (newP) {
+      saveProjectToFirebase(newP).then(() => {
+        // Re-render portfolio to show new project in KPI tiles and cards
+        if (currentView === 'portfolio') renderPortfolio();
+        else {
+          // Switch to new project view then portfolio will update on next visit
+          currentView = id;
+          buildSidebar();
+          renderMain();
+        }
+      });
+    }
+  } else {
+    // Not logged in — still re-render to show new project locally
+    buildSidebar();
+    if (currentView === 'portfolio') renderPortfolio();
   }
 };
 
