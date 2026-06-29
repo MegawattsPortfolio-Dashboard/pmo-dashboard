@@ -3134,18 +3134,18 @@ async function generateCEOReport() {
       // Left column — wins
       s.addShape(pptx.shapes.ROUNDED_RECTANGLE, {
         x:0.5, y:1.2, w:4.3, h:4.0,
-        fill:{color:"FFFFFF", transparency:5}, rectRadius:0.1
+        fill:{color:"EEF5FF"}, rectRadius:0.1
       });
       s.addText("✅  KEY WINS THIS PERIOD", {
         x:0.6, y:1.3, w:4.1, h:0.35, fontSize:10, bold:true,
-        color:RPT.GOLD, charSpacing:2
+        color:RPT.NAVY, charSpacing:2
       });
       const winsText = completedMS.slice(0,6).map(w=>({
-        text:w, options:{bullet:true, breakLine:true, color:RPT.WHITE, fontSize:11}
+        text:w, options:{bullet:true, breakLine:true, color:RPT.NAVY, fontSize:11}
       }));
       if(winsText.length===0) winsText.push({
         text:"Reporting period in progress — milestones tracking to plan",
-        options:{italic:true, color:"AABBCC", fontSize:11}
+        options:{italic:true, color:RPT.LGRAY, fontSize:11}
       });
       if(winsText.length>0) {
         winsText[winsText.length-1].options.breakLine = false;
@@ -3155,11 +3155,11 @@ async function generateCEOReport() {
       // Right column — next actions
       s.addShape(pptx.shapes.ROUNDED_RECTANGLE, {
         x:5.1, y:1.2, w:4.4, h:4.0,
-        fill:{color:"FFFFFF", transparency:5}, rectRadius:0.1
+        fill:{color:"FFF8EC"}, rectRadius:0.1
       });
       s.addText("⚡  RECOMMENDED NEXT ACTIONS", {
         x:5.2, y:1.3, w:4.2, h:0.35, fontSize:10, bold:true,
-        color:RPT.GOLD, charSpacing:2
+        color:RPT.NAVY, charSpacing:2
       });
 
       // Generate next actions from data
@@ -3175,7 +3175,7 @@ async function generateCEOReport() {
       actions.push("Next portfolio review: "+new Date(Date.now()+7*86400000).toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"}));
 
       const actText = actions.slice(0,6).map((a,i)=>({
-        text:a, options:{bullet:true, breakLine:i<actions.length-1, color:RPT.WHITE, fontSize:11}
+        text:a, options:{bullet:true, breakLine:i<actions.length-1, color:RPT.NAVY, fontSize:11}
       }));
       if(actText.length>0) actText[actText.length-1].options.breakLine = false;
       s.addText(actText, {x:5.2, y:1.75, w:4.2, h:3.2, valign:"top"});
