@@ -447,6 +447,106 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
 .roles-perm-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#4A5568;}
 .perm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 
+/* ── RESOURCE TRACKER ── */
+.resource-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:16px;}
+.resource-card{background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:14px;}
+.resource-name{font-size:13px;font-weight:600;color:#0D1B3E;}
+.resource-role{font-size:11px;color:#8B9BB4;margin-top:2px;}
+.resource-util{height:6px;background:#EEF2F8;border-radius:3px;margin:8px 0;overflow:hidden;}
+.resource-util-fill{height:100%;border-radius:3px;transition:width .3s;}
+.resource-util-label{font-size:11px;font-weight:600;}
+.resource-table{width:100%;border-collapse:collapse;font-size:12px;}
+.resource-table th{background:#0D1B3E;color:rgba(255,255,255,.85);font-size:11px;font-weight:600;padding:9px 10px;text-align:left;}
+.resource-table td{padding:8px 10px;border-bottom:1px solid #F4F6F9;vertical-align:middle;}
+.resource-table tr:nth-child(even) td{background:#F9FAFC;}
+.util-bar{display:flex;align-items:center;gap:8px;}
+.util-track{flex:1;height:6px;background:#EEF2F8;border-radius:3px;overflow:hidden;}
+.util-fill{height:100%;border-radius:3px;}
+
+/* ── NCR LOG ── */
+.ncr-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.ncr-open{background:#FFDCDC;color:#9B1C1C;}
+.ncr-closed{background:#E2EFDA;color:#1E6B2E;}
+.ncr-inreview{background:#FFF3CC;color:#92400E;}
+.ncr-severity-high{color:#9B1C1C;font-weight:700;}
+.ncr-severity-med{color:#92400E;font-weight:600;}
+.ncr-severity-low{color:#1E6B2E;}
+
+/* ── DOCUMENT REGISTER ── */
+.doc-status{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.doc-approved{background:#E2EFDA;color:#1E6B2E;}
+.doc-pending{background:#FFF3CC;color:#92400E;}
+.doc-rejected{background:#FFDCDC;color:#9B1C1C;}
+.doc-superseded{background:#F4F6F9;color:#8B9BB4;}
+.doc-type{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:#EEF2F8;color:#185FA5;}
+
+/* ── BUDGET ALERTS ── */
+.alert-banner{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:8px;margin-bottom:12px;border-left:4px solid;}
+.alert-red{background:#FFF5F5;border-color:#9B1C1C;}
+.alert-amber{background:#FFFBEB;border-color:#C9901A;}
+.alert-green{background:#F0FFF4;border-color:#1E6B2E;}
+.alert-icon{font-size:20px;flex-shrink:0;}
+.alert-title{font-size:13px;font-weight:600;}
+.alert-sub{font-size:11px;color:#8B9BB4;margin-top:2px;}
+.threshold-form{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;background:#F9FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;margin-bottom:16px;}
+
+/* ── GANTT WITH DEPENDENCIES ── */
+.gantt-dep-line{stroke:#CBD5E0;stroke-width:1.5;fill:none;stroke-dasharray:4,3;}
+.gantt-task-bar{rx:3;cursor:pointer;transition:opacity .15s;}
+.gantt-task-bar:hover{opacity:.8;}
+.gantt-critical{fill:#9B1C1C;}
+.gantt-normal{fill:#185FA5;}
+.gantt-complete{fill:#1E6B2E;}
+.gantt-delayed{fill:#C9901A;}
+.gantt-svg-wrap{overflow-x:auto;background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:12px;}
+
+/* ── COMMENTS / NOTES ── */
+.comment-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+.comment-item{background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:12px 14px;}
+.comment-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.comment-author{font-size:12px;font-weight:600;color:#0D1B3E;}
+.comment-date{font-size:11px;color:#8B9BB4;}
+.comment-text{font-size:13px;color:#2D3748;line-height:1.6;}
+.comment-tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-right:4px;margin-top:6px;}
+.tag-issue{background:#FFDCDC;color:#9B1C1C;}
+.tag-decision{background:#DDEEFF;color:#185FA5;}
+.tag-update{background:#E2EFDA;color:#1E6B2E;}
+.tag-risk{background:#FFF3CC;color:#92400E;}
+.tag-general{background:#EEF2F8;color:#4A5568;}
+.comment-input-area{background:#F9FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;}
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width:768px) {
+  .shell{flex-direction:column;}
+  .sidebar{width:100%!important;min-width:100%!important;height:auto;max-height:200px;border-right:none;border-bottom:1px solid #E2E8F0;}
+  .sidebar.h-collapsed{width:100%!important;min-width:100%!important;max-height:48px;overflow:hidden;}
+  .topbar{padding:0 12px;height:48px;flex-wrap:wrap;}
+  .topbar-right{gap:4px;}
+  .topbar-logo{font-size:12px;}
+  .port-tiles{grid-template-columns:repeat(2,1fr)!important;}
+  .kpi-grid-4{grid-template-columns:repeat(2,1fr)!important;}
+  .kpi-grid-3{grid-template-columns:repeat(2,1fr)!important;}
+  .proj-cards{grid-template-columns:1fr!important;}
+  .proj-tabs{overflow-x:auto;white-space:nowrap;flex-wrap:nowrap;}
+  .proj-tab{font-size:11px;padding:7px 10px;}
+  .edit-panel{width:100%!important;right:-100%!important;}
+  .edit-panel.open{right:0!important;}
+  .finance-grid{grid-template-columns:1fr 1fr!important;}
+  .raci-wrap{font-size:10px;}
+  .main-content{padding:12px!important;}
+  .backup-modal,.roles-modal{width:95vw!important;}
+  .topbar-sub{display:none;}
+}
+@media (max-width:480px) {
+  .port-tiles{grid-template-columns:1fr!important;}
+  .kpi-grid-4,.kpi-grid-3,.kpi-grid-2{grid-template-columns:1fr!important;}
+  .finance-summary,.raci-summary{grid-template-columns:repeat(2,1fr)!important;}
+}
+
+/* ── ALERT BADGE on portfolio cards ── */
+.alert-dot{width:8px;height:8px;border-radius:50%;background:#9B1C1C;display:inline-block;margin-left:4px;animation:pulse 1.5s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
 /* ── FOOTER ── */
 .footer{background:#fff;border-top:1px solid #E2E8F0;padding:10px 28px;font-size:11px;color:#8B9BB4;flex-shrink:0;display:flex;justify-content:space-between;}
 
@@ -498,6 +598,9 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- PptxGenJS for report generation -->
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+<!-- jsPDF for PDF export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -697,8 +800,10 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
   <div class="admin-bar-actions">
     <span class="cloud-status cloud-saved" id="cloud-status">● All saved</span>
     <span class="admin-bar-role" id="admin-role-badge">Admin</span>
+    <button class="admin-sync-btn" onclick="checkAndSendAlerts()" title="Check portfolio alerts">🔔 Alerts</button>
     <button class="admin-sync-btn" onclick="openBackupModal()" title="Backup & Restore data">💾 Backup</button>
     <button class="admin-sync-btn" onclick="openRolesModal()" title="Manage user roles & access">👥 Users</button>
+    <button class="admin-sync-btn" onclick="generateWhatsAppAlert()" title="Send portfolio alert via WhatsApp">📱 Alert</button>
     <button class="admin-sync-btn" onclick="loadFromFirebase()">↻ Sync</button>
     <button class="admin-logout-btn" onclick="doLogout()">Sign out</button>
   </div>
@@ -1151,6 +1256,17 @@ let currentView = "portfolio";
 let _sidebarCollapsed = false;
 let _sidebarHCollapsed = false;
 
+function toggleSidebarV() {
+  _sidebarCollapsed = !_sidebarCollapsed;
+  const wrap  = document.getElementById('nav-projects-wrap');
+  const arrow = document.getElementById('nav-v-arrow');
+  if (wrap) {
+    wrap.style.maxHeight = _sidebarCollapsed ? '0' : '2000px';
+    wrap.style.overflow  = _sidebarCollapsed ? 'hidden' : 'auto';
+  }
+  if (arrow) arrow.textContent = _sidebarCollapsed ? '▶' : '▼';
+}
+
 function toggleSidebarH() {
   _sidebarHCollapsed = !_sidebarHCollapsed;
   const sidebar  = document.getElementById('sidebar');
@@ -1381,6 +1497,7 @@ function renderPortfolio(){
 
     <!-- TAB: OVERVIEW -->
     <div class="tab-content active" id="ptab-overview">
+      <div id="portfolio-alerts">${renderPortfolioAlerts()}</div>
       <div class="sec-label">Project status — click any card to open
         <span style="font-size:10px;font-weight:400;color:#8B9BB4;margin-left:8px;text-transform:none;letter-spacing:0">${PROJECTS.length} projects · ${PROJECTS.length>8?'compact view':'full view'}</span>
       </div>
@@ -1595,9 +1712,15 @@ function renderProject(p){
         <span class="breadcrumb-sep">/</span>
         <span class="breadcrumb-current">${p.id} — ${p.name}</span>
       </div>
-      <button class="edit-proj-btn" onclick="openEditPanel('${p.id}')" style="display:${_isAdmin?'':'none'};">
-        ✏️ Edit / Re-baseline
-      </button>
+      <div style="display:flex;gap:8px;">
+        <button onclick="exportProjectPDF('${p.id}')"
+          style="padding:7px 14px;background:#9B1C1C;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">
+          📄 Export PDF
+        </button>
+        <button class="edit-proj-btn" onclick="openEditPanel('${p.id}')" style="display:${_isAdmin?'':'none'};">
+          ✏️ Edit / Re-baseline
+        </button>
+      </div>
     </div>
 
     <div style="font-size:12px;color:#8B9BB4;margin-bottom:4px;">${p.id} · ${p.type} · ${p.client}</div>
@@ -1619,6 +1742,10 @@ function renderProject(p){
       <div class="proj-tab" id="tab-btn-finance"   onclick="switchTab('finance','${p.id}')">💰 Finance Log</div>
       <div class="proj-tab" id="tab-btn-wbs"       onclick="switchTab('wbs','${p.id}')">📋 WBS Tracker</div>
       <div class="proj-tab" id="tab-btn-raci"      onclick="switchTab('raci','${p.id}')">👥 RACI Matrix</div>
+      <div class="proj-tab" id="tab-btn-ncr"       onclick="switchTab('ncr','${p.id}')">🔴 NCR Log</div>
+      <div class="proj-tab" id="tab-btn-docs"      onclick="switchTab('docs','${p.id}')">📁 Documents</div>
+      <div class="proj-tab" id="tab-btn-resources" onclick="switchTab('resources','${p.id}')">👷 Resources</div>
+      <div class="proj-tab" id="tab-btn-comments"  onclick="switchTab('comments','${p.id}')">💬 Notes</div>
     </div>
 
     <!-- TAB: OVERVIEW -->
@@ -1929,6 +2056,151 @@ function renderProject(p){
           <span class="raci-legend-item"><span class="raci-badge raci-C">C</span> Consulted — input required before completion</span>
           <span class="raci-legend-item"><span class="raci-badge raci-I">I</span> Informed — notified of outcome</span>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB: NCR LOG -->
+    <div class="tab-content" id="tab-ncr">
+      <div class="kpi-grid kpi-grid-4" style="margin-bottom:16px">
+        <div class="kpi-card bad"><div class="kpi-label">Open NCRs</div><div class="kpi-val">${p.ncrs_open||0}</div></div>
+        <div class="kpi-card good"><div class="kpi-label">Closed NCRs</div><div class="kpi-val">${p.ncrs_closed||0}</div></div>
+        <div class="kpi-card"><div class="kpi-label">Total NCRs</div><div class="kpi-val">${(p.ncrs_open||0)+(p.ncrs_closed||0)}</div></div>
+        <div class="kpi-card ${(p.ncrs_open||0)===0?'good':'warn'}"><div class="kpi-label">NCR Rate</div><div class="kpi-val">${(p.ncrs_open||0)+(p.ncrs_closed||0)>0?Math.round((p.ncrs_open||0)/((p.ncrs_open||0)+(p.ncrs_closed||0))*100):0}%</div><div class="kpi-note">Open rate</div></div>
+      </div>
+      ${_isAdmin?`<div class="finance-form" style="margin-bottom:16px">
+        <div class="update-form-title">🔴 Raise New NCR</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="finance-group"><label class="finance-label">NCR Reference</label>
+            <input class="finance-input" id="ncr-ref-${p.id}" placeholder="NCR-001"></div>
+          <div class="finance-group"><label class="finance-label">Date Raised</label>
+            <input class="finance-input" id="ncr-date-${p.id}" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+          <div class="finance-group"><label class="finance-label">Severity</label>
+            <select class="finance-select" id="ncr-sev-${p.id}">
+              <option value="high">High — Critical non-conformance</option>
+              <option value="medium">Medium — Significant issue</option>
+              <option value="low">Low — Minor observation</option>
+            </select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div class="finance-group"><label class="finance-label">Description</label>
+            <input class="finance-input" id="ncr-desc-${p.id}" placeholder="Describe the non-conformance"></div>
+          <div class="finance-group"><label class="finance-label">Location / Area</label>
+            <input class="finance-input" id="ncr-loc-${p.id}" placeholder="e.g. Floor 7, DB-02 panel"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end">
+          <div class="finance-group"><label class="finance-label">Root Cause</label>
+            <select class="finance-select" id="ncr-cause-${p.id}">
+              <option>Workmanship</option><option>Material</option><option>Design</option>
+              <option>Method</option><option>Supervision</option><option>Other</option>
+            </select></div>
+          <div class="finance-group"><label class="finance-label">Assigned To</label>
+            <input class="finance-input" id="ncr-owner-${p.id}" placeholder="Engineer / PM name"></div>
+          <div class="finance-group"><label class="finance-label">Due Date</label>
+            <input class="finance-input" id="ncr-due-${p.id}" type="date"></div>
+          <button class="btn-add-finance" onclick="addNCR('${p.id}')">+ Raise NCR</button>
+        </div>
+      </div>`:''}
+      <div class="sec-label">NCR Register</div>
+      <div style="overflow-x:auto"><table class="finance-table" id="ncr-table-${p.id}">
+        <thead><tr>
+          <th>Ref</th><th>Date</th><th>Description</th><th>Location</th>
+          <th>Severity</th><th>Root Cause</th><th>Owner</th><th>Due</th>
+          <th>Status</th><th>Closed Date</th>${_isAdmin?'<th></th>':''}
+        </tr></thead>
+        <tbody id="ncr-tbody-${p.id}"></tbody>
+      </table></div>
+    </div>
+
+    <!-- TAB: DOCUMENT REGISTER -->
+    <div class="tab-content" id="tab-docs">
+      ${_isAdmin?`<div class="finance-form" style="margin-bottom:16px">
+        <div class="update-form-title">📁 Register New Document</div>
+        <div style="display:grid;grid-template-columns:120px 1fr 120px 120px 120px auto;gap:10px;align-items:end">
+          <div class="finance-group"><label class="finance-label">Doc Number</label>
+            <input class="finance-input" id="doc-num-${p.id}" placeholder="DWG-001"></div>
+          <div class="finance-group"><label class="finance-label">Title / Description</label>
+            <input class="finance-input" id="doc-title-${p.id}" placeholder="Document title"></div>
+          <div class="finance-group"><label class="finance-label">Type</label>
+            <select class="finance-select" id="doc-type-${p.id}">
+              <option>Drawing</option><option>Submittal</option><option>RFI</option>
+              <option>Method Statement</option><option>ITP</option><option>Report</option>
+              <option>Certificate</option><option>Contract</option><option>Other</option>
+            </select></div>
+          <div class="finance-group"><label class="finance-label">Revision</label>
+            <input class="finance-input" id="doc-rev-${p.id}" placeholder="Rev A"></div>
+          <div class="finance-group"><label class="finance-label">Status</label>
+            <select class="finance-select" id="doc-status-${p.id}">
+              <option value="pending">Pending Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+              <option value="superseded">Superseded</option>
+            </select></div>
+          <button class="btn-add-finance" onclick="addDocument('${p.id}')">+ Add</button>
+        </div>
+      </div>`:''}
+      <div style="overflow-x:auto"><table class="finance-table" id="doc-table-${p.id}">
+        <thead><tr>
+          <th>Doc No.</th><th>Title</th><th>Type</th><th>Rev</th>
+          <th>Date Issued</th><th>Status</th><th>Issued By</th>${_isAdmin?'<th></th>':''}
+        </tr></thead>
+        <tbody id="doc-tbody-${p.id}"></tbody>
+      </table></div>
+    </div>
+
+    <!-- TAB: RESOURCE TRACKER -->
+    <div class="tab-content" id="tab-resources">
+      ${_isAdmin?`<div class="finance-form" style="margin-bottom:16px">
+        <div class="update-form-title">👷 Add / Update Resource</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 80px auto;gap:10px;align-items:end">
+          <div class="finance-group"><label class="finance-label">Name</label>
+            <input class="finance-input" id="res-name-${p.id}" placeholder="Engineer name"></div>
+          <div class="finance-group"><label class="finance-label">Role / Discipline</label>
+            <input class="finance-input" id="res-role-${p.id}" placeholder="e.g. Electrical Engineer"></div>
+          <div class="finance-group"><label class="finance-label">Project Assignment</label>
+            <input class="finance-input" id="res-proj-${p.id}" value="${p.id}" placeholder="Project ID"></div>
+          <div class="finance-group"><label class="finance-label">Start Date</label>
+            <input class="finance-input" id="res-start-${p.id}" type="date"></div>
+          <div class="finance-group"><label class="finance-label">% Util.</label>
+            <input class="finance-input" id="res-util-${p.id}" type="number" min="0" max="100" placeholder="100"></div>
+          <button class="btn-add-finance" onclick="addResource('${p.id}')">+ Add</button>
+        </div>
+      </div>`:''}
+      <div class="resource-grid" id="res-cards-${p.id}"></div>
+      <div class="sec-label">Resource Deployment Log</div>
+      <div style="overflow-x:auto"><table class="resource-table" id="res-table-${p.id}">
+        <thead><tr>
+          <th>Name</th><th>Role</th><th>Project</th><th>Start Date</th>
+          <th>Utilisation</th><th>Status</th>${_isAdmin?'<th></th>':''}
+        </tr></thead>
+        <tbody id="res-tbody-${p.id}"></tbody>
+      </table></div>
+    </div>
+
+    <!-- TAB: COMMENTS / NOTES -->
+    <div class="tab-content" id="tab-comments">
+      ${_isAdmin||true?`<div class="comment-input-area" style="margin-bottom:16px">
+        <div class="update-form-title">💬 Add Note / Comment</div>
+        <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center">
+          <select class="update-period-sel" id="comment-tag-${p.id}" style="width:160px">
+            <option value="general">General Note</option>
+            <option value="issue">Issue</option>
+            <option value="decision">Decision</option>
+            <option value="risk">Risk</option>
+            <option value="update">Progress Update</option>
+          </select>
+          <input class="finance-input" id="comment-author-${p.id}" placeholder="Your name" style="width:180px">
+        </div>
+        <textarea class="update-textarea" id="comment-text-${p.id}" style="min-height:80px"
+          placeholder="Add your note, observation or comment here..."></textarea>
+        <div style="margin-top:8px">
+          <button class="btn-analyse" onclick="addComment('${p.id}')" style="background:#0D1B3E">
+            + Add Note
+          </button>
+        </div>
+      </div>`:''}
+      <div class="sec-label">Project Notes & Comments</div>
+      <div class="comment-list" id="comment-list-${p.id}">
+        <div style="color:#8B9BB4;font-size:13px;padding:8px 0">No notes yet. Add the first one above.</div>
       </div>
     </div>
 
@@ -4095,6 +4367,612 @@ async function resolveUserRole(userEmail) {
   return _currentUserRole;
 }
 
+// ── NCR LOG ──────────────────────────────────────────────────────────────────
+function addNCR(projId) {
+  if (!_isAdmin) return;
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const ref   = document.getElementById('ncr-ref-'+projId).value.trim() || ('NCR-'+String(((p.ncrLog||[]).length+1)).padStart('3','0'));
+  const date  = document.getElementById('ncr-date-'+projId).value;
+  const sev   = document.getElementById('ncr-sev-'+projId).value;
+  const desc  = document.getElementById('ncr-desc-'+projId).value.trim();
+  const loc   = document.getElementById('ncr-loc-'+projId).value.trim();
+  const cause = document.getElementById('ncr-cause-'+projId).value;
+  const owner = document.getElementById('ncr-owner-'+projId).value.trim();
+  const due   = document.getElementById('ncr-due-'+projId).value;
+  if (!desc) { alert('Please enter a description'); return; }
+  if (!p.ncrLog) p.ncrLog = [];
+  p.ncrLog.push({id:Date.now(), ref, date, sev, desc, loc, cause, owner, due, status:'open', closedDate:''});
+  p.ncrs_open = (p.ncrLog||[]).filter(n=>n.status==='open').length;
+  p.ncrs_closed = (p.ncrLog||[]).filter(n=>n.status==='closed').length;
+  saveProjectToFirebase(p);
+  renderNCRTable(projId);
+  ['ncr-ref','ncr-desc','ncr-loc','ncr-owner','ncr-due'].forEach(id=>{
+    const el=document.getElementById(id+'-'+projId); if(el) el.value='';
+  });
+  _toast('✅ NCR raised — '+ref);
+}
+
+function renderNCRTable(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const tbody = document.getElementById('ncr-tbody-'+projId);
+  if (!tbody) return;
+  const log = p.ncrLog||[];
+  const sevColors = {high:'ncr-severity-high',medium:'ncr-severity-med',low:'ncr-severity-low'};
+  tbody.innerHTML = log.length ? log.map(n=>`
+    <tr>
+      <td><strong>${n.ref}</strong></td>
+      <td>${n.date||'-'}</td>
+      <td>${n.desc}</td>
+      <td>${n.loc||'-'}</td>
+      <td class="${sevColors[n.sev]||''}">${(n.sev||'').toUpperCase()}</td>
+      <td>${n.cause||'-'}</td>
+      <td>${n.owner||'-'}</td>
+      <td>${n.due||'-'}</td>
+      <td><span class="ncr-status ${n.status==='open'?'ncr-open':n.status==='closed'?'ncr-closed':'ncr-inreview'}">${n.status}</span></td>
+      <td>${n.closedDate||'-'}</td>
+      ${_isAdmin?`<td style="display:flex;gap:4px">
+        ${n.status!=='closed'?`<button onclick="closeNCR('${projId}',${n.id})" style="padding:3px 8px;background:#1E6B2E;border:none;border-radius:4px;color:#fff;font-size:10px;cursor:pointer">Close</button>`:''}
+        <button onclick="deleteNCR('${projId}',${n.id})" class="finance-del-btn">🗑</button>
+      </td>`:''}
+    </tr>`).join('') : `<tr><td colspan="11" style="text-align:center;color:#8B9BB4;padding:16px">No NCRs raised yet.</td></tr>`;
+}
+
+function closeNCR(projId, ncrId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.ncrLog) return;
+  const ncr = p.ncrLog.find(n=>n.id===ncrId);
+  if (!ncr) return;
+  ncr.status = 'closed';
+  ncr.closedDate = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  p.ncrs_open   = p.ncrLog.filter(n=>n.status==='open').length;
+  p.ncrs_closed = p.ncrLog.filter(n=>n.status==='closed').length;
+  saveProjectToFirebase(p);
+  renderNCRTable(projId);
+  _toast('NCR closed — '+ ncr.ref);
+}
+
+function deleteNCR(projId, ncrId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.ncrLog) return;
+  p.ncrLog = p.ncrLog.filter(n=>n.id!==ncrId);
+  p.ncrs_open   = p.ncrLog.filter(n=>n.status==='open').length;
+  p.ncrs_closed = p.ncrLog.filter(n=>n.status==='closed').length;
+  saveProjectToFirebase(p);
+  renderNCRTable(projId);
+}
+
+// ── DOCUMENT REGISTER ─────────────────────────────────────────────────────────
+function addDocument(projId) {
+  if (!_isAdmin) return;
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const num   = document.getElementById('doc-num-'+projId).value.trim();
+  const title = document.getElementById('doc-title-'+projId).value.trim();
+  const type  = document.getElementById('doc-type-'+projId).value;
+  const rev   = document.getElementById('doc-rev-'+projId).value.trim()||'Rev A';
+  const stat  = document.getElementById('doc-status-'+projId).value;
+  if (!title) { alert('Please enter a document title'); return; }
+  if (!p.docRegister) p.docRegister = [];
+  p.docRegister.push({
+    id:Date.now(), num:num||'DOC-'+String(p.docRegister.length+1).padStart(3,'0'),
+    title, type, rev, status:stat, issuedBy:'PMO Lead',
+    dateIssued:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})
+  });
+  saveProjectToFirebase(p);
+  renderDocTable(projId);
+  ['doc-num','doc-title','doc-rev'].forEach(id=>{
+    const el=document.getElementById(id+'-'+projId); if(el) el.value='';
+  });
+  _toast('✅ Document registered');
+}
+
+function updateDocStatus(projId, docId, newStatus) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.docRegister) return;
+  const doc = p.docRegister.find(d=>d.id===docId);
+  if (doc) { doc.status = newStatus; saveProjectToFirebase(p); renderDocTable(projId); }
+}
+
+function deleteDocument(projId, docId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.docRegister) return;
+  p.docRegister = p.docRegister.filter(d=>d.id!==docId);
+  saveProjectToFirebase(p);
+  renderDocTable(projId);
+}
+
+function renderDocTable(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const tbody = document.getElementById('doc-tbody-'+projId);
+  if (!tbody) return;
+  const docs = p.docRegister||[];
+  const statCls = {approved:'doc-approved',pending:'doc-pending',rejected:'doc-rejected',superseded:'doc-superseded'};
+  tbody.innerHTML = docs.length ? docs.map(d=>`
+    <tr>
+      <td><strong>${d.num}</strong></td>
+      <td>${d.title}</td>
+      <td><span class="doc-type">${d.type}</span></td>
+      <td>${d.rev}</td>
+      <td>${d.dateIssued}</td>
+      <td>
+        ${_isAdmin
+          ? `<select class="role-select" onchange="updateDocStatus('${projId}',${d.id},this.value)">
+              ${['pending','approved','rejected','superseded'].map(s=>`<option value="${s}" ${d.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+             </select>`
+          : `<span class="doc-status ${statCls[d.status]||''}">${d.status}</span>`}
+      </td>
+      <td>${d.issuedBy||'-'}</td>
+      ${_isAdmin?`<td><button onclick="deleteDocument('${projId}',${d.id})" class="finance-del-btn">🗑</button></td>`:''}
+    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;color:#8B9BB4;padding:16px">No documents registered yet.</td></tr>`;
+}
+
+// ── RESOURCE TRACKER ──────────────────────────────────────────────────────────
+function addResource(projId) {
+  if (!_isAdmin) return;
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const name  = document.getElementById('res-name-'+projId).value.trim();
+  const role  = document.getElementById('res-role-'+projId).value.trim();
+  const proj  = document.getElementById('res-proj-'+projId).value.trim()||projId;
+  const start = document.getElementById('res-start-'+projId).value;
+  const util  = parseInt(document.getElementById('res-util-'+projId).value)||100;
+  if (!name) { alert('Please enter a resource name'); return; }
+  if (!p.resources) p.resources = [];
+  p.resources.push({id:Date.now(), name, role, proj, start, util, status:'active'});
+  saveProjectToFirebase(p);
+  renderResourceTable(projId);
+  ['res-name','res-role','res-util'].forEach(id=>{
+    const el=document.getElementById(id+'-'+projId); if(el) el.value='';
+  });
+  _toast('✅ Resource added — '+name);
+}
+
+function renderResourceTable(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const tbody  = document.getElementById('res-tbody-'+projId);
+  const cards  = document.getElementById('res-cards-'+projId);
+  if (!tbody) return;
+  const resources = p.resources||[];
+
+  // Cards
+  if (cards) {
+    cards.innerHTML = resources.map(r=>{
+      const util = Math.min(100, r.util||0);
+      const col  = util>=90?'#9B1C1C':util>=75?'#C9901A':'#1E6B2E';
+      return `<div class="resource-card">
+        <div class="resource-name">${r.name}</div>
+        <div class="resource-role">${r.role||'-'}</div>
+        <div class="resource-util"><div class="resource-util-fill" style="width:${util}%;background:${col}"></div></div>
+        <div class="resource-util-label" style="color:${col}">${util}% utilised</div>
+        <div style="font-size:11px;color:#8B9BB4;margin-top:4px">${r.proj} · ${r.status||'active'}</div>
+      </div>`;
+    }).join('') || '<div style="color:#8B9BB4;font-size:13px">No resources assigned yet.</div>';
+  }
+
+  // Table
+  tbody.innerHTML = resources.length ? resources.map(r=>{
+    const util=Math.min(100,r.util||0);
+    const col=util>=90?'#9B1C1C':util>=75?'#C9901A':'#1E6B2E';
+    return `<tr>
+      <td><strong>${r.name}</strong></td>
+      <td>${r.role||'-'}</td>
+      <td>${r.proj||projId}</td>
+      <td>${r.start||'-'}</td>
+      <td>
+        <div class="util-bar">
+          <div class="util-track"><div class="util-fill" style="width:${util}%;background:${col}"></div></div>
+          ${_isAdmin
+            ? `<input class="wbs-edit-input" type="number" min="0" max="100" value="${util}"
+                onchange="updateResourceUtil('${projId}',${r.id},this.value)">%`
+            : `<span style="font-size:12px;font-weight:600;color:${col}">${util}%</span>`}
+        </div>
+      </td>
+      <td><span class="ncr-status ${r.status==='active'?'ncr-closed':'ncr-open'}">${r.status||'active'}</span></td>
+      ${_isAdmin?`<td>
+        <button onclick="toggleResourceStatus('${projId}',${r.id})" style="padding:3px 8px;background:#185FA5;border:none;border-radius:4px;color:#fff;font-size:10px;cursor:pointer;margin-right:4px">
+          ${r.status==='active'?'Demobilise':'Remobilise'}
+        </button>
+        <button onclick="deleteResource('${projId}',${r.id})" class="finance-del-btn">🗑</button>
+      </td>`:''}
+    </tr>`;
+  }).join('') : `<tr><td colspan="7" style="text-align:center;color:#8B9BB4;padding:16px">No resources assigned yet.</td></tr>`;
+}
+
+function updateResourceUtil(projId, resId, val) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.resources) return;
+  const r = p.resources.find(r=>r.id===resId);
+  if (r) { r.util=Math.max(0,Math.min(100,parseInt(val)||0)); saveProjectToFirebase(p); renderResourceTable(projId); }
+}
+
+function toggleResourceStatus(projId, resId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.resources) return;
+  const r = p.resources.find(r=>r.id===resId);
+  if (r) { r.status=r.status==='active'?'demobilised':'active'; saveProjectToFirebase(p); renderResourceTable(projId); _toast(r.name+' '+r.status); }
+}
+
+function deleteResource(projId, resId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.resources) return;
+  p.resources = p.resources.filter(r=>r.id!==resId);
+  saveProjectToFirebase(p);
+  renderResourceTable(projId);
+}
+
+// ── BUDGET VARIANCE ALERTS ────────────────────────────────────────────────────
+function checkBudgetAlerts() {
+  const alerts = [];
+  PROJECTS.forEach(p => {
+    const spi = p.pv?p.ev/p.pv:0;
+    const cpi = p.ac?p.ev/p.ac:0;
+    const e   = evm(p);
+    if (cpi < 0.85) alerts.push({type:'red',   proj:p.id, msg:'CPI '+cpi.toFixed(3)+' — critical cost overrun. EAC: '+NM(e.eac)+' vs BAC: '+NM(p.bac)});
+    else if (cpi < 0.9) alerts.push({type:'amber', proj:p.id, msg:'CPI '+cpi.toFixed(3)+' — cost performance at risk'});
+    if (spi < 0.85) alerts.push({type:'red',   proj:p.id, msg:'SPI '+spi.toFixed(3)+' — critical schedule slippage'});
+    else if (spi < 0.9) alerts.push({type:'amber', proj:p.id, msg:'SPI '+spi.toFixed(3)+' — schedule performance at risk'});
+    if (p.ncrs_open > 3) alerts.push({type:'amber', proj:p.id, msg:p.ncrs_open+' open NCRs — quality review required'});
+    if (p.rag==='red') alerts.push({type:'red', proj:p.id, msg:'Project status CRITICAL — immediate escalation required'});
+  });
+  return alerts;
+}
+
+function renderPortfolioAlerts() {
+  const alerts = checkBudgetAlerts();
+  if (!alerts.length) return '';
+  return alerts.map(a=>`
+    <div class="alert-banner alert-${a.type}">
+      <span class="alert-icon">${a.type==='red'?'🔴':'🟡'}</span>
+      <div>
+        <div class="alert-title">${a.proj} — ${a.type==='red'?'CRITICAL':'WARNING'}</div>
+        <div class="alert-sub">${a.msg}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── COMMENTS / NOTES ──────────────────────────────────────────────────────────
+function addComment(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const text   = document.getElementById('comment-text-'+projId).value.trim();
+  const tag    = document.getElementById('comment-tag-'+projId).value;
+  const author = document.getElementById('comment-author-'+projId).value.trim() || (_currentUser?_currentUser.email:'Anonymous');
+  if (!text) { alert('Please enter a comment'); return; }
+  if (!p.comments) p.comments = [];
+  p.comments.push({
+    id:Date.now(), text, tag, author,
+    date:new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+  });
+  saveProjectToFirebase(p);
+  renderComments(projId);
+  document.getElementById('comment-text-'+projId).value = '';
+  _toast('✅ Note added');
+}
+
+function deleteComment(projId, commentId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.comments) return;
+  p.comments = p.comments.filter(c=>c.id!==commentId);
+  saveProjectToFirebase(p);
+  renderComments(projId);
+}
+
+function renderComments(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  const el = document.getElementById('comment-list-'+projId);
+  if (!el) return;
+  const comments = (p.comments||[]).slice().reverse();
+  const tagCls = {issue:'tag-issue',decision:'tag-decision',risk:'tag-risk',update:'tag-update',general:'tag-general'};
+  el.innerHTML = comments.length ? comments.map(c=>`
+    <div class="comment-item">
+      <div class="comment-hdr">
+        <span class="comment-author">${c.author}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="comment-date">${c.date}</span>
+          ${_isAdmin?`<button onclick="deleteComment('${projId}',${c.id})" class="finance-del-btn">🗑</button>`:''}
+        </div>
+      </div>
+      <div class="comment-text">${c.text}</div>
+      <span class="comment-tag ${tagCls[c.tag]||'tag-general'}">${c.tag||'general'}</span>
+    </div>`).join('')
+  : '<div style="color:#8B9BB4;font-size:13px;padding:8px 0">No notes yet.</div>';
+}
+
+// ── FULL INTERACTIVE GANTT WITH DEPENDENCIES ─────────────────────────────────
+function renderGanttFull(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p||!p.wbsTasks||!p.wbsTasks.length) {
+    const el = document.getElementById('gantt-body-'+projId);
+    if (el) el.innerHTML = '<div style="padding:20px;color:#8B9BB4;font-size:13px;text-align:center">No WBS tasks defined. Add tasks in the WBS Tracker tab to see the Gantt chart.</div>';
+    return;
+  }
+
+  // Use WBS tasks for Gantt if available, fall back to milestones
+  const tasks = p.wbsTasks.length ? p.wbsTasks : (p.milestones||[]).map((m,i)=>({
+    code:Array.isArray(m)?m[0]:m.ref, name:Array.isArray(m)?m[1]:m.name,
+    start:Array.isArray(m)?m[2]:m.planned, end:Array.isArray(m)?m[2]:m.planned,
+    pct:Array.isArray(m)?m[4]:m.pct, status:Array.isArray(m)?(m[4]===1?'complete':m[4]>0?'inprogress':'notstarted'):m.status||'notstarted'
+  }));
+
+  const el = document.getElementById('gantt-body-'+projId);
+  if (!el) return;
+
+  // Build SVG Gantt
+  const allDates = [];
+  tasks.forEach(t=>{
+    if(t.start&&!['TBC',''].includes(t.start)) allDates.push(new Date(t.start));
+    if(t.end&&!['TBC',''].includes(t.end))   allDates.push(new Date(t.end));
+  });
+  if(!allDates.length) { el.innerHTML='<div style="padding:20px;color:#8B9BB4">No valid dates on WBS tasks.</div>'; return; }
+
+  const minD = new Date(Math.min(...allDates)); minD.setDate(1);
+  const maxD = new Date(Math.max(...allDates)); maxD.setMonth(maxD.getMonth()+1);
+  const totalMs = maxD-minD;
+  const ROW_H=32, HDR_H=40, LABEL_W=180, CHART_W=700, TOTAL_W=LABEL_W+CHART_W+20;
+  const SVG_H = HDR_H + tasks.length*ROW_H + 20;
+
+  function xPct(dateStr) {
+    if(!dateStr||['TBC',''].includes(dateStr)) return null;
+    return Math.max(0,Math.min(100,((new Date(dateStr)-minD)/totalMs)*100));
+  }
+
+  // Month headers
+  let months=''; let d=new Date(minD);
+  while(d<=maxD){
+    const x=LABEL_W+((d-minD)/totalMs)*CHART_W;
+    months+=`<line x1="${x}" y1="0" x2="${x}" y2="${SVG_H}" stroke="#F4F6F9" stroke-width="1"/>
+    <text x="${x+4}" y="18" font-size="9" fill="#8B9BB4">${d.toLocaleDateString('en-GB',{month:'short',year:'2-digit'})}</text>`;
+    d.setMonth(d.getMonth()+1);
+  }
+
+  // Today line
+  const todayPct = ((new Date()-minD)/totalMs)*100;
+  const todayX   = LABEL_W + (CHART_W*todayPct/100);
+  const todayLine= todayPct>=0&&todayPct<=100
+    ? `<line x1="${todayX}" y1="${HDR_H}" x2="${todayX}" y2="${SVG_H}" stroke="#9B1C1C" stroke-width="1.5" stroke-dasharray="4,3"/>
+       <text x="${todayX+3}" y="${HDR_H+10}" font-size="8" fill="#9B1C1C" font-weight="600">TODAY</text>` : '';
+
+  // Task rows
+  let rows='';
+  const today = new Date();
+  tasks.forEach((t,i)=>{
+    const y    = HDR_H + i*ROW_H;
+    const cy   = y + ROW_H/2;
+    const rowBg= i%2===0?'#FAFBFC':'#FFFFFF';
+    const pct  = typeof t.pct==='number'?t.pct:0;
+    const stat = t.status||'notstarted';
+    const barCol = pct>=1?'#1E6B2E':stat==='delayed'||xPct(t.end)<todayPct&&pct<1?'#C9901A':'#185FA5';
+    const critCol= t.critical?'#9B1C1C':barCol;
+
+    const x1 = xPct(t.start); const x2 = xPct(t.end||t.start);
+    const bx1 = x1!==null ? LABEL_W+(CHART_W*x1/100) : null;
+    const bx2 = x2!==null ? LABEL_W+(CHART_W*x2/100) : null;
+    const barW = bx1!==null&&bx2!==null ? Math.max(8,bx2-bx1) : 0;
+
+    rows+=`<rect x="0" y="${y}" width="${TOTAL_W}" height="${ROW_H}" fill="${rowBg}"/>
+    <text x="8" y="${cy+4}" font-size="11" fill="#2D3748" font-weight="${t.critical?'700':'400'}">${(t.code||'')+' '+(t.name||'').substring(0,22)}</text>`;
+
+    if(bx1!==null){
+      // Background bar (planned)
+      rows+=`<rect x="${bx1}" y="${y+8}" width="${barW}" height="${ROW_H-16}" rx="3" fill="${critCol}" opacity="0.2"/>`;
+      // Progress fill
+      rows+=`<rect x="${bx1}" y="${y+8}" width="${barW*pct}" height="${ROW_H-16}" rx="3" fill="${critCol}" opacity="0.85"/>`;
+      // Percentage label
+      rows+=`<text x="${bx1+barW+4}" y="${cy+4}" font-size="9" fill="${critCol}" font-weight="600">${Math.round(pct*100)}%</text>`;
+    }
+  });
+
+  el.innerHTML = `<div class="gantt-svg-wrap">
+    <div style="font-size:10px;color:#8B9BB4;margin-bottom:6px;display:flex;gap:16px">
+      <span><span style="display:inline-block;width:12px;height:4px;background:#185FA5;border-radius:2px;margin-right:4px;vertical-align:middle"></span>In Progress</span>
+      <span><span style="display:inline-block;width:12px;height:4px;background:#1E6B2E;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Complete</span>
+      <span><span style="display:inline-block;width:12px;height:4px;background:#C9901A;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Delayed</span>
+      <span><span style="display:inline-block;width:12px;height:4px;background:#9B1C1C;border-radius:2px;margin-right:4px;vertical-align:middle"></span>Critical</span>
+      <span style="margin-left:auto"><span style="display:inline-block;width:1px;height:12px;background:#9B1C1C;border-left:2px dashed #9B1C1C;margin-right:4px;vertical-align:middle"></span>Today</span>
+    </div>
+    <svg width="${TOTAL_W}" height="${SVG_H}" style="font-family:system-ui,sans-serif;min-width:${TOTAL_W}px">
+      <rect width="${TOTAL_W}" height="${HDR_H}" fill="#0D1B3E"/>
+      <text x="8" y="26" font-size="11" font-weight="600" fill="rgba(255,255,255,.8)">WBS / Task</text>
+      ${months}${todayLine}${rows}
+    </svg>
+  </div>`;
+}
+
+// ── WHATSAPP ALERT GENERATION ─────────────────────────────────────────────────
+function generateWhatsAppAlert() {
+  const alerts = checkBudgetAlerts();
+  const urgentDecs = [];
+  PROJECTS.forEach(p=>{
+    (p.decisions||[]).forEach(d=>{
+      if((Array.isArray(d)?d[3]:d.urg)==='red') urgentDecs.push({proj:p.id, text:Array.isArray(d)?d[0]:d.text});
+    });
+  });
+
+  const totalBac = PROJECTS.reduce((s,p)=>s+p.bac,0);
+  const totalEv  = PROJECTS.reduce((s,p)=>s+p.ev,0);
+  const totalPv  = PROJECTS.reduce((s,p)=>s+p.pv,0);
+  const totalAc  = PROJECTS.reduce((s,p)=>s+p.ac,0);
+  const portSpi  = totalPv?totalEv/totalPv:0;
+  const portCpi  = totalAc?totalEv/totalAc:0;
+
+  const msg = [
+    '*MEGAWATTS NIGERIA LIMITED*',
+    '*PMO Portfolio Alert — ' + new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) + '*',
+    '',
+    '📊 *Portfolio Status*',
+    '• Projects: ' + PROJECTS.length,
+    '• Portfolio SPI: ' + portSpi.toFixed(3) + (portSpi>=1?' ✅':portSpi<0.85?' 🔴':' 🟡'),
+    '• Portfolio CPI: ' + portCpi.toFixed(3) + (portCpi>=1?' ✅':portCpi<0.9?' 🔴':' 🟡'),
+    '',
+    alerts.length ? '⚠️ *Alerts (' + alerts.length + ')*' : '✅ *No active alerts*',
+    ...alerts.slice(0,5).map(a=>'• ' + a.proj + ': ' + a.msg),
+    '',
+    urgentDecs.length ? '🔴 *Urgent Decisions (' + urgentDecs.length + ')*' : '',
+    ...urgentDecs.slice(0,3).map(d=>'• ' + d.proj + ': ' + d.text.substring(0,60)+'...'),
+    '',
+    '🔗 Dashboard: https://megawattsportfolio-dashboard.github.io/pmo-dashboard/',
+    '',
+    '_Sent by Megawatts PMO System_'
+  ].filter(l=>l!==undefined).join('\n');
+
+  const encoded = encodeURIComponent(msg);
+  const waUrl   = 'https://wa.me/?text=' + encoded;
+
+  // Open WhatsApp in new tab
+  window.open(waUrl, '_blank');
+  _toast('✅ WhatsApp message prepared — select recipients in WhatsApp');
+}
+
+// ── PORTFOLIO-LEVEL ALERTS INJECTION ─────────────────────────────────────────
+// Inject budget alerts at top of portfolio overview tab
+const _origRenderPortfolio = renderPortfolio;
+// (alerts are rendered inline via renderPortfolioAlerts() called in renderPortfolio)
+
+// ── PDF EXPORT ───────────────────────────────────────────────────────────────
+function exportProjectPDF(projId) {
+  const p = PROJECTS.find(x=>x.id===projId);
+  if (!p) return;
+  try {
+    const { jsPDF } = window.jspdf || {};
+    if (!jsPDF) { alert('PDF library not loaded. Please check your internet connection.'); return; }
+    const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+    const e = evm(p);
+    const W = 210, M = 14;
+    doc.setFillColor(13,27,62); doc.rect(0,0,W,22,'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(14); doc.setFont('helvetica','bold');
+    doc.text('Megawatts Nigeria Limited', M, 9);
+    doc.setFontSize(9); doc.setFont('helvetica','normal');
+    doc.text(p.fullname+' | '+p.id+' | '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}), M, 17);
+    let y = 30;
+    doc.setTextColor(13,27,62); doc.setFontSize(10); doc.setFont('helvetica','bold');
+    doc.text('EVM SCORECARD', M, y); y+=5;
+    doc.autoTable({
+      startY:y, margin:{left:M,right:M},
+      body:[
+        ['BAC','N'+Math.round(p.bac/1e6)+'M','PV','N'+Math.round(p.pv/1e6)+'M','EV','N'+Math.round(p.ev/1e6)+'M','AC','N'+Math.round(p.ac/1e6)+'M'],
+        ['SPI',e.spi.toFixed(3),'CPI',e.cpi.toFixed(3),'EAC','N'+Math.round(e.eac/1e6)+'M','VAC','N'+Math.round(e.vac/1e6)+'M'],
+      ],
+      styles:{fontSize:9,cellPadding:3},
+      columnStyles:{0:{fontStyle:'bold',fillColor:[238,242,248]},2:{fontStyle:'bold',fillColor:[238,242,248]},4:{fontStyle:'bold',fillColor:[238,242,248]},6:{fontStyle:'bold',fillColor:[238,242,248]}},
+      theme:'grid'
+    });
+    y = doc.lastAutoTable.finalY + 8;
+    if ((p.milestones||[]).length) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('MILESTONES', M, y); y+=4;
+      doc.autoTable({
+        startY:y, margin:{left:M,right:M},
+        head:[['Milestone','Planned','Status','% Done']],
+        body:(p.milestones||[]).map(m=>{
+          const name=Array.isArray(m)?m[1]:m.name;
+          const planned=Array.isArray(m)?m[2]:m.planned;
+          const pct=Array.isArray(m)?m[4]:m.pct;
+          const status=pct===1?'Complete':pct>0?'In Progress':'Not Started';
+          return [name, planned||'-', status, Math.round((pct||0)*100)+'%'];
+        }),
+        styles:{fontSize:8,cellPadding:2.5},
+        headStyles:{fillColor:[13,27,62],textColor:255,fontStyle:'bold'},
+        theme:'striped'
+      });
+      y = doc.lastAutoTable.finalY + 8;
+    }
+    if ((p.risks||[]).length && y < 240) {
+      doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('RISK REGISTER', M, y); y+=4;
+      doc.autoTable({
+        startY:y, margin:{left:M,right:M},
+        head:[['Ref','Risk','Score','Owner','Status']],
+        body:(p.risks||[]).map(r=>[Array.isArray(r)?r[0]:r.ref, Array.isArray(r)?r[1]:r.desc, Array.isArray(r)?r[5]:r.score, Array.isArray(r)?r[7]:r.owner, Array.isArray(r)?r[8]:r.status]),
+        styles:{fontSize:8,cellPadding:2.5},
+        headStyles:{fillColor:[13,27,62],textColor:255,fontStyle:'bold'},
+        theme:'striped'
+      });
+    }
+    const pages = doc.getNumberOfPages();
+    for (let i=1;i<=pages;i++) {
+      doc.setPage(i);
+      doc.setFillColor(238,242,248); doc.rect(0,285,W,12,'F');
+      doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(139,155,180);
+      doc.text('Megawatts Nigeria Limited | PMO Portfolio System | Toyib Salam Olanrewaju, PMP | CONFIDENTIAL', M, 291);
+      doc.text('Page '+i+' of '+pages, W-M-15, 291);
+    }
+    doc.save('Megawatts_'+p.id+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+    _toast('PDF report downloaded for '+p.id);
+  } catch(err) {
+    alert('PDF export failed: '+err.message);
+    console.error(err);
+  }
+}
+
+// ── PORTFOLIO ALERTS ──────────────────────────────────────────────────────────
+function checkAndSendAlerts() {
+  const alerts = [];
+  PROJECTS.forEach(p => {
+    const e = evm(p);
+    if (e.cpi < 0.9 && p.rag !== 'complete')
+      alerts.push({proj:p.id, type:'Cost Overrun', message:p.id+' CPI='+e.cpi.toFixed(3)+' — over budget. EAC: '+NM(Math.round(e.eac))+' vs BAC: '+NM(p.bac), urg:'red'});
+    if (e.spi < 0.85 && p.rag !== 'complete')
+      alerts.push({proj:p.id, type:'Schedule Delay', message:p.id+' SPI='+e.spi.toFixed(3)+' — behind schedule. Recovery plan required.', urg:'red'});
+    if (p.rag === 'red')
+      alerts.push({proj:p.id, type:'Critical Status', message:p.id+' is RED — immediate escalation required.', urg:'red'});
+    if ((p.ncrs_open||0) >= 3)
+      alerts.push({proj:p.id, type:'NCR Backlog', message:p.id+' has '+(p.ncrs_open||0)+' open NCRs — quality risk escalating.', urg:'amber'});
+  });
+  if (!alerts.length) { _toast('All projects within acceptable thresholds — no alerts triggered'); return; }
+  showAlertsModal(alerts);
+}
+
+function showAlertsModal(alerts) {
+  let existing = document.getElementById('alerts-modal-overlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'alerts-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(13,27,62,.6);z-index:1200;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = e => { if(e.target===overlay) overlay.remove(); };
+  const waDate = new Date().toLocaleDateString('en-GB');
+  const waBody = alerts.map(a=>a.type+' - '+a.proj+': '+a.message).join(' | ');
+  const waText = encodeURIComponent('MEGAWATTS PMO ALERT - '+waDate+' | '+waBody);
+  const alertsHTML = alerts.map(a=>`
+    <div style="background:${a.urg==='red'?'#FFF5F5':'#FFFBEB'};border:1px solid ${a.urg==='red'?'#FFDCDC':'#FDE68A'};border-radius:8px;padding:12px;margin-bottom:8px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span>${a.urg==='red'?'🔴':'🟡'}</span>
+        <strong style="font-size:13px;color:#0D1B3E">${a.type}</strong>
+        <span style="font-size:11px;background:#EEF2F8;padding:2px 8px;border-radius:10px;color:#185FA5;font-weight:600">${a.proj}</span>
+      </div>
+      <div style="font-size:12px;color:#4A5568">${a.message}</div>
+      <button onclick="switchTo('${a.proj}');document.getElementById('alerts-modal-overlay').remove()"
+        style="margin-top:6px;padding:4px 10px;background:#185FA5;border:none;border-radius:4px;color:#fff;font-size:11px;cursor:pointer">Open Project →</button>
+    </div>`).join('');
+  overlay.innerHTML = `<div style="background:#fff;border-radius:12px;width:540px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);">
+    <div style="background:#9B1C1C;padding:16px 22px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;">
+      <div style="color:#fff;font-size:15px;font-weight:700">⚠️ Portfolio Alerts — ${alerts.length} Issue(s)</div>
+      <button onclick="document.getElementById('alerts-modal-overlay').remove()" style="background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div style="padding:20px;">
+      ${alertsHTML}
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid #E2E8F0;display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="https://wa.me/?text=${waText}" target="_blank"
+          style="padding:9px 18px;background:#25D366;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;">💬 Share via WhatsApp</a>
+        <button onclick="copyAlertsText()" style="padding:9px 18px;background:#EEF2F8;border:1px solid #E2E8F0;border-radius:6px;color:#0D1B3E;font-size:13px;font-weight:600;cursor:pointer;">📋 Copy Text</button>
+        <button onclick="document.getElementById('alerts-modal-overlay').remove()" style="padding:9px 16px;background:none;border:1px solid #E2E8F0;border-radius:6px;color:#8B9BB4;font-size:13px;cursor:pointer">Dismiss</button>
+      </div>
+    </div>
+  </div>`;
+  overlay.setAttribute('data-alerts', JSON.stringify(alerts));
+  document.body.appendChild(overlay);
+}
+
+function copyAlertsText() {
+  const overlay = document.getElementById('alerts-modal-overlay');
+  const alerts  = JSON.parse(overlay.getAttribute('data-alerts')||'[]');
+  const lines   = ['MEGAWATTS PMO ALERT - '+new Date().toLocaleDateString('en-GB'),''];
+  alerts.forEach(a=>{ lines.push(a.type.toUpperCase()+' - '+a.proj); lines.push(a.message); lines.push(''); });
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>_toast('Alert text copied to clipboard'));
+}
+
 // ── RACI MATRIX ──────────────────────────────────────────────────────────────
 
 // Default RACI activities applied to every project
@@ -4587,6 +5465,11 @@ function switchTab(tabId, projId) {
   if (tabId === 'finance')  setTimeout(()=>renderFinanceTable(projId), 50);
   if (tabId === 'wbs')      setTimeout(()=>renderWBSTable(projId), 50);
   if (tabId === 'raci')     setTimeout(()=>renderRaciTable(projId), 50);
+  if (tabId === 'ncr')      setTimeout(()=>renderNCRTable(projId), 50);
+  if (tabId === 'docs')     setTimeout(()=>renderDocTable(projId), 50);
+  if (tabId === 'resources') setTimeout(()=>renderResourceTable(projId), 50);
+  if (tabId === 'comments') setTimeout(()=>renderComments(projId), 50);
+  if (tabId === 'gantt')    setTimeout(()=>renderGanttFull(projId), 50);
 }
 
 // ── TIER 1A: S-CURVE ──────────────────────────────────────────────────────────
