@@ -400,6 +400,53 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
 .wbs-import-btn{padding:7px 16px;background:#185FA5;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
 .wbs-import-btn:hover{background:#0D1B3E;}
 
+/* ── ROLE BADGES & ACCESS ── */
+.role-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.03em;}
+.role-admin{background:#0D1B3E;color:#C9901A;}
+.role-pm{background:#185FA5;color:#fff;}
+.role-finance{background:#1E6B2E;color:#fff;}
+.role-hse{background:#9B1C1C;color:#fff;}
+.role-viewer{background:#EEF2F8;color:#2D3748;}
+.admin-bar-role{font-size:11px;padding:2px 10px;border-radius:10px;background:rgba(255,255,255,.15);color:#fff;font-weight:600;margin-left:8px;}
+
+/* ── BACKUP / RESTORE ── */
+.backup-modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,27,62,.6);z-index:1100;align-items:center;justify-content:center;}
+.backup-modal-overlay.open{display:flex;}
+.backup-modal{background:#fff;border-radius:12px;width:520px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.backup-modal-hdr{background:#0D1B3E;padding:16px 22px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;}
+.backup-modal-hdr h2{color:#fff;font-size:15px;font-weight:600;}
+.backup-modal-body{padding:22px;}
+.backup-option{background:#F9FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:border-color .15s;}
+.backup-option:hover{border-color:#185FA5;background:#EBF3FB;}
+.backup-option-icon{font-size:28px;flex-shrink:0;}
+.backup-option-title{font-size:14px;font-weight:600;color:#0D1B3E;}
+.backup-option-sub{font-size:12px;color:#8B9BB4;margin-top:3px;}
+.backup-stats{background:#EEF2F8;border-radius:8px;padding:14px 16px;margin-bottom:16px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;}
+.backup-stat-val{font-size:18px;font-weight:700;color:#0D1B3E;}
+.backup-stat-label{font-size:10px;color:#8B9BB4;font-weight:500;margin-top:2px;}
+.restore-drop{border:2px dashed #E2E8F0;border-radius:8px;padding:20px;text-align:center;cursor:pointer;position:relative;transition:border-color .15s;}
+.restore-drop:hover{border-color:#185FA5;background:#F4F9FF;}
+.restore-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+
+/* ── ROLES MODAL ── */
+.roles-modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,27,62,.6);z-index:1100;align-items:center;justify-content:center;}
+.roles-modal-overlay.open{display:flex;}
+.roles-modal{background:#fff;border-radius:12px;width:580px;max-width:95vw;max-height:88vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25);}
+.roles-hdr{background:#0D1B3E;padding:16px 22px;border-radius:12px 12px 0 0;display:flex;justify-content:space-between;align-items:center;}
+.roles-hdr h2{color:#fff;font-size:15px;font-weight:600;}
+.roles-body{padding:22px;}
+.roles-table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;}
+.roles-table th{background:#EEF2F8;color:#4A5568;font-weight:600;font-size:11px;text-align:left;padding:9px 12px;border-bottom:1px solid #E2E8F0;}
+.roles-table td{padding:10px 12px;border-bottom:1px solid #F4F6F9;vertical-align:middle;}
+.roles-table tr:last-child td{border-bottom:none;}
+.role-select{padding:5px 8px;border:1px solid #E2E8F0;border-radius:5px;font-size:12px;font-family:inherit;outline:none;color:#2D3748;}
+.roles-add-form{background:#F9FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:14px;display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;}
+.roles-permissions{background:#EEF2F8;border-radius:8px;padding:14px;margin-top:16px;}
+.roles-perm-title{font-size:12px;font-weight:700;color:#0D1B3E;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;}
+.roles-perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.roles-perm-item{display:flex;align-items:center;gap:8px;font-size:12px;color:#4A5568;}
+.perm-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+
 /* ── FOOTER ── */
 .footer{background:#fff;border-top:1px solid #E2E8F0;padding:10px 28px;font-size:11px;color:#8B9BB4;flex-shrink:0;display:flex;justify-content:space-between;}
 
@@ -454,7 +501,7 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, setDoc, deleteDoc }
+  import { getFirestore, collection, getDocs, getDoc, doc, setDoc, deleteDoc }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
   import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
     from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -475,7 +522,7 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
   // Expose to global scope so non-module scripts can use them
   window._fbDb   = db;
   window._fbAuth = auth;
-  window._fbFns  = { collection, getDocs, doc, setDoc, deleteDoc,
+  window._fbFns  = { collection, getDocs, getDoc, doc, setDoc, deleteDoc,
                      signInWithEmailAndPassword, signOut, onAuthStateChanged };
 </script>
 </head>
@@ -522,6 +569,107 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
 </div>
 
 
+<!-- BACKUP / RESTORE MODAL -->
+<div class="backup-modal-overlay" id="backup-overlay" onclick="closeBackupModal(event)">
+  <div class="backup-modal">
+    <div class="backup-modal-hdr">
+      <h2>💾 Data Backup & Restore</h2>
+      <button onclick="document.getElementById('backup-overlay').classList.remove('open')"
+        style="background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div class="backup-modal-body">
+      <div class="backup-stats" id="backup-stats"></div>
+
+      <div class="backup-option" onclick="exportAllData()">
+        <span class="backup-option-icon">📦</span>
+        <div>
+          <div class="backup-option-title">Export Full Backup (JSON)</div>
+          <div class="backup-option-sub">Downloads all projects, finance logs, WBS tasks, RACI matrices, update history and baselines as a single JSON file. Store safely as your recovery point.</div>
+        </div>
+      </div>
+
+      <div class="backup-option" onclick="exportProjectsCSV()">
+        <span class="backup-option-icon">📊</span>
+        <div>
+          <div class="backup-option-title">Export Portfolio Summary (CSV)</div>
+          <div class="backup-option-sub">Downloads a CSV with all project EVM metrics — BAC, PV, EV, AC, SPI, CPI, EAC. Opens directly in Excel.</div>
+        </div>
+      </div>
+
+      <div style="margin:16px 0 10px;font-size:13px;font-weight:600;color:#0D1B3E;">Restore from Backup</div>
+      <div class="restore-drop" id="restore-drop"
+        ondragover="event.preventDefault();this.style.borderColor='#185FA5'"
+        ondragleave="this.style.borderColor=''"
+        ondrop="handleRestoreFileDrop(event)">
+        <input type="file" accept=".json" onchange="handleRestoreFile(this)">
+        <div style="font-size:24px;margin-bottom:6px">📂</div>
+        <div style="font-size:13px;font-weight:500;color:#4A5568">Drag JSON backup here or click to browse</div>
+        <div style="font-size:11px;color:#8B9BB4;margin-top:4px">Only restores from backups exported by this dashboard</div>
+      </div>
+      <div id="restore-status" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROLES MANAGEMENT MODAL -->
+<div class="roles-modal-overlay" id="roles-overlay" onclick="closeRolesModal(event)">
+  <div class="roles-modal">
+    <div class="roles-hdr">
+      <h2>👥 User Access & Roles</h2>
+      <button onclick="document.getElementById('roles-overlay').classList.remove('open')"
+        style="background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div class="roles-body">
+      <div style="font-size:13px;color:#8B9BB4;margin-bottom:16px;">
+        Manage who can access the dashboard and what they can do. Share the live URL with team members — they log in with their assigned credentials.
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Current Users</div>
+      <table class="roles-table">
+        <thead><tr>
+          <th>Email</th><th>Role</th><th>Access Level</th><th></th>
+        </tr></thead>
+        <tbody id="roles-tbody"></tbody>
+      </table>
+
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 10px;">Add New User</div>
+      <div class="roles-add-form">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Email Address</label>
+          <input class="finance-input" id="roles-new-email" type="email" placeholder="pm@megawatts.ng">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Role</label>
+          <select class="role-select" id="roles-new-role" style="width:100%;padding:8px 10px">
+            <option value="pm">Project Manager</option>
+            <option value="finance">Finance Officer</option>
+            <option value="hse">HSE Officer</option>
+            <option value="viewer">Viewer (Read Only)</option>
+            <option value="admin">Admin (Full Access)</option>
+          </select>
+        </div>
+        <button class="btn-add-finance" onclick="addUserRole()" style="white-space:nowrap">+ Add User</button>
+      </div>
+      <div id="roles-add-status" style="margin-top:8px;font-size:12px;"></div>
+
+      <div class="roles-permissions">
+        <div class="roles-perm-title">Role Permissions</div>
+        <div class="roles-perm-grid">
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#0D1B3E"></span><strong>Admin</strong> — Full access. Add/edit/delete projects, reports, RACI, finance, WBS</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#185FA5"></span><strong>Project Manager</strong> — Update progress, EVM values, milestones, decisions on assigned projects</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#1E6B2E"></span><strong>Finance Officer</strong> — Add/edit finance log entries only</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#9B1C1C"></span><strong>HSE Officer</strong> — Update HSE KPIs, incident reports, NCR log</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#EEF2F8;border:1px solid #CBD5E0"></span><strong>Viewer</strong> — Read only. Cannot edit anything</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#FFF3CC;border-radius:8px;font-size:12px;color:#92400E;">
+        <strong>⚠️ Important:</strong> New users must be added in Firebase Authentication first (console.firebase.google.com → Authentication → Users → Add user) before they can log in. This dashboard stores their role — Firebase handles the password.
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- LOGIN MODAL -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-box">
@@ -548,7 +696,10 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
   <span class="admin-bar-text">✅ Admin mode — <strong>changes save to Firebase automatically</strong></span>
   <div class="admin-bar-actions">
     <span class="cloud-status cloud-saved" id="cloud-status">● All saved</span>
-    <button class="admin-sync-btn" onclick="loadFromFirebase()">↻ Sync from cloud</button>
+    <span class="admin-bar-role" id="admin-role-badge">Admin</span>
+    <button class="admin-sync-btn" onclick="openBackupModal()" title="Backup & Restore data">💾 Backup</button>
+    <button class="admin-sync-btn" onclick="openRolesModal()" title="Manage user roles & access">👥 Users</button>
+    <button class="admin-sync-btn" onclick="loadFromFirebase()">↻ Sync</button>
     <button class="admin-logout-btn" onclick="doLogout()">Sign out</button>
   </div>
 </div>
@@ -3649,6 +3800,299 @@ async function generatePMOReport() {
 
   btn.textContent = "📋 PMO Report";
   btn.disabled = false;
+}
+
+// ── DATA BACKUP & RESTORE ────────────────────────────────────────────────────
+
+function openBackupModal() {
+  // Populate stats
+  const statsEl = document.getElementById('backup-stats');
+  if (statsEl) {
+    const totalFinance = PROJECTS.reduce((s,p)=>s+(p.financeLog||[]).length,0);
+    const totalWBS     = PROJECTS.reduce((s,p)=>s+(p.wbsTasks||[]).length,0);
+    const totalUpdates = PROJECTS.reduce((s,p)=>s+(p.updateLog||[]).length,0);
+    const totalDecs    = PROJECTS.reduce((s,p)=>s+(p.decisions||[]).length,0);
+    statsEl.innerHTML = `
+      <div><div class="backup-stat-val">${PROJECTS.length}</div><div class="backup-stat-label">Projects</div></div>
+      <div><div class="backup-stat-val">${totalWBS}</div><div class="backup-stat-label">WBS Tasks</div></div>
+      <div><div class="backup-stat-val">${totalFinance}</div><div class="backup-stat-label">Finance Entries</div></div>
+      <div><div class="backup-stat-val">${totalUpdates}</div><div class="backup-stat-label">Update Logs</div></div>`;
+  }
+  document.getElementById('backup-overlay').classList.add('open');
+}
+
+function closeBackupModal(e) {
+  if (e.target === document.getElementById('backup-overlay'))
+    document.getElementById('backup-overlay').classList.remove('open');
+}
+
+function exportAllData() {
+  const backup = {
+    exportDate:    new Date().toISOString(),
+    exportVersion: "2.0",
+    exportedBy:    "Megawatts Nigeria PMO Dashboard",
+    organization:  "Megawatts Nigeria Limited",
+    pmoLead:       "Toyib Salam Olanrewaju, PMP",
+    projects:      PROJECTS,
+    userRoles:     _userRoles,
+    stats: {
+      totalProjects: PROJECTS.length,
+      totalBac:      PROJECTS.reduce((s,p)=>s+p.bac,0),
+      exportTimestamp: Date.now()
+    }
+  };
+
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {type:'application/json;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  const ts   = new Date().toISOString().slice(0,10);
+  a.href     = url;
+  a.download = 'Megawatts_PMO_Backup_' + ts + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  _toast('✅ Full backup exported — ' + PROJECTS.length + ' projects, all data included');
+}
+
+function exportProjectsCSV() {
+  const headers = ['Project ID','Project Name','Client','Type','PM','BAC','PV','EV','AC','SPI','CPI','EAC','VAC','Budget Var %','% Complete','NCRs Open','LTI','RAG Status'];
+  const rows = PROJECTS.map(p => {
+    const spi = p.pv?p.ev/p.pv:0, cpi = p.ac?p.ev/p.ac:0;
+    const eac = cpi?p.bac/cpi:p.bac, vac = p.bac-eac;
+    const bvpct = p.bac?(p.bac-p.ac)/p.bac*100:0;
+    return [
+      p.id, p.fullname||p.name, p.client, p.type, p.pm,
+      p.bac, p.pv, p.ev, p.ac,
+      spi.toFixed(3), cpi.toFixed(3),
+      Math.round(eac), Math.round(vac),
+      bvpct.toFixed(1)+'%',
+      (p.pct_actual||0)+'%',
+      p.ncrs_open||0, p.lti||0, p.rag
+    ].map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',');
+  });
+
+  const csv  = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'Megawatts_Portfolio_' + new Date().toISOString().slice(0,10) + '.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  _toast('✅ CSV exported — open in Excel to view');
+}
+
+async function handleRestoreFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  await _doRestore(file);
+}
+
+async function handleRestoreFileDrop(event) {
+  event.preventDefault();
+  document.getElementById('restore-drop').style.borderColor = '';
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  await _doRestore(file);
+}
+
+async function _doRestore(file) {
+  const statusEl = document.getElementById('restore-status');
+  statusEl.innerHTML = '<div style="color:#92400E;font-size:13px">⏳ Reading backup file...</div>';
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (!data.exportVersion || !data.projects) {
+      throw new Error('Invalid backup file — not a Megawatts PMO backup');
+    }
+
+    const projCount = data.projects.length;
+    const exportDate = new Date(data.exportDate).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+    statusEl.innerHTML = `<div style="background:#FFF3CC;border:1px solid #FDE68A;border-radius:8px;padding:14px;font-size:13px;color:#92400E;">
+      <strong>⚠️ Confirm Restore</strong><br><br>
+      This will replace ALL current data with the backup from <strong>${exportDate}</strong>
+      containing <strong>${projCount} projects</strong>.<br><br>
+      <strong>This cannot be undone.</strong> Export a current backup first if needed.<br><br>
+      <button onclick="_confirmRestore(${JSON.stringify(data.projects).replace(/'/g,"\'")})" 
+        style="padding:9px 20px;background:#9B1C1C;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;margin-right:8px">
+        ✅ Yes, Restore ${projCount} Projects
+      </button>
+      <button onclick="document.getElementById('restore-status').innerHTML=''"
+        style="padding:9px 16px;background:none;border:1px solid #E2E8F0;border-radius:6px;font-size:13px;color:#8B9BB4;cursor:pointer">
+        Cancel
+      </button>
+    </div>`;
+
+  } catch(err) {
+    statusEl.innerHTML = `<div style="color:#9B1C1C;font-size:13px">⚠️ Restore failed: ${err.message}</div>`;
+  }
+}
+
+async function _confirmRestore(projectsData) {
+  const statusEl = document.getElementById('restore-status');
+  statusEl.innerHTML = '<div style="color:#92400E;font-size:13px">⏳ Restoring data to Firebase...</div>';
+
+  try {
+    PROJECTS.length = 0;
+    projectsData.forEach(p => PROJECTS.push(p));
+
+    // Save all to Firebase
+    if (_isAdmin) {
+      await saveAllToFirebase();
+    }
+
+    buildSidebar();
+    renderMain();
+    document.getElementById('backup-overlay').classList.remove('open');
+    _toast('✅ Restore complete — ' + projectsData.length + ' projects restored');
+
+  } catch(err) {
+    statusEl.innerHTML = `<div style="color:#9B1C1C;font-size:13px">⚠️ Restore error: ${err.message}</div>`;
+  }
+}
+
+// ── USER ROLES & ACCESS CONTROL ───────────────────────────────────────────────
+
+// Role definitions
+const ROLES = {
+  admin:   { label:"Admin",           color:"0D1B3E", permissions:["all"] },
+  pm:      { label:"Project Manager", color:"185FA5", permissions:["edit_progress","edit_evm","edit_milestones","edit_decisions","edit_wbs","edit_updates","edit_finance_view"] },
+  finance: { label:"Finance Officer", color:"1E6B2E", permissions:["edit_finance"] },
+  hse:     { label:"HSE Officer",     color:"9B1C1C", permissions:["edit_hse","edit_ncr"] },
+  viewer:  { label:"Viewer",          color:"8B9BB4", permissions:[] },
+};
+
+// User role registry — stored in Firebase
+let _userRoles = [
+  { email:"lanreola713@gmail.com", role:"admin", addedDate: new Date().toISOString().slice(0,10) }
+];
+
+let _currentUserRole = "viewer"; // Default until login resolves
+
+function hasPermission(perm) {
+  if (_currentUserRole === "admin") return true;
+  const role = ROLES[_currentUserRole];
+  if (!role) return false;
+  return role.permissions.includes("all") || role.permissions.includes(perm);
+}
+
+function openRolesModal() {
+  loadRolesFromFirebase().then(() => {
+    renderRolesTable();
+    document.getElementById('roles-overlay').classList.add('open');
+  });
+}
+
+function closeRolesModal(e) {
+  if (e.target === document.getElementById('roles-overlay'))
+    document.getElementById('roles-overlay').classList.remove('open');
+}
+
+function renderRolesTable() {
+  const tbody = document.getElementById('roles-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = _userRoles.map((u,i) => {
+    const role = ROLES[u.role] || ROLES.viewer;
+    return `<tr>
+      <td style="font-size:13px;color:#2D3748">${u.email}</td>
+      <td>
+        <select class="role-select" onchange="updateUserRole(${i},this.value)">
+          ${Object.entries(ROLES).map(([k,v])=>
+            `<option value="${k}" ${u.role===k?"selected":""}>${v.label}</option>`
+          ).join('')}
+        </select>
+      </td>
+      <td><span class="role-badge" style="background:#${role.color};color:#fff">${role.label}</span></td>
+      <td><button onclick="removeUserRole(${i})"
+        style="background:none;border:none;color:#CBD5E0;cursor:pointer;font-size:14px">🗑</button></td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:#8B9BB4;padding:16px">No users yet</td></tr>';
+}
+
+async function addUserRole() {
+  const email = document.getElementById('roles-new-email').value.trim();
+  const role  = document.getElementById('roles-new-role').value;
+  const statusEl = document.getElementById('roles-add-status');
+
+  if (!email || !email.includes('@')) {
+    statusEl.innerHTML = '<span style="color:#9B1C1C">Please enter a valid email address</span>';
+    return;
+  }
+  if (_userRoles.find(u => u.email === email)) {
+    statusEl.innerHTML = '<span style="color:#9B1C1C">This email is already registered</span>';
+    return;
+  }
+
+  _userRoles.push({ email, role, addedDate: new Date().toISOString().slice(0,10) });
+  await saveRolesToFirebase();
+  renderRolesTable();
+  document.getElementById('roles-new-email').value = '';
+  statusEl.innerHTML = `<span style="color:#1E6B2E">✅ ${email} added as ${ROLES[role].label}</span>`;
+  setTimeout(() => statusEl.innerHTML = '', 3000);
+}
+
+async function updateUserRole(idx, newRole) {
+  _userRoles[idx].role = newRole;
+  await saveRolesToFirebase();
+  renderRolesTable();
+  _toast('Role updated');
+}
+
+async function removeUserRole(idx) {
+  if (_userRoles[idx].role === 'admin' && _userRoles.filter(u=>u.role==='admin').length === 1) {
+    alert('Cannot remove the last Admin user. Add another Admin first.');
+    return;
+  }
+  _userRoles.splice(idx, 1);
+  await saveRolesToFirebase();
+  renderRolesTable();
+  _toast('User removed');
+}
+
+async function saveRolesToFirebase() {
+  if (!_isAdmin || !window._fbDb) return;
+  try {
+    const { doc, setDoc } = window._fbFns;
+    await setDoc(doc(window._fbDb, 'config', 'userRoles'), { roles: _userRoles });
+  } catch(e) { console.error('Save roles error:', e); }
+}
+
+async function loadRolesFromFirebase() {
+  if (!window._fbDb) return;
+  try {
+    const { doc, getDoc } = window._fbFns;
+    // Check if getDoc is available (it may need to be imported)
+    if (!getDoc) return;
+    const snap = await getDoc(doc(window._fbDb, 'config', 'userRoles'));
+    if (snap.exists()) {
+      _userRoles = snap.data().roles || _userRoles;
+    }
+  } catch(e) { console.error('Load roles error:', e); }
+}
+
+async function resolveUserRole(userEmail) {
+  // Find this user's role from Firebase
+  await loadRolesFromFirebase();
+  const userRecord = _userRoles.find(u => u.email.toLowerCase() === userEmail.toLowerCase());
+  _currentUserRole = userRecord ? userRecord.role : 'viewer';
+
+  // Update admin role badge
+  const badge = document.getElementById('admin-role-badge');
+  if (badge && _currentUserRole) {
+    const role = ROLES[_currentUserRole] || ROLES.viewer;
+    badge.textContent = role.label;
+    badge.style.background = '#' + role.color;
+  }
+
+  return _currentUserRole;
 }
 
 // ── RACI MATRIX ──────────────────────────────────────────────────────────────
