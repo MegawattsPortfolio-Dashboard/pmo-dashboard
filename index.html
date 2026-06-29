@@ -598,8 +598,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <!-- PptxGenJS for report generation -->
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-<!-- EmailJS for automated email delivery -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <!-- jsPDF for PDF export -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -676,113 +674,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
 </div>
 
 
-<!-- EMAIL SCHEDULER MODAL -->
-<div class="backup-modal-overlay" id="email-scheduler-overlay" onclick="closeEmailScheduler(event)">
-  <div class="backup-modal" style="width:620px;max-width:96vw;">
-    <div class="backup-modal-hdr" style="background:#C9901A;">
-      <h2>📧 Automated Weekly Email Reports</h2>
-      <button onclick="document.getElementById('email-scheduler-overlay').classList.remove('open')"
-        style="background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer">✕</button>
-    </div>
-    <div class="backup-modal-body">
-
-      <!-- EmailJS Setup Notice -->
-      <div style="background:#FFF3CC;border:1px solid #FDE68A;border-radius:8px;padding:14px;margin-bottom:16px;">
-        <div style="font-size:13px;font-weight:600;color:#92400E;margin-bottom:6px;">⚙️ One-time Setup Required (Free)</div>
-        <div style="font-size:12px;color:#92400E;line-height:1.6;">
-          This uses <strong>EmailJS</strong> — a free service that sends emails directly from the browser without a server.
-          Create a free account at <a href="https://www.emailjs.com" target="_blank" style="color:#185FA5">emailjs.com</a>,
-          create a service (Gmail works), create an email template, then enter your credentials below.
-          Free plan: 200 emails/month — more than enough for weekly reports.
-        </div>
-      </div>
-
-      <!-- EmailJS Credentials -->
-      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">EmailJS Configuration</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Public Key</label>
-          <input class="finance-input" id="ejs-public-key" placeholder="e.g. user_xxxxxxxxxxx" oninput="saveEmailConfig()">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Service ID</label>
-          <input class="finance-input" id="ejs-service-id" placeholder="e.g. service_xxxxxxx" oninput="saveEmailConfig()">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Template ID</label>
-          <input class="finance-input" id="ejs-template-id" placeholder="e.g. template_xxxxxxx" oninput="saveEmailConfig()">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Sender Name</label>
-          <input class="finance-input" id="ejs-sender-name" placeholder="Toyib Salam, PMO Lead" oninput="saveEmailConfig()">
-        </div>
-      </div>
-
-      <!-- Recipients -->
-      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Report Recipients</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">CEO Email</label>
-          <input class="finance-input" id="email-ceo" type="email" placeholder="ceo@megawatts.ng" oninput="saveEmailConfig()">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Head of PMO Email</label>
-          <input class="finance-input" id="email-pmo" type="email" placeholder="pmo@megawatts.ng" oninput="saveEmailConfig()">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Additional CC</label>
-          <input class="finance-input" id="email-cc" type="email" placeholder="optional@megawatts.ng" oninput="saveEmailConfig()">
-        </div>
-      </div>
-
-      <!-- Per-project client emails -->
-      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin:14px 0 10px;">Client Emails — Per Project</div>
-      <div id="client-email-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
-
-      <!-- Schedule settings -->
-      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Weekly Schedule</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Send Every</label>
-          <select class="finance-select" id="schedule-day" onchange="saveEmailConfig()">
-            <option value="1">Monday</option>
-            <option value="2">Tuesday</option>
-            <option value="3">Wednesday</option>
-            <option value="4">Thursday</option>
-            <option value="5" selected>Friday</option>
-          </select>
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">At Time</label>
-          <input class="finance-input" id="schedule-time" type="time" value="08:00" oninput="saveEmailConfig()">
-        </div>
-        <div>
-          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Report Types</label>
-          <select class="finance-select" id="schedule-report-type" onchange="saveEmailConfig()">
-            <option value="all">CEO + PMO + Client</option>
-            <option value="ceo-pmo">CEO + PMO only</option>
-            <option value="client">Client only</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Status and actions -->
-      <div id="email-schedule-status" style="margin-bottom:14px;font-size:12px;color:#8B9BB4;"></div>
-
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button onclick="sendReportsNow()" style="padding:10px 22px;background:#1E6B2E;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">
-          📤 Send Reports Now
-        </button>
-        <button onclick="activateWeeklySchedule()" style="padding:10px 22px;background:#185FA5;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">
-          ⏰ Activate Weekly Schedule
-        </button>
-        <button onclick="testEmailConfig()" style="padding:10px 22px;background:#EEF2F8;border:1px solid #E2E8F0;border-radius:6px;color:#0D1B3E;font-size:13px;font-weight:600;cursor:pointer;">
-          🧪 Test Connection
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- CLIENT REPORT MODAL (project selector) -->
 <div class="backup-modal-overlay" id="client-report-overlay" onclick="closeClientReportModal(event)">
@@ -5119,240 +5010,6 @@ function copyAlertsText() {
 
 // ── EMAIL REPORTS & CLIENT REPORT ────────────────────────────────────────────
 
-const EMAIL_CONFIG_KEY = 'megawatts_pmo_email_cfg';
-
-function loadEmailConfig() {
-  try { return JSON.parse(localStorage.getItem(EMAIL_CONFIG_KEY)||'{}'); }
-  catch(e) { return {}; }
-}
-
-function saveEmailConfig() {
-  const cfg = {
-    publicKey:    (document.getElementById('ejs-public-key')||{}).value||'',
-    serviceId:    (document.getElementById('ejs-service-id')||{}).value||'',
-    templateId:   (document.getElementById('ejs-template-id')||{}).value||'',
-    senderName:   (document.getElementById('ejs-sender-name')||{}).value||'Toyib Salam Olanrewaju, PMO Lead',
-    emailCeo:     (document.getElementById('email-ceo')||{}).value||'',
-    emailPmo:     (document.getElementById('email-pmo')||{}).value||'',
-    emailCc:      (document.getElementById('email-cc')||{}).value||'',
-    scheduleDay:  (document.getElementById('schedule-day')||{}).value||'5',
-    scheduleTime: (document.getElementById('schedule-time')||{}).value||'08:00',
-    reportType:   (document.getElementById('schedule-report-type')||{}).value||'all',
-    clientEmails: _getClientEmails(),
-    scheduleActive: false,
-  };
-  try { localStorage.setItem(EMAIL_CONFIG_KEY, JSON.stringify(cfg)); } catch(e) {}
-  return cfg;
-}
-
-function _getClientEmails() {
-  const result = {};
-  PROJECTS.forEach(p => {
-    const el = document.getElementById('client-email-'+p.id);
-    if (el && el.value) result[p.id] = el.value.trim();
-  });
-  return result;
-}
-
-function openEmailScheduler() {
-  const cfg = loadEmailConfig();
-  const fields = {
-    'ejs-public-key':cfg.publicKey,'ejs-service-id':cfg.serviceId,
-    'ejs-template-id':cfg.templateId,'ejs-sender-name':cfg.senderName||'Toyib Salam Olanrewaju, PMO Lead',
-    'email-ceo':cfg.emailCeo,'email-pmo':cfg.emailPmo,'email-cc':cfg.emailCc,
-    'schedule-day':cfg.scheduleDay||'5','schedule-time':cfg.scheduleTime||'08:00',
-    'schedule-report-type':cfg.reportType||'all',
-  };
-  Object.entries(fields).forEach(([id,val])=>{
-    const el = document.getElementById(id);
-    if (el && val) el.value = val;
-  });
-
-  // Build client email list
-  const listEl = document.getElementById('client-email-list');
-  if (listEl) {
-    listEl.innerHTML = PROJECTS.filter(p=>p.rag!=='complete').map(p=>
-      '<div style="display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;margin-bottom:6px;">' +
-      '<label style="font-size:12px;font-weight:600;color:#0D1B3E">'+p.id+'</label>' +
-      '<input class="finance-input" id="client-email-'+p.id+'" type="email" placeholder="client@company.com" value="'+((cfg.clientEmails||{})[p.id]||'')+'">'+
-      '</div>'
-    ).join('');
-  }
-
-  const statusEl = document.getElementById('email-schedule-status');
-  if (statusEl) statusEl.innerHTML = cfg.scheduleActive
-    ? '<span style="color:#1E6B2E;font-weight:600">Schedule active</span>'
-    : '<span style="color:#8B9BB4">Schedule not active. Click Activate to enable.</span>';
-
-  document.getElementById('email-scheduler-overlay').classList.add('open');
-}
-
-function closeEmailScheduler(e) {
-  if (e.target===document.getElementById('email-scheduler-overlay'))
-    document.getElementById('email-scheduler-overlay').classList.remove('open');
-}
-
-async function testEmailConfig() {
-  const cfg = saveEmailConfig();
-  if (!cfg.publicKey||!cfg.serviceId||!cfg.templateId) {
-    alert('Please fill in your EmailJS Public Key, Service ID and Template ID first.');
-    return;
-  }
-  const statusEl = document.getElementById('email-schedule-status');
-  statusEl.innerHTML = '<span style="color:#92400E">Testing...</span>';
-  try {
-    emailjs.init(cfg.publicKey);
-    await emailjs.send(cfg.serviceId, cfg.templateId, {
-      to_email: _currentUser&&_currentUser.email||'test@megawatts.ng',
-      to_name:'PMO Admin', subject:'Megawatts PMO Test Email',
-      report_type:'Connection Test', report_date:new Date().toLocaleDateString('en-GB'),
-      portfolio_summary:'Test email from Megawatts PMO Dashboard. Your configuration is working.',
-      dashboard_url:window.location.href, sender_name:cfg.senderName,
-    });
-    statusEl.innerHTML = '<span style="color:#1E6B2E;font-weight:600">✅ Test email sent! Check your inbox.</span>';
-  } catch(err) {
-    statusEl.innerHTML = '<span style="color:#9B1C1C">❌ Failed: '+(err.text||err.message||'Check credentials')+'</span>';
-  }
-}
-
-function buildPortfolioEmailBody() {
-  const totalBac=PROJECTS.reduce((s,p)=>s+p.bac,0);
-  const totalEv=PROJECTS.reduce((s,p)=>s+p.ev,0);
-  const totalPv=PROJECTS.reduce((s,p)=>s+p.pv,0);
-  const totalAc=PROJECTS.reduce((s,p)=>s+p.ac,0);
-  const portSpi=totalPv?totalEv/totalPv:0;
-  const portCpi=totalAc?totalEv/totalAc:0;
-  const portEac=portCpi?totalBac/portCpi:totalBac;
-  const onTrack=PROJECTS.filter(p=>p.rag==='green'||p.rag==='complete').length;
-  const critical=PROJECTS.filter(p=>p.rag==='red').length;
-  const atRisk=PROJECTS.filter(p=>p.rag==='amber').length;
-  const lines=[
-    'MEGAWATTS NIGERIA LIMITED — PMO WEEKLY REPORT',
-    'Week ending: '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}),
-    '',
-    'PORTFOLIO SUMMARY',
-    'Total Contract Value: '+NM(totalBac),
-    'Portfolio SPI: '+portSpi.toFixed(3)+(portSpi>=1?' (On schedule)':portSpi<0.85?' (CRITICAL)':' (At risk)'),
-    'Portfolio CPI: '+portCpi.toFixed(3)+(portCpi>=1?' (Under budget)':portCpi<0.9?' (CRITICAL)':' (At risk)'),
-    'Portfolio EAC: '+NM(Math.round(portEac)),
-    '',
-    'STATUS: On Track: '+onTrack+' | At Risk: '+atRisk+' | Critical: '+critical,
-    '',
-    'PROJECT STATUS',
-  ];
-  PROJECTS.forEach(p=>{
-    const e=evm(p);
-    const rag=p.rag==='green'?'ON TRACK':p.rag==='red'?'CRITICAL':p.rag==='amber'?'AT RISK':'COMPLETE';
-    lines.push(p.id+' | '+p.name+' | '+p.pct_actual+'% | SPI:'+e.spi.toFixed(2)+' | CPI:'+e.cpi.toFixed(2)+' | '+rag);
-  });
-  const urgDecs=PROJECTS.flatMap(p=>(p.decisions||[]).filter(d=>(Array.isArray(d)?d[3]:d.urg)==='red'));
-  if (urgDecs.length) {
-    lines.push('','URGENT DECISIONS REQUIRED');
-    urgDecs.forEach(d=>lines.push('- '+(Array.isArray(d)?d[0]:d.text)));
-  }
-  lines.push('','Dashboard: '+window.location.href,'','PMO Lead: Toyib Salam Olanrewaju, PMP');
-  return lines.join('\n');
-}
-
-function buildClientEmailBody(projId) {
-  const p=PROJECTS.find(x=>x.id===projId);
-  if (!p) return '';
-  const pct=p.pct_actual||0;
-  const ragLabel=p.rag==='green'?'On Track':p.rag==='red'?'Critical':p.rag==='amber'?'At Risk':'Complete';
-  const lines=[
-    'PROJECT PROGRESS REPORT','',
-    p.fullname,'Client: '+p.client,
-    'Report Date: '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}),
-    '','STATUS: '+ragLabel.toUpperCase()+' | Progress: '+pct+'%',
-    'Contract Value: '+NM(p.contract||p.bac),'Programme: '+(p.start||'-')+' to '+(p.end||'-'),
-    '','MILESTONE STATUS',
-  ];
-  (p.milestones||[]).forEach(m=>{
-    const name=Array.isArray(m)?m[1]:m.name;
-    const planned=Array.isArray(m)?m[2]:m.planned;
-    const mpct=Array.isArray(m)?m[4]:m.pct;
-    const status=mpct===1?'Complete':mpct>0?'In Progress':'Pending';
-    lines.push('- '+name+' ('+planned+'): '+status);
-  });
-  const cdecs=(p.decisions||[]).filter(d=>(Array.isArray(d)?d[3]:d.urg)==='red');
-  if (cdecs.length) {
-    lines.push('','ITEMS REQUIRING CLIENT ACTION');
-    cdecs.forEach(d=>lines.push('- '+(Array.isArray(d)?d[0]:d.text)));
-  }
-  lines.push('','Prepared by: '+( p.pm||'PMO Lead')+' | Reviewed by: Toyib Salam Olanrewaju, PMP');
-  return lines.join('\n');
-}
-
-async function sendReportsNow() {
-  const cfg=saveEmailConfig();
-  if (!cfg.publicKey||!cfg.serviceId||!cfg.templateId) {
-    alert('Please complete EmailJS configuration first (Public Key, Service ID, Template ID).');
-    return;
-  }
-  const statusEl=document.getElementById('email-schedule-status');
-  statusEl.innerHTML='<span style="color:#92400E">Sending reports...</span>';
-  try {
-    emailjs.init(cfg.publicKey);
-    const date=new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
-    const body=buildPortfolioEmailBody();
-    let sent=0,failed=0;
-    const type=cfg.reportType||'all';
-
-    async function trySend(to,name,subject,reportType,emailBody) {
-      if (!to) return;
-      try {
-        await emailjs.send(cfg.serviceId,cfg.templateId,{
-          to_email:to,to_name:name,subject,report_type:reportType,
-          report_date:date,portfolio_summary:emailBody,
-          dashboard_url:window.location.href,sender_name:cfg.senderName,
-        });
-        sent++;
-      } catch(e) { failed++; console.error('Email to '+to+' failed:',e); }
-    }
-
-    if (type==='all'||type==='ceo-pmo') {
-      await trySend(cfg.emailCeo,'CEO','Megawatts Portfolio Report — Week Ending '+date,'CEO Executive Report',body);
-      await trySend(cfg.emailPmo,'Head of PMO','Megawatts PMO Report — Week Ending '+date,'PMO Detailed Report',body);
-    }
-    if (type==='all'||type==='client') {
-      for (const p of PROJECTS) {
-        const clientEmail=(cfg.clientEmails||{})[p.id];
-        if (clientEmail) await trySend(clientEmail,p.client,p.fullname+' — Progress Report '+date,'Client Progress Report',buildClientEmailBody(p.id));
-      }
-    }
-    if (cfg.emailCc&&sent>0) await trySend(cfg.emailCc,'CC','Megawatts PMO Reports '+date+' [CC]','CC',body);
-
-    const msg=sent+' report(s) sent'+(failed?' | '+failed+' failed':'');
-    statusEl.innerHTML='<span style="color:'+(failed?'#9B1C1C':'#1E6B2E')+';font-weight:600">'+(failed?'⚠️':'✅')+' '+msg+'</span>';
-    _toast((failed?'⚠️':'✅')+' '+msg);
-  } catch(err) {
-    statusEl.innerHTML='<span style="color:#9B1C1C">❌ Send failed: '+err.message+'</span>';
-  }
-}
-
-let _weeklyTimer=null;
-function activateWeeklySchedule() {
-  const cfg=saveEmailConfig();
-  if (!cfg.publicKey||!cfg.serviceId||!cfg.templateId) {
-    alert('Please complete EmailJS configuration before activating the schedule.');
-    return;
-  }
-  cfg.scheduleActive=true;
-  try{localStorage.setItem(EMAIL_CONFIG_KEY,JSON.stringify(cfg));}catch(e){}
-  if (_weeklyTimer) clearInterval(_weeklyTimer);
-  _weeklyTimer=setInterval(()=>{
-    const now=new Date();
-    const timeStr=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-    const scfg=loadEmailConfig();
-    if (String(now.getDay())===String(scfg.scheduleDay||'5')&&timeStr===(scfg.scheduleTime||'08:00')&&scfg.scheduleActive)
-      sendReportsNow();
-  },60000);
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const statusEl=document.getElementById('email-schedule-status');
-  if (statusEl) statusEl.innerHTML='<span style="color:#1E6B2E;font-weight:600">✅ Schedule active — every '+days[parseInt(cfg.scheduleDay||5)]+' at '+(cfg.scheduleTime||'08:00')+'</span>';
-  _toast('✅ Weekly schedule activated');
-}
-
 function openClientReportModal() {
   const listEl=document.getElementById('client-proj-list');
   if (listEl) {
@@ -7202,5 +6859,493 @@ function saveProject(autoSave){
   },100);
 }
 </script>
+</body>
+</html>
+      </div>
+
+      <!-- Recipients -->
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Report Recipients</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:8px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">CEO Email</label>
+          <input class="finance-input" id="email-ceo" type="email" placeholder="ceo@megawatts.ng" oninput="saveEmailConfig()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Head of PMO Email</label>
+          <input class="finance-input" id="email-pmo" type="email" placeholder="pmo@megawatts.ng" oninput="saveEmailConfig()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Additional CC</label>
+          <input class="finance-input" id="email-cc" type="email" placeholder="optional@megawatts.ng" oninput="saveEmailConfig()">
+        </div>
+      </div>
+
+      <!-- Per-project client emails -->
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin:14px 0 10px;">Client Emails — Per Project</div>
+      <div id="client-email-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;"></div>
+
+      <!-- Schedule settings -->
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Weekly Schedule</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Send Every</label>
+          <select class="finance-select" id="schedule-day" onchange="saveEmailConfig()">
+            <option value="1">Monday</option>
+            <option value="2">Tuesday</option>
+            <option value="3">Wednesday</option>
+            <option value="4">Thursday</option>
+            <option value="5" selected>Friday</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">At Time</label>
+          <input class="finance-input" id="schedule-time" type="time" value="08:00" oninput="saveEmailConfig()">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Report Types</label>
+          <select class="finance-select" id="schedule-report-type" onchange="saveEmailConfig()">
+            <option value="all">CEO + PMO + Client</option>
+            <option value="ceo-pmo">CEO + PMO only</option>
+            <option value="client">Client only</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Status and actions -->
+      <div id="email-schedule-status" style="margin-bottom:14px;font-size:12px;color:#8B9BB4;"></div>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button onclick="sendReportsNow()" style="padding:10px 22px;background:#1E6B2E;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">
+          📤 Send Reports Now
+        </button>
+        <button onclick="activateWeeklySchedule()" style="padding:10px 22px;background:#185FA5;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">
+          ⏰ Activate Weekly Schedule
+        </button>
+        <button onclick="testEmailConfig()" style="padding:10px 22px;background:#EEF2F8;border:1px solid #E2E8F0;border-radius:6px;color:#0D1B3E;font-size:13px;font-weight:600;cursor:pointer;">
+          🧪 Test Connection
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CLIENT REPORT MODAL (project selector) -->
+<div class="backup-modal-overlay" id="client-report-overlay" onclick="closeClientReportModal(event)">
+  <div class="backup-modal" style="width:480px;">
+    <div class="backup-modal-hdr" style="background:#0D7377;">
+      <h2>📨 Generate Client Report</h2>
+      <button onclick="document.getElementById('client-report-overlay').classList.remove('open')"
+        style="background:none;border:none;color:rgba(255,255,255,.7);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div class="backup-modal-body">
+      <div style="font-size:13px;color:#8B9BB4;margin-bottom:14px;">
+        Select project(s) to generate a client-facing progress report. The report is professional, concise and excludes internal EVM detail.
+      </div>
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Select Projects</div>
+      <div id="client-proj-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px;max-height:250px;overflow-y:auto;"></div>
+      <div style="display:flex;gap:10px;">
+        <button onclick="generateClientReport()" style="flex:1;padding:10px;background:#0D7377;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;">
+          📊 Generate PowerPoint Report
+        </button>
+        <button onclick="document.getElementById('client-report-overlay').classList.remove('open')"
+          style="padding:10px 18px;background:none;border:1px solid #E2E8F0;border-radius:6px;color:#8B9BB4;font-size:13px;cursor:pointer">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BACKUP / RESTORE MODAL -->
+<div class="backup-modal-overlay" id="backup-overlay" onclick="closeBackupModal(event)">
+  <div class="backup-modal">
+    <div class="backup-modal-hdr">
+      <h2>💾 Data Backup & Restore</h2>
+      <button onclick="document.getElementById('backup-overlay').classList.remove('open')"
+        style="background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div class="backup-modal-body">
+      <div class="backup-stats" id="backup-stats"></div>
+
+      <div class="backup-option" onclick="exportAllData()">
+        <span class="backup-option-icon">📦</span>
+        <div>
+          <div class="backup-option-title">Export Full Backup (JSON)</div>
+          <div class="backup-option-sub">Downloads all projects, finance logs, WBS tasks, RACI matrices, update history and baselines as a single JSON file. Store safely as your recovery point.</div>
+        </div>
+      </div>
+
+      <div class="backup-option" onclick="exportProjectsCSV()">
+        <span class="backup-option-icon">📊</span>
+        <div>
+          <div class="backup-option-title">Export Portfolio Summary (CSV)</div>
+          <div class="backup-option-sub">Downloads a CSV with all project EVM metrics — BAC, PV, EV, AC, SPI, CPI, EAC. Opens directly in Excel.</div>
+        </div>
+      </div>
+
+      <div style="margin:16px 0 10px;font-size:13px;font-weight:600;color:#0D1B3E;">Restore from Backup</div>
+      <div class="restore-drop" id="restore-drop"
+        ondragover="event.preventDefault();this.style.borderColor='#185FA5'"
+        ondragleave="this.style.borderColor=''"
+        ondrop="handleRestoreFileDrop(event)">
+        <input type="file" accept=".json" onchange="handleRestoreFile(this)">
+        <div style="font-size:24px;margin-bottom:6px">📂</div>
+        <div style="font-size:13px;font-weight:500;color:#4A5568">Drag JSON backup here or click to browse</div>
+        <div style="font-size:11px;color:#8B9BB4;margin-top:4px">Only restores from backups exported by this dashboard</div>
+      </div>
+      <div id="restore-status" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ROLES MANAGEMENT MODAL -->
+<div class="roles-modal-overlay" id="roles-overlay" onclick="closeRolesModal(event)">
+  <div class="roles-modal">
+    <div class="roles-hdr">
+      <h2>👥 User Access & Roles</h2>
+      <button onclick="document.getElementById('roles-overlay').classList.remove('open')"
+        style="background:none;border:none;color:rgba(255,255,255,.6);font-size:22px;cursor:pointer">✕</button>
+    </div>
+    <div class="roles-body">
+      <div style="font-size:13px;color:#8B9BB4;margin-bottom:16px;">
+        Manage who can access the dashboard and what they can do. Share the live URL with team members — they log in with their assigned credentials.
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">Current Users</div>
+      <table class="roles-table">
+        <thead><tr>
+          <th>Email</th><th>Role</th><th>Access Level</th><th></th>
+        </tr></thead>
+        <tbody id="roles-tbody"></tbody>
+      </table>
+
+      <div style="font-size:12px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.05em;margin:16px 0 10px;">Add New User</div>
+      <div class="roles-add-form">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Email Address</label>
+          <input class="finance-input" id="roles-new-email" type="email" placeholder="pm@megawatts.ng">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#4A5568;display:block;margin-bottom:4px">Role</label>
+          <select class="role-select" id="roles-new-role" style="width:100%;padding:8px 10px">
+            <option value="pm">Project Manager</option>
+            <option value="finance">Finance Officer</option>
+            <option value="hse">HSE Officer</option>
+            <option value="viewer">Viewer (Read Only)</option>
+            <option value="admin">Admin (Full Access)</option>
+          </select>
+        </div>
+        <button class="btn-add-finance" onclick="addUserRole()" style="white-space:nowrap">+ Add User</button>
+      </div>
+      <div id="roles-add-status" style="margin-top:8px;font-size:12px;"></div>
+
+      <div class="roles-permissions">
+        <div class="roles-perm-title">Role Permissions</div>
+        <div class="roles-perm-grid">
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#0D1B3E"></span><strong>Admin</strong> — Full access. Add/edit/delete projects, reports, RACI, finance, WBS</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#185FA5"></span><strong>Project Manager</strong> — Update progress, EVM values, milestones, decisions on assigned projects</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#1E6B2E"></span><strong>Finance Officer</strong> — Add/edit finance log entries only</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#9B1C1C"></span><strong>HSE Officer</strong> — Update HSE KPIs, incident reports, NCR log</div>
+          <div class="roles-perm-item"><span class="perm-dot" style="background:#EEF2F8;border:1px solid #CBD5E0"></span><strong>Viewer</strong> — Read only. Cannot edit anything</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;padding:12px 14px;background:#FFF3CC;border-radius:8px;font-size:12px;color:#92400E;">
+        <strong>⚠️ Important:</strong> New users must be added in Firebase Authentication first (console.firebase.google.com → Authentication → Users → Add user) before they can log in. This dashboard stores their role — Firebase handles the password.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">MEGAWATTS NIGERIA LIMITED</div>
+    <div class="login-title">Admin Login</div>
+    <div class="login-sub">Sign in to edit projects and update EVM values live</div>
+    <div class="login-group">
+      <label class="login-label">Email address</label>
+      <input class="login-input" id="login-email" type="email" placeholder="your@email.com" autocomplete="email">
+    </div>
+    <div class="login-group">
+      <label class="login-label">Password</label>
+      <input class="login-input" id="login-password" type="password" placeholder="••••••••"
+        onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-loading" id="login-loading">Signing in...</div>
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+  </div>
+</div>
+
+<!-- ADMIN BAR (shown when logged in) -->
+<div class="admin-bar" id="admin-bar">
+  <span class="admin-bar-text">✅ Admin mode — <strong>changes save to Firebase automatically</strong></span>
+  <div class="admin-bar-actions">
+    <span class="cloud-status cloud-saved" id="cloud-status">● All saved</span>
+    <span class="admin-bar-role" id="admin-role-badge">Admin</span>
+    <button class="admin-sync-btn" onclick="checkAndSendAlerts()" title="Check portfolio alerts">🔔 Alerts</button>
+    <button class="admin-sync-btn" onclick="openBackupModal()" title="Backup & Restore data">💾 Backup</button>
+    <button class="admin-sync-btn" onclick="openRolesModal()" title="Manage user roles & access">👥 Users</button>
+    <button class="admin-sync-btn" onclick="openEmailScheduler()" title="Configure and send automated email reports" style="background:rgba(201,144,26,.3);border-color:rgba(201,144,26,.6);">📧 Email Reports</button>
+    <button class="admin-sync-btn" onclick="generateWhatsAppAlert()" title="Send portfolio alert via WhatsApp">📱 Alert</button>
+    <button class="admin-sync-btn" onclick="loadFromFirebase()">↻ Sync</button>
+    <button class="admin-logout-btn" onclick="doLogout()">Sign out</button>
+  </div>
+</div>
+
+<!-- EDIT PROJECT PANEL -->
+<div class="edit-panel-overlay" id="edit-overlay" onclick="closeEditPanel()"></div>
+<div class="edit-panel" id="edit-panel">
+  <div class="edit-panel-hdr">
+    <div>
+      <h3 id="edit-panel-title">Edit Project</h3>
+      <p id="edit-panel-sub">Update EVM values and project details</p>
+    </div>
+    <button class="edit-panel-close" onclick="closeEditPanel()">&#215;</button>
+  </div>
+  <div class="edit-panel-body">
+
+    <div class="edit-section">RAG Status &amp; Progress</div>
+    <div class="edit-grid">
+      <div class="edit-group">
+        <label class="edit-label">RAG Status</label>
+        <select class="edit-select" id="ep-rag">
+          <option value="green">🟢 Green — On Track</option>
+          <option value="amber">🟡 Amber — At Risk</option>
+          <option value="red">🔴 Red — Critical</option>
+          <option value="complete">🔵 Complete</option>
+        </select>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">% Complete (Actual)</label>
+        <input class="edit-input" id="ep-pct" type="number" min="0" max="100">
+      </div>
+    </div>
+
+    <div class="edit-section">EVM Values — Current Period</div>
+    <div class="edit-grid">
+      <div class="edit-group">
+        <label class="edit-label">BAC — Budget at Completion (₦)</label>
+        <input class="edit-input" id="ep-bac" type="number" oninput="updateEVMPreview()">
+        <span class="edit-hint">Approved total budget</span>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">Contract Value (₦)</label>
+        <input class="edit-input" id="ep-contract" type="number">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">PV — Planned Value (₦)</label>
+        <input class="edit-input" id="ep-pv" type="number" oninput="updateEVMPreview()">
+        <span class="edit-hint">Budgeted cost scheduled to date</span>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">EV — Earned Value (₦)</label>
+        <input class="edit-input" id="ep-ev" type="number" oninput="updateEVMPreview()">
+        <span class="edit-hint">Budgeted cost of work completed</span>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">AC — Actual Cost (₦)</label>
+        <input class="edit-input" id="ep-ac" type="number" oninput="updateEVMPreview()">
+        <span class="edit-hint">Real money spent to date</span>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">Open NCRs</label>
+        <input class="edit-input" id="ep-ncrs" type="number" min="0">
+      </div>
+    </div>
+
+    <!-- Live EVM preview -->
+    <div class="evm-live" id="ep-evm-live">
+      <div><div class="evm-live-label">SPI = EV÷PV</div><div class="evm-live-val" id="ep-spi">—</div></div>
+      <div><div class="evm-live-label">CPI = EV÷AC</div><div class="evm-live-val" id="ep-cpi">—</div></div>
+      <div><div class="evm-live-label">EAC = BAC÷CPI</div><div class="evm-live-val" id="ep-eac">—</div></div>
+      <div><div class="evm-live-label">SV = EV−PV</div><div class="evm-live-val" id="ep-sv">—</div></div>
+      <div><div class="evm-live-label">CV = EV−AC</div><div class="evm-live-val" id="ep-cv">—</div></div>
+      <div><div class="evm-live-label">VAC = BAC−EAC</div><div class="evm-live-val" id="ep-vac">—</div></div>
+    </div>
+
+    <div class="edit-section">Re-baseline Note (optional)</div>
+    <div class="edit-grid">
+      <div class="edit-group full">
+        <label class="edit-label">Reason for change / re-baseline note</label>
+        <input class="edit-input" id="ep-note" placeholder="e.g. Scope change approved — design revision added 3 weeks to programme">
+        <span class="edit-hint">This will be logged in the baseline history below with today's date</span>
+      </div>
+    </div>
+
+    <div class="edit-section">Project Details</div>
+    <div class="edit-grid">
+      <div class="edit-group full">
+        <label class="edit-label">Project Full Name</label>
+        <input class="edit-input" id="ep-fullname">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">Project Manager</label>
+        <input class="edit-input" id="ep-pm">
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">Start Date</label>
+        <input class="edit-input" id="ep-start" type="date" oninput="formatDateDisplay('ep-start','ep-start-disp')">
+        <span class="edit-hint" id="ep-start-disp" style="color:#0D1B3E;font-weight:500"></span>
+      </div>
+      <div class="edit-group">
+        <label class="edit-label">Planned End Date</label>
+        <input class="edit-input" id="ep-end" type="date" oninput="formatDateDisplay('ep-end','ep-end-disp')">
+        <span class="edit-hint" id="ep-end-disp" style="color:#0D1B3E;font-weight:500"></span>
+      </div>
+    </div>
+
+    <div class="edit-section">Baseline History</div>
+    <div class="baseline-list" id="ep-baseline-list">
+      <div style="font-size:12px;color:#8B9BB4;">No baseline changes recorded yet.</div>
+    </div>
+
+  </div>
+  <div class="edit-panel-footer">
+    <button class="btn-rebaseline" onclick="applyEdit(true)">Re-baseline &amp; Save</button>
+    <button class="btn-update" onclick="applyEdit(false)">Update Values</button>
+  </div>
+</div>
+
+<!-- ADD PROJECT MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2>Add New Project</h2>
+      <button class="modal-close" onclick="closeModal()">&#215;</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">Project Information</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Project Reference *</label>
+          <input class="form-input" id="f-id" placeholder="PRJ-006" oninput="autoCalcEVM()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Type *</label>
+          <select class="form-select" id="f-type">
+            <option value="">Select type...</option>
+            <option>HVAC</option><option>Electrical</option><option>MEP</option>
+            <option>Fire Protection</option><option>Plumbing</option>
+            <option>ELV</option><option>Civil</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Project Full Name *</label>
+          <input class="form-input" id="f-fullname" placeholder="e.g. HVAC Installation — Client Building Name">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Client / Employer *</label>
+          <input class="form-input" id="f-client" placeholder="Client organisation name">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Project Manager</label>
+          <input class="form-input" id="f-pm" placeholder="e.g. Eng. Name O.">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input class="form-input" id="f-start" type="date" style="cursor:pointer;" oninput="calcDuration()">
+          <span class="form-hint" id="f-start-display" style="color:#185FA5;font-weight:500;"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">End Date (Planned Completion)</label>
+          <input class="form-input" id="f-end" type="date" style="cursor:pointer;">
+          <span class="form-hint" id="f-end-display" style="color:#185FA5;font-weight:500;"></span>
+        </div>
+        <div class="form-group full" id="duration-display" style="display:none;">
+          <div style="background:#EBF3FB;border-radius:6px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:12px;color:#185FA5;font-weight:500;">Project Duration</span>
+            <span style="font-size:13px;font-weight:600;color:#0D1B3E;" id="duration-val">—</span>
+          </div>
+        </div>
+        <div class="form-group" id="duration-group" style="display:none;">
+          <label class="form-label">Project Duration</label>
+          <div id="f-duration" style="padding:8px 10px;background:#EEF2F8;border-radius:6px;font-size:13px;font-weight:600;color:#0D1B3E;"></div>
+          <span class="form-hint" id="f-duration-note"></span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">RAG Status</label>
+          <select class="form-select" id="f-rag">
+            <option value="green">🟢 Green — On Track</option>
+            <option value="amber">🟡 Amber — At Risk</option>
+            <option value="red">🔴 Red — Critical</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">% Complete (Actual)</label>
+          <input class="form-input" id="f-pct" type="number" min="0" max="100" placeholder="0" oninput="autoCalcEVM()">
+        </div>
+      </div>
+
+      <div class="modal-section">EVM Inputs — Enter values in Naira (₦)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">BAC — Budget at Completion (₦) *</label>
+          <input class="form-input" id="f-bac" type="number" placeholder="0" oninput="autoCalcEVM()">
+          <span class="form-hint">Total approved project budget</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contract Value (₦)</label>
+          <input class="form-input" id="f-contract" type="number" placeholder="0">
+          <span class="form-hint">Awarded contract value</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PV — Planned Value (₦) *</label>
+          <input class="form-input" id="f-pv" type="number" placeholder="0" oninput="autoCalcEVM()">
+          <span class="form-hint">Budgeted cost of work scheduled to date</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">EV — Earned Value (₦) *</label>
+          <input class="form-input" id="f-ev" type="number" placeholder="0" oninput="autoCalcEVM()">
+          <span class="form-hint">Budgeted cost of work actually completed</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">AC — Actual Cost (₦) *</label>
+          <input class="form-input" id="f-ac" type="number" placeholder="0" oninput="autoCalcEVM()">
+          <span class="form-hint">Real money spent to date</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Open NCRs</label>
+          <input class="form-input" id="f-ncrs" type="number" placeholder="0" min="0">
+        </div>
+      </div>
+
+      <div class="evm-calc" id="evm-preview">
+        <div class="evm-calc-item"><div class="evm-calc-label">SPI = EV ÷ PV</div><div class="evm-calc-val" id="prev-spi">—</div></div>
+        <div class="evm-calc-item"><div class="evm-calc-label">CPI = EV ÷ AC</div><div class="evm-calc-val" id="prev-cpi">—</div></div>
+        <div class="evm-calc-item"><div class="evm-calc-label">EAC = BAC ÷ CPI</div><div class="evm-calc-val" id="prev-eac">—</div></div>
+        <div class="evm-calc-item"><div class="evm-calc-label">SV = EV − PV</div><div class="evm-calc-val" id="prev-sv">—</div></div>
+        <div class="evm-calc-item"><div class="evm-calc-label">CV = EV − AC</div><div class="evm-calc-val" id="prev-cv">—</div></div>
+        <div class="evm-calc-item"><div class="evm-calc-label">VAC = BAC − EAC</div><div class="evm-calc-val" id="prev-vac">—</div></div>
+      </div>
+
+      <div class="modal-section">First Decision / Action (optional)</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Decision text</label>
+          <input class="form-input" id="f-dec" placeholder="e.g. Confirm procurement schedule with client">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Owner</label>
+          <input class="form-input" id="f-dec-owner" placeholder="PMO Lead">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deadline</label>
+          <input class="form-input" id="f-dec-deadline" placeholder="This Week">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveProject(false)" style="background:#185FA5;">Add — Save Manually Later</button>
+      <button class="btn-save" onclick="saveProject(true)">Add &amp; Save File Now</button>
+    </div>
+  </div>
+</div>
+
+
 </body>
 </html>
