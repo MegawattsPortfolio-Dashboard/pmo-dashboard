@@ -2740,8 +2740,8 @@ Rules:
 - Extract every distinct task/activity/deliverable
 - Use the WBS code if present, otherwise number sequentially (1.1, 1.2 etc.)
 - Budget should be a number (0 if not specified)
-- pct should be 0 (baseline — no progress yet)
-- status should always be "notstarted" for baseline
+- pct should be a decimal between 0 and 1 reflecting the ACTUAL % Complete shown in the document for that task (e.g. a task shown as "60%" or "60% Complete" or "In Progress" with a stated 60 value should be extracted as 0.6). If no percentage is stated for a task, default pct to 0.
+- status should be inferred from pct: "complete" if pct is 1, "notstarted" if pct is 0, otherwise "inprogress". Ignore any status text in the document that conflicts with the stated percentage — percentage is always authoritative.
 - If dates are present extract them, otherwise use empty string
 - Maximum 50 tasks`;
 
@@ -2762,13 +2762,17 @@ Rules:
 
     if (!tasks.length) throw new Error('Could not extract WBS tasks from document. Please check the document format.');
 
-    // Add unique IDs and save to project
+    // Add unique IDs and save to project — preserve actual extracted pct/status, never force to zero
     ensureRaci(p);
-    p.wbsTasks = tasks.map((t,i) => ({
-      ...t, id: Date.now()+i, actual:0,
-      budget: parseFloat(t.budget)||0,
-      pct: 0, status:'notstarted'
-    }));
+    p.wbsTasks = tasks.map((t,i) => {
+      const pct = Math.max(0, Math.min(1, parseFloat(t.pct) || 0));
+      return {
+        ...t, id: Date.now()+i, actual:0,
+        budget: parseFloat(t.budget)||0,
+        pct: pct,
+        status: pct >= 1 ? 'complete' : pct > 0 ? 'inprogress' : 'notstarted'
+      };
+    });
     p.wbsBaselineFile = file.name;
     p.wbsBaselineDate = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
     p.wbsBaselineRaw  = rawText.substring(0,5000); // store for reference
