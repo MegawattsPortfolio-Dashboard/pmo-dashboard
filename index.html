@@ -3191,6 +3191,11 @@ function syncProjectFromWBS(p) {
   const avgPct = tasks.reduce((s,t) => s + (t.pct||0), 0) / tasks.length;
   p.pct_actual = Math.round(avgPct * 100);
 
+  // 1b. Earned Value — EV = Actual % Complete x BAC (standard PMI formula)
+  //     Calculated here so EV always stays in sync with WBS progress.
+  //     PV remains manually entered (it represents the planned schedule baseline).
+  if (p.bac) { p.ev = Math.round(avgPct * p.bac); }
+
   // 2. Actual Cost — sum of every task's Actual Cost field. This is the
   //    dashboard's single source of truth for AC (the Finance Log tab is a
   //    separate daily expense record and does not affect this figure).
