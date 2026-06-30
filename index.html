@@ -1023,6 +1023,11 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
           </select>
         </div>
         <div class="form-group">
+          <label class="form-label">% Complete (Planned)</label>
+          <input class="form-input" id="f-pct-plan" type="number" min="0" max="100" placeholder="0" oninput="autoCalcEVM()">
+          <span class="form-hint">Used to auto-calculate PV below</span>
+        </div>
+        <div class="form-group">
           <label class="form-label">% Complete (Actual)</label>
           <input class="form-input" id="f-pct" type="number" min="0" max="100" placeholder="0" oninput="autoCalcEVM()">
         </div>
@@ -1041,9 +1046,9 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
           <span class="form-hint">Awarded contract value</span>
         </div>
         <div class="form-group">
-          <label class="form-label">PV — Planned Value (₦) *</label>
-          <input class="form-input" id="f-pv" type="number" placeholder="0" oninput="autoCalcEVM()">
-          <span class="form-hint">Budgeted cost of work scheduled to date</span>
+          <label class="form-label">PV — Planned Value (₦) <span id="f-pv-auto-tag" style="font-size:10px;color:#1E6B2E;font-weight:600">(Auto)</span></label>
+          <input class="form-input" id="f-pv" type="number" placeholder="0" oninput="onManualPVEdit()">
+          <span class="form-hint">= Planned % × BAC. Type directly to override.</span>
         </div>
         <div class="form-group">
           <label class="form-label">EV — Earned Value (₦) *</label>
@@ -6880,6 +6885,8 @@ function openModal(){
   document.getElementById("f-start-display").textContent="";
   document.getElementById("f-end-display").textContent="";
   document.getElementById("f-rag").value="green";
+  document.getElementById("f-pct-plan").value="";
+  resetPVOverride();
   // Auto-suggest next ref
   const nums = PROJECTS.map(p=>parseInt(p.id.replace("PRJ-",""))||0);
   const next = Math.max(0,...nums)+1;
@@ -6940,8 +6947,18 @@ function calcDuration(){
   }
 }
 
+// PV auto-calculation: PV = Planned % Complete × BAC
+// EV and AC remain manual/WBS-driven inputs — this only auto-fills PV.
+let _pvManualOverride = false;
+
 function autoCalcEVM(){
-  const bac=parseFloat(document.getElementById("f-bac").value)||0;
+  const bac     = parseFloat(document.getElementById("f-bac").value)||0;
+  const pctPlan = parseFloat(document.getElementById("f-pct-plan").value)||0;
+
+  if (!_pvManualOverride && bac) {
+    document.getElementById("f-pv").value = Math.round(bac * (pctPlan/100));
+  }
+
   const pv =parseFloat(document.getElementById("f-pv").value)||0;
   const ev =parseFloat(document.getElementById("f-ev").value)||0;
   const ac =parseFloat(document.getElementById("f-ac").value)||0;
@@ -6963,6 +6980,20 @@ function autoCalcEVM(){
   setVal("prev-vac",vac,vac>=0,vac<0);
 }
 
+function onManualPVEdit() {
+  _pvManualOverride = true;
+  const tag = document.getElementById('f-pv-auto-tag');
+  if (tag) { tag.textContent = '(Manual)'; tag.style.color = '#92400E'; }
+  autoCalcEVM();
+}
+
+function resetPVOverride() {
+  _pvManualOverride = false;
+  const tag = document.getElementById('f-pv-auto-tag');
+  if (tag) { tag.textContent = '(Auto)'; tag.style.color = '#1E6B2E'; }
+}
+
+
 function saveProject(autoSave){
   const id       = document.getElementById("f-id").value.trim();
   const fullname = document.getElementById("f-fullname").value.trim();
@@ -6981,6 +7012,7 @@ function saveProject(autoSave){
   const ac       = parseFloat(document.getElementById("f-ac").value)||0;
   const ncrs     = parseInt(document.getElementById("f-ncrs").value)||0;
   const pct      = parseInt(document.getElementById("f-pct").value)||0;
+  const pctPlan  = parseInt(document.getElementById("f-pct-plan").value)||pct;
   const decTxt   = document.getElementById("f-dec").value.trim();
   const decOwner = document.getElementById("f-dec-owner").value.trim()||"PMO Lead";
   const decDL    = document.getElementById("f-dec-deadline").value.trim()||"This Period";
@@ -7004,7 +7036,7 @@ function saveProject(autoSave){
     id, fullname, client, type, pm, start, end, rag,
     name: type+" — "+client.split(" ")[0],
     contract, bac, pv, ev, ac,
-    pct_plan: pct, pct_actual: pct,
+    pct_plan: pctPlan, pct_actual: pct,
     ncrs_open: ncrs, ncrs_closed: 0,
     lti: 0, near_miss: 0, hse: 1.0,
     vo: 0, sub: "100%", rework: "0.0%",
