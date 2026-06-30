@@ -3215,7 +3215,7 @@ function syncProjectFromWBS(p) {
   });
 }
 
-
+function addWBSTask(projId) {
   if (!_isAdmin) { alert('Please log in as Admin.'); return; }
   const p = PROJECTS.find(x => x.id === projId);
   if (!p) return;
