@@ -866,37 +866,42 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
         </select>
       </div>
       <div class="edit-group">
-        <label class="edit-label">% Complete (Actual)</label>
-        <input class="edit-input" id="ep-pct" type="number" min="0" max="100">
+        <label class="edit-label">% Complete (Actual) <span style="font-weight:400;color:#8B9BB4;">🔒 from WBS</span></label>
+        <input class="edit-input" id="ep-pct" type="number" min="0" max="100" readonly
+          style="background:#F4F6F9;color:#4A5568;cursor:not-allowed;">
+        <span class="edit-hint">Budget-weighted average of WBS task progress</span>
       </div>
     </div>
 
-    <div class="edit-section">EVM Values — Current Period</div>
+    <div class="edit-section">EVM Values — Live from WBS (read-only)</div>
     <div class="edit-grid">
       <div class="edit-group">
-        <label class="edit-label">BAC — Budget at Completion (₦)</label>
-        <input class="edit-input" id="ep-bac" type="number" oninput="updateEVMPreview()">
-        <span class="edit-hint">Approved total budget</span>
+        <label class="edit-label">BAC — Budget at Completion (₦) <span style="font-weight:400;color:#8B9BB4;">🔒 from WBS</span></label>
+        <input class="edit-input" id="ep-bac" type="number" readonly
+          style="background:#F4F6F9;color:#4A5568;cursor:not-allowed;">
+        <span class="edit-hint">Sum of all WBS task budgets</span>
       </div>
       <div class="edit-group">
         <label class="edit-label">Contract Value (₦)</label>
         <input class="edit-input" id="ep-contract" type="number">
       </div>
       <div class="edit-group">
-        <label class="edit-label">PV — Planned Value (₦)</label>
-        <input class="edit-input" id="ep-pv" type="number" oninput="updateEVMPreview()">
-        <span class="edit-hint">Budgeted cost scheduled to date</span>
+        <label class="edit-label">PV — Planned Value (₦) <span style="font-weight:400;color:#8B9BB4;">🔒 from WBS</span></label>
+        <input class="edit-input" id="ep-pv" type="number" readonly
+          style="background:#F4F6F9;color:#4A5568;cursor:not-allowed;">
+        <span class="edit-hint">Sum of (task budget × planned % at today's date) across all WBS tasks</span>
       </div>
       <div class="edit-group">
-        <label class="edit-label">EV — Earned Value (₦)</label>
-        <input class="edit-input" id="ep-ev" type="number" oninput="updateEVMPreview()">
-        <span class="edit-hint">Budgeted cost of work completed</span>
+        <label class="edit-label">EV — Earned Value (₦) <span style="font-weight:400;color:#8B9BB4;">🔒 from WBS</span></label>
+        <input class="edit-input" id="ep-ev" type="number" readonly
+          style="background:#F4F6F9;color:#4A5568;cursor:not-allowed;">
+        <span class="edit-hint">Sum of (task budget × actual % complete) across all WBS tasks</span>
       </div>
       <div class="edit-group">
         <label class="edit-label">AC — Actual Cost (₦) <span style="font-weight:400;color:#8B9BB4;">🔒 from WBS</span></label>
         <input class="edit-input" id="ep-ac" type="number" readonly
           style="background:#F4F6F9;color:#4A5568;cursor:not-allowed;">
-        <span class="edit-hint">Sourced from the WBS Tracker's Actual Cost column — update task spend there to change this value</span>
+        <span class="edit-hint">Sum of all WBS task Actual Cost values</span>
       </div>
       <div class="edit-group">
         <label class="edit-label">Open NCRs</label>
@@ -1023,11 +1028,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label">% Complete (Planned)</label>
-          <input class="form-input" id="f-pct-plan" type="number" min="0" max="100" placeholder="0" oninput="autoCalcEVM()">
-          <span class="form-hint">Used to auto-calculate PV below</span>
-        </div>
-        <div class="form-group">
           <label class="form-label">% Complete (Actual)</label>
           <input class="form-input" id="f-pct" type="number" min="0" max="100" placeholder="0" oninput="autoCalcEVM()">
         </div>
@@ -1046,9 +1046,9 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
           <span class="form-hint">Awarded contract value</span>
         </div>
         <div class="form-group">
-          <label class="form-label">PV — Planned Value (₦) <span id="f-pv-auto-tag" style="font-size:10px;color:#1E6B2E;font-weight:600">(Auto)</span></label>
-          <input class="form-input" id="f-pv" type="number" placeholder="0" oninput="onManualPVEdit()">
-          <span class="form-hint">= Planned % × BAC. Type directly to override.</span>
+          <label class="form-label">PV — Planned Value (₦) *</label>
+          <input class="form-input" id="f-pv" type="number" placeholder="0" oninput="autoCalcEVM()">
+          <span class="form-hint">Budgeted cost of work scheduled to date</span>
         </div>
         <div class="form-group">
           <label class="form-label">EV — Earned Value (₦) *</label>
@@ -2550,18 +2550,17 @@ function applyEdit(isRebaseline) {
   const p = PROJECTS.find(x => x.id === _editProjId);
   if (!p) return;
 
-  const newBac      = parseFloat(document.getElementById('ep-bac').value)      || p.bac;
   const newContract = parseFloat(document.getElementById('ep-contract').value) || p.contract;
-  const newPv       = parseFloat(document.getElementById('ep-pv').value)       || p.pv;
-  const newEv       = parseFloat(document.getElementById('ep-ev').value)       || p.ev;
-  // NOTE: AC is intentionally NOT read from the form — it is locked/read-only
-  // here and sourced exclusively from the WBS Tracker's Actual Cost column.
   const newNcrs     = parseInt(document.getElementById('ep-ncrs').value)       || 0;
-  const newPct      = parseInt(document.getElementById('ep-pct').value)        || p.pct_actual;
   const newRag      = document.getElementById('ep-rag').value;
   const newFullname = document.getElementById('ep-fullname').value.trim()      || p.fullname;
   const newPm       = document.getElementById('ep-pm').value.trim()            || p.pm;
   const note        = document.getElementById('ep-note').value.trim();
+
+  // NOTE: BAC, PV, EV, AC and pct_actual are all WBS-derived and intentionally
+  // NOT read from the form — they are locked/read-only fields populated by
+  // syncProjectFromWBS. Editing task data in the WBS Tracker is the correct
+  // path to change any of these values.
 
   // Get updated dates
   const startVal = document.getElementById('ep-start').value;
@@ -2578,15 +2577,9 @@ function applyEdit(isRebaseline) {
     bac: p.bac, pv: p.pv, ev: p.ev, ac: p.ac,
   });
 
-  // Apply new values
-  p.bac        = newBac;
+  // Apply only the fields that remain manually editable
   p.contract   = newContract;
-  p.pv         = newPv;
-  p.ev         = newEv;
-  // p.ac is intentionally left untouched — it is managed exclusively via the WBS Tracker
   p.ncrs_open  = newNcrs;
-  p.pct_actual = newPct;
-  p.pct_plan   = isRebaseline ? newPct : p.pct_plan;
   p.rag        = newRag;
   p.fullname   = newFullname;
   p.pm         = newPm;
@@ -3184,27 +3177,107 @@ function refreshProjectKeepingTab(projId) {
 
 function syncProjectFromWBS(p) {
   const tasks = p.wbsTasks || [];
-  if (!tasks.length) return; // nothing to sync from yet — leave existing data as-is
+  if (!tasks.length) return;
 
-  // 1. Overall % complete — average of all task percentages (each task weighted equally;
-  //    switch to budget-weighted average if preferred later)
-  const avgPct = tasks.reduce((s,t) => s + (t.pct||0), 0) / tasks.length;
-  p.pct_actual = Math.round(avgPct * 100);
+  const today = new Date();
+  today.setHours(0,0,0,0);
 
-  // 1b. Earned Value — EV = Actual % Complete x BAC (standard PMI formula)
-  //     Calculated here so EV always stays in sync with WBS progress.
-  //     PV remains manually entered (it represents the planned schedule baseline).
-  if (p.bac) { p.ev = Math.round(avgPct * p.bac); }
+  // ── Helper: parse DD-Mon-YY or DD-Mon-YYYY or YYYY-MM-DD date strings ──────
+  function parseTaskDate(str) {
+    if (!str || typeof str !== 'string') return null;
+    str = str.trim();
+    // YYYY-MM-DD
+    if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+      const d = new Date(str + 'T00:00:00'); return isNaN(d)?null:d;
+    }
+    // DD-Mon-YY or DD-Mon-YYYY (e.g. 13-Jul-26 or 13-Jul-2026)
+    const m = str.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+    if (m) {
+      const months = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+      const mon = months[m[2].toLowerCase()];
+      if (mon === undefined) return null;
+      let yr = parseInt(m[3]);
+      if (yr < 100) yr += 2000;
+      const d = new Date(yr, mon, parseInt(m[1]));
+      return isNaN(d)?null:d;
+    }
+    return null;
+  }
 
-  // 2. Actual Cost — sum of every task's Actual Cost field. This is the
-  //    dashboard's single source of truth for AC (the Finance Log tab is a
-  //    separate daily expense record and does not affect this figure).
+  // ── 1. BAC — sum of all WBS task budgets ───────────────────────────────────
+  const totalBudget = tasks.reduce((s,t) => s + (parseFloat(t.budget)||0), 0);
+  if (totalBudget > 0) p.bac = totalBudget;
+
+  // ── 2. AC — sum of all WBS task Actual Cost values ────────────────────────
   const totalActual = tasks.reduce((s,t) => s + (parseFloat(t.actual)||0), 0);
   p.ac = totalActual;
 
-  // 3. Milestones — group WBS tasks by their Category field (e.g. "Initiation",
-  //    "Design", "Procurement"...) which mirrors the phase/section structure of
-  //    the uploaded WBS. Each group becomes one milestone row.
+  // ── 3. EV — sum of (task budget × actual % complete) ─────────────────────
+  // EV = "how much of the budget has been earned based on work actually done"
+  const totalEV = tasks.reduce((s,t) => {
+    const bgt = parseFloat(t.budget)||0;
+    const pct = Math.min(1, Math.max(0, parseFloat(t.pct)||0));
+    return s + (bgt * pct);
+  }, 0);
+  p.ev = Math.round(totalEV);
+
+  // ── 4. PV — sum of (task budget × planned % complete at today's date) ─────
+  // For each task: distribute budget linearly across its planned duration.
+  // If today is before task start → planned pct = 0.
+  // If today is after task finish → planned pct = 1.
+  // Otherwise → interpolate linearly between start and finish.
+  const totalPV = tasks.reduce((s,t) => {
+    const bgt   = parseFloat(t.budget)||0;
+    if (!bgt) return s;
+    const tStart = parseTaskDate(t.start);
+    const tEnd   = parseTaskDate(t.end);
+    let plannedPct = 0;
+    if (!tStart || !tEnd || tEnd <= tStart) {
+      // No valid dates — use task's own % complete as planned baseline
+      plannedPct = Math.min(1, Math.max(0, parseFloat(t.pct)||0));
+    } else if (today <= tStart) {
+      plannedPct = 0;
+    } else if (today >= tEnd) {
+      plannedPct = 1;
+    } else {
+      const elapsed  = today - tStart;
+      const duration = tEnd   - tStart;
+      plannedPct = elapsed / duration;
+    }
+    return s + (bgt * plannedPct);
+  }, 0);
+  p.pv = Math.round(totalPV);
+
+  // ── 5. Overall % complete — budget-weighted average across WBS tasks ───────
+  // Weighted by task budget so bigger tasks have proportionally more influence
+  const totalWeight = tasks.reduce((s,t) => s + (parseFloat(t.budget)||1), 0);
+  const weightedPct = tasks.reduce((s,t) => {
+    const w = parseFloat(t.budget)||1;
+    const pct = Math.min(1, Math.max(0, parseFloat(t.pct)||0));
+    return s + (w * pct);
+  }, 0);
+  p.pct_actual = Math.round((weightedPct / totalWeight) * 100);
+
+  // ── 6. Planned % at today — for display on the KPI card ───────────────────
+  const weightedPlan = tasks.reduce((s,t) => {
+    const bgt    = parseFloat(t.budget)||1;
+    const tStart = parseTaskDate(t.start);
+    const tEnd   = parseTaskDate(t.end);
+    let plannedPct = 0;
+    if (!tStart || !tEnd || tEnd <= tStart) {
+      plannedPct = 0;
+    } else if (today <= tStart) {
+      plannedPct = 0;
+    } else if (today >= tEnd) {
+      plannedPct = 1;
+    } else {
+      plannedPct = (today - tStart) / (tEnd - tStart);
+    }
+    return s + (bgt * plannedPct);
+  }, 0);
+  p.pct_plan = Math.round((weightedPlan / totalWeight) * 100);
+
+  // ── 7. Milestones — group WBS tasks by Category ───────────────────────────
   const groups = {};
   const groupOrder = [];
   tasks.forEach(t => {
@@ -3214,20 +3287,19 @@ function syncProjectFromWBS(p) {
   });
 
   p.milestones = groupOrder.map(key => {
-    const groupTasks = groups[key];
-    const groupPct = groupTasks.reduce((s,t) => s + (t.pct||0), 0) / groupTasks.length;
-    // Use the latest planned finish date among the group's tasks as the milestone's target date
-    const dates = groupTasks.map(t => t.end).filter(Boolean);
-    const planned = dates.length ? dates[dates.length - 1] : '';
+    const groupTasks  = groups[key];
+    const totalBgt    = groupTasks.reduce((s,t)=>s+(parseFloat(t.budget)||1),0);
+    const weightedGrp = groupTasks.reduce((s,t)=>{
+      const w = parseFloat(t.budget)||1;
+      return s + w*(Math.min(1,Math.max(0,parseFloat(t.pct)||0)));
+    },0);
+    const groupPct    = weightedGrp / totalBgt;
+    const dates       = groupTasks.map(t => t.end).filter(Boolean);
+    const planned     = dates.length ? dates[dates.length - 1] : '';
     const allComplete = groupTasks.every(t => (t.pct||0) >= 1);
-    const anyInProgress = groupTasks.some(t => (t.pct||0) > 0);
-    const actual = allComplete ? planned : (anyInProgress ? 'In Progress' : '');
-    return {
-      name: key,
-      planned,
-      actual,
-      pct: groupPct,
-    };
+    const anyInProg   = groupTasks.some(t => (t.pct||0) > 0);
+    const actual      = allComplete ? planned : (anyInProg ? 'In Progress' : '');
+    return { name:key, planned, actual, pct:groupPct };
   });
 }
 
@@ -6890,8 +6962,6 @@ function openModal(){
   document.getElementById("f-start-display").textContent="";
   document.getElementById("f-end-display").textContent="";
   document.getElementById("f-rag").value="green";
-  document.getElementById("f-pct-plan").value="";
-  resetPVOverride();
   // Auto-suggest next ref
   const nums = PROJECTS.map(p=>parseInt(p.id.replace("PRJ-",""))||0);
   const next = Math.max(0,...nums)+1;
@@ -6952,18 +7022,8 @@ function calcDuration(){
   }
 }
 
-// PV auto-calculation: PV = Planned % Complete × BAC
-// EV and AC remain manual/WBS-driven inputs — this only auto-fills PV.
-let _pvManualOverride = false;
-
 function autoCalcEVM(){
-  const bac     = parseFloat(document.getElementById("f-bac").value)||0;
-  const pctPlan = parseFloat(document.getElementById("f-pct-plan").value)||0;
-
-  if (!_pvManualOverride && bac) {
-    document.getElementById("f-pv").value = Math.round(bac * (pctPlan/100));
-  }
-
+  const bac=parseFloat(document.getElementById("f-bac").value)||0;
   const pv =parseFloat(document.getElementById("f-pv").value)||0;
   const ev =parseFloat(document.getElementById("f-ev").value)||0;
   const ac =parseFloat(document.getElementById("f-ac").value)||0;
@@ -6985,20 +7045,6 @@ function autoCalcEVM(){
   setVal("prev-vac",vac,vac>=0,vac<0);
 }
 
-function onManualPVEdit() {
-  _pvManualOverride = true;
-  const tag = document.getElementById('f-pv-auto-tag');
-  if (tag) { tag.textContent = '(Manual)'; tag.style.color = '#92400E'; }
-  autoCalcEVM();
-}
-
-function resetPVOverride() {
-  _pvManualOverride = false;
-  const tag = document.getElementById('f-pv-auto-tag');
-  if (tag) { tag.textContent = '(Auto)'; tag.style.color = '#1E6B2E'; }
-}
-
-
 function saveProject(autoSave){
   const id       = document.getElementById("f-id").value.trim();
   const fullname = document.getElementById("f-fullname").value.trim();
@@ -7017,7 +7063,6 @@ function saveProject(autoSave){
   const ac       = parseFloat(document.getElementById("f-ac").value)||0;
   const ncrs     = parseInt(document.getElementById("f-ncrs").value)||0;
   const pct      = parseInt(document.getElementById("f-pct").value)||0;
-  const pctPlan  = parseInt(document.getElementById("f-pct-plan").value)||pct;
   const decTxt   = document.getElementById("f-dec").value.trim();
   const decOwner = document.getElementById("f-dec-owner").value.trim()||"PMO Lead";
   const decDL    = document.getElementById("f-dec-deadline").value.trim()||"This Period";
@@ -7041,7 +7086,7 @@ function saveProject(autoSave){
     id, fullname, client, type, pm, start, end, rag,
     name: type+" — "+client.split(" ")[0],
     contract, bac, pv, ev, ac,
-    pct_plan: pctPlan, pct_actual: pct,
+    pct_plan: pct, pct_actual: pct,
     ncrs_open: ncrs, ncrs_closed: 0,
     lti: 0, near_miss: 0, hse: 1.0,
     vo: 0, sub: "100%", rework: "0.0%",
