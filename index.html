@@ -893,9 +893,10 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
         <span class="edit-hint">Budgeted cost of work completed</span>
       </div>
       <div class="edit-group">
-        <label class="edit-label">AC — Actual Cost (₦)</label>
-        <input class="edit-input" id="ep-ac" type="number" oninput="updateEVMPreview()">
-        <span class="edit-hint">Real money spent to date</span>
+        <label class="edit-label">AC — Actual Cost (₦) <span style="font-weight:400;color:#8B9BB4;">🔒 from WBS</span></label>
+        <input class="edit-input" id="ep-ac" type="number" readonly
+          style="background:#F4F6F9;color:#4A5568;cursor:not-allowed;">
+        <span class="edit-hint">Sourced from the WBS Tracker's Actual Cost column — update task spend there to change this value</span>
       </div>
       <div class="edit-group">
         <label class="edit-label">Open NCRs</label>
@@ -1977,9 +1978,12 @@ function renderProject(p){
 
     <!-- TAB: FINANCE LOG -->
     <div class="tab-content" id="tab-finance">
+      <div style="background:#EEF2F8;border-left:3px solid #185FA5;padding:10px 14px;border-radius:6px;margin-bottom:14px;font-size:12px;color:#4A5568;">
+        📋 This tab is a standalone daily expense ledger for the PMO's own documentation and printouts. It does not feed the dashboard's Actual Cost — that figure is drawn directly from the WBS Tracker's Actual Cost column.
+      </div>
       <div class="finance-summary">
         <div class="finance-kpi"><div class="finance-kpi-label">BAC (Approved Budget)</div><div class="finance-kpi-val">${NM(p.bac)}</div></div>
-        <div class="finance-kpi"><div class="finance-kpi-label">Total Spent (AC)</div><div class="finance-kpi-val" id="fin-ac-${p.id}">${NM(p.ac)}</div></div>
+        <div class="finance-kpi"><div class="finance-kpi-label">Actual Cost (from WBS)</div><div class="finance-kpi-val" id="fin-ac-${p.id}">${NM(p.ac)}</div></div>
         <div class="finance-kpi"><div class="finance-kpi-label">Remaining Budget</div><div class="finance-kpi-val" id="fin-rem-${p.id}" style="color:${p.bac>p.ac?'#1E6B2E':'#9B1C1C'}">${NM(p.bac-p.ac)}</div></div>
         <div class="finance-kpi"><div class="finance-kpi-label">Budget Utilisation</div><div class="finance-kpi-val" id="fin-util-${p.id}">${p.bac?Math.round(p.ac/p.bac*100):0}%</div></div>
       </div>
@@ -2005,7 +2009,7 @@ function renderProject(p){
         </div>
       </div>` : '<div style="font-size:13px;color:#8B9BB4;padding:10px 0;margin-bottom:12px;">🔐 Log in as Admin to add expenditure entries.</div>'}
 
-      <div class="sec-label">Expenditure Log</div>
+      <div class="sec-label">Expenditure Log (standalone record — separate from dashboard AC)</div>
       <div style="overflow-x:auto">
         <table class="finance-table" id="fin-table-${p.id}">
           <thead><tr>
@@ -2016,8 +2020,8 @@ function renderProject(p){
           </tr></thead>
           <tbody id="fin-tbody-${p.id}"></tbody>
           <tfoot><tr class="finance-total-row">
-            <td colspan="3">TOTAL EXPENDITURE TO DATE</td>
-            <td style="text-align:right" id="fin-total-${p.id}">${N(p.ac)}</td>
+            <td colspan="3">TOTAL LOGGED IN THIS LEDGER</td>
+            <td style="text-align:right" id="fin-total-${p.id}">${N((p.financeLog||[]).reduce((s,e)=>s+e.amt,0))}</td>
             <td></td>${_isAdmin?'<td></td>':''}
           </tr></tfoot>
         </table>
@@ -2539,7 +2543,8 @@ function applyEdit(isRebaseline) {
   const newContract = parseFloat(document.getElementById('ep-contract').value) || p.contract;
   const newPv       = parseFloat(document.getElementById('ep-pv').value)       || p.pv;
   const newEv       = parseFloat(document.getElementById('ep-ev').value)       || p.ev;
-  const newAc       = parseFloat(document.getElementById('ep-ac').value)       || p.ac;
+  // NOTE: AC is intentionally NOT read from the form — it is locked/read-only
+  // here and sourced exclusively from the WBS Tracker's Actual Cost column.
   const newNcrs     = parseInt(document.getElementById('ep-ncrs').value)       || 0;
   const newPct      = parseInt(document.getElementById('ep-pct').value)        || p.pct_actual;
   const newRag      = document.getElementById('ep-rag').value;
@@ -2567,7 +2572,7 @@ function applyEdit(isRebaseline) {
   p.contract   = newContract;
   p.pv         = newPv;
   p.ev         = newEv;
-  p.ac         = newAc;
+  // p.ac is intentionally left untouched — it is managed exclusively via the WBS Tracker
   p.ncrs_open  = newNcrs;
   p.pct_actual = newPct;
   p.pct_plan   = isRebaseline ? newPct : p.pct_plan;
@@ -2855,6 +2860,7 @@ async function _processWBSFile(file, projId) {
       p.wbsTasks = tasks;
       p.wbsBaselineFile = file.name;
       p.wbsBaselineDate = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      syncProjectFromWBS(p);
 
       saveProjectToFirebase(p);
 
@@ -2863,7 +2869,7 @@ async function _processWBSFile(file, projId) {
         <span class="upload-preview-name" style="color:#1E6B2E;">${tasks.length} WBS tasks loaded from "${file.name}"</span>
       </div>`;
 
-      setTimeout(()=>{ switchTab('wbs', projId); }, 800);
+      setTimeout(()=>{ refreshProjectKeepingTab(projId); }, 800);
       _toast('✅ WBS uploaded — '+tasks.length+' tasks loaded');
 
     } catch(err) {
@@ -3080,20 +3086,17 @@ function addFinanceEntry(projId) {
   if (!p.financeLog) p.financeLog = [];
   p.financeLog.push({date, desc, cat, amt, id: Date.now()});
 
-  // Recalculate AC from finance log
-  const totalSpent = p.financeLog.reduce((s,e) => s+e.amt, 0);
-  p.ac = totalSpent;
-
-  // Save to Firebase
+  // NOTE: This is a standalone daily expense ledger for the PMO's own records
+  // and printouts. It does NOT update p.ac — Actual Cost on the dashboard is
+  // driven exclusively by the WBS Tracker's Actual Cost column.
   if (_isAdmin) saveProjectToFirebase(p);
 
   // Clear inputs
   document.getElementById('fin-desc-'+projId).value = '';
   document.getElementById('fin-amt-'+projId).value  = '';
 
-  // Refresh finance tab
   renderFinanceTable(projId);
-  _toast('✅ Expenditure logged — AC updated to ' + NM(p.ac));
+  _toast('✅ Expenditure logged to Finance Log');
 }
 
 function renderFinanceTable(projId) {
@@ -3134,14 +3137,85 @@ function deleteFinanceEntry(projId, entryId) {
   const p = PROJECTS.find(x => x.id === projId);
   if (!p || !p.financeLog) return;
   p.financeLog = p.financeLog.filter(e => e.id !== entryId);
-  p.ac = p.financeLog.reduce((s,e)=>s+e.amt, 0);
+  // NOTE: Does not touch p.ac — see addFinanceEntry note above.
   saveProjectToFirebase(p);
   renderFinanceTable(projId);
-  _toast('Entry deleted — AC recalculated');
+  _toast('Entry removed from Finance Log');
 }
 
 // ── WBS TRACKER ───────────────────────────────────────────────────────────────
-function addWBSTask(projId) {
+// Whenever the WBS changes (task added/edited/deleted/imported), this recalculates:
+//   1. Overall project % complete  -> weighted average of all WBS task % complete
+//   2. Actual Cost (AC)            -> sum of all WBS task Actual Cost values
+//   3. Milestones                  -> one per WBS "phase/category" group, with
+//                                     % complete = average of its child tasks
+// This makes the WBS the single source of truth for these dashboard figures.
+// The Finance Log tab is a SEPARATE, standalone daily expense ledger for the
+// PMO's own documentation/printout purposes — it has no relationship to the
+// dashboard's EVM figures and does not feed AC. AC is determined exclusively
+// by the WBS, which is why the AC field in the Edit/Re-baseline panel is
+// locked (read-only) — see openEditPanel/applyEdit.
+// ── REFRESH PROJECT VIEW WITHOUT LOSING CURRENT TAB ───────────────────────────
+// renderProject() rebuilds the whole project view (including Overview tab's
+// milestones, EVM cards, and overall % figures) but always resets to the
+// Overview tab. This wrapper preserves whichever tab the user was on — used
+// after WBS edits so Overview/Milestones/AC stay live-synced without yanking
+// the PMO away from the WBS tab mid-edit.
+function refreshProjectKeepingTab(projId) {
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p) return;
+  const tabToRestore = _activeTab;
+  renderProject(p);
+  if (tabToRestore && tabToRestore !== 'overview') {
+    switchTab(tabToRestore, projId);
+  }
+}
+
+function syncProjectFromWBS(p) {
+  const tasks = p.wbsTasks || [];
+  if (!tasks.length) return; // nothing to sync from yet — leave existing data as-is
+
+  // 1. Overall % complete — average of all task percentages (each task weighted equally;
+  //    switch to budget-weighted average if preferred later)
+  const avgPct = tasks.reduce((s,t) => s + (t.pct||0), 0) / tasks.length;
+  p.pct_actual = Math.round(avgPct * 100);
+
+  // 2. Actual Cost — sum of every task's Actual Cost field. This is the
+  //    dashboard's single source of truth for AC (the Finance Log tab is a
+  //    separate daily expense record and does not affect this figure).
+  const totalActual = tasks.reduce((s,t) => s + (parseFloat(t.actual)||0), 0);
+  p.ac = totalActual;
+
+  // 3. Milestones — group WBS tasks by their Category field (e.g. "Initiation",
+  //    "Design", "Procurement"...) which mirrors the phase/section structure of
+  //    the uploaded WBS. Each group becomes one milestone row.
+  const groups = {};
+  const groupOrder = [];
+  tasks.forEach(t => {
+    const key = (t.category || 'General').trim() || 'General';
+    if (!groups[key]) { groups[key] = []; groupOrder.push(key); }
+    groups[key].push(t);
+  });
+
+  p.milestones = groupOrder.map(key => {
+    const groupTasks = groups[key];
+    const groupPct = groupTasks.reduce((s,t) => s + (t.pct||0), 0) / groupTasks.length;
+    // Use the latest planned finish date among the group's tasks as the milestone's target date
+    const dates = groupTasks.map(t => t.end).filter(Boolean);
+    const planned = dates.length ? dates[dates.length - 1] : '';
+    const allComplete = groupTasks.every(t => (t.pct||0) >= 1);
+    const anyInProgress = groupTasks.some(t => (t.pct||0) > 0);
+    const actual = allComplete ? planned : (anyInProgress ? 'In Progress' : '');
+    return {
+      name: key,
+      planned,
+      actual,
+      pct: groupPct,
+    };
+  });
+}
+
+
   if (!_isAdmin) { alert('Please log in as Admin.'); return; }
   const p = PROJECTS.find(x => x.id === projId);
   if (!p) return;
@@ -3165,8 +3239,9 @@ function addWBSTask(projId) {
     budget:bgt, actual:0, pct:0, status:'notstarted', notes, id:Date.now()
   });
 
+  syncProjectFromWBS(p);
   saveProjectToFirebase(p);
-  renderWBSTable(projId);
+  refreshProjectKeepingTab(projId);
 
   // Clear inputs
   ['wbs-code','wbs-name','wbs-category','wbs-duration','wbs-start','wbs-end',
@@ -3247,11 +3322,9 @@ function updateWBSPct(projId, idx, val) {
   const pct = Math.max(0, Math.min(100, parseFloat(val)||0)) / 100;
   p.wbsTasks[idx].pct = pct;
   p.wbsTasks[idx].status = pct>=1?'complete':pct>0?'inprogress':'notstarted';
-  // Update overall project % complete from WBS average
-  const avg = p.wbsTasks.reduce((s,t)=>s+(t.pct||0),0)/p.wbsTasks.length;
-  p.pct_actual = Math.round(avg*100);
+  syncProjectFromWBS(p);
   saveProjectToFirebase(p);
-  renderWBSTable(projId);
+  refreshProjectKeepingTab(projId);
   _toast('WBS task updated — overall progress: '+p.pct_actual+'%');
 }
 
@@ -3260,9 +3333,10 @@ function updateWBSActual(projId, idx, val) {
   const p = PROJECTS.find(x => x.id === projId);
   if (!p || !p.wbsTasks || !p.wbsTasks[idx]) return;
   p.wbsTasks[idx].actual = Math.max(0, parseFloat(val)||0);
+  syncProjectFromWBS(p);
   saveProjectToFirebase(p);
-  renderWBSTable(projId);
-  _toast('Actual spent updated');
+  refreshProjectKeepingTab(projId);
+  _toast('Actual spent updated — total AC: '+NM(p.ac));
 }
 
 function deleteWBSTask(projId, taskId) {
@@ -3270,8 +3344,9 @@ function deleteWBSTask(projId, taskId) {
   const p = PROJECTS.find(x => x.id === projId);
   if (!p || !p.wbsTasks) return;
   p.wbsTasks = p.wbsTasks.filter((t,i) => (t.id||i) !== taskId);
+  syncProjectFromWBS(p);
   saveProjectToFirebase(p);
-  renderWBSTable(projId);
+  refreshProjectKeepingTab(projId);
   _toast('WBS task deleted');
 }
 
