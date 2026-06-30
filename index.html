@@ -1711,6 +1711,12 @@ function renderProject(p){
   document.getElementById("foot-context").textContent = p.id+" — "+p.type+" — "+p.client;
   _activeTab = 'overview';
 
+  // Keep AC, overall % complete, and milestones in sync with the WBS every
+  // time this project is opened — prevents stale figures from persisting if
+  // they were saved before the WBS was the source of truth, or edited outside
+  // the normal WBS update flow.
+  syncProjectFromWBS(p);
+
   const e = evm(p);
 
   // Build milestone bars (for overview tab)
@@ -5708,9 +5714,6 @@ async function generateClientReport() {
 window.addEventListener('load',()=>{
   const btn=document.getElementById('client-report-btn');
   if (btn) btn.onclick=openClientReportModal;
-  // Restore weekly schedule if it was active
-  const cfg=loadEmailConfig();
-  if (cfg.scheduleActive&&cfg.publicKey) activateWeeklySchedule();
 });
 
 // ── CLIENT PORTAL LINK ───────────────────────────────────────────────────────
