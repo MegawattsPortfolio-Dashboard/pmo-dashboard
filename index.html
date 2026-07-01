@@ -307,10 +307,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
 .task-update-meta{font-size:10px;color:#8B9BB4;margin-bottom:3px;}
 .task-update-text{font-size:12px;color:#2D3748;line-height:1.5;}
 .task-update-pct{font-size:11px;color:#1E6B2E;font-weight:600;margin-top:3px;}
-.rich-text-toolbar{display:flex;gap:4px;padding:6px 8px;background:#F4F6F9;border:1px solid #E2E8F0;border-bottom:none;border-radius:6px 6px 0 0;flex-wrap:wrap;}
-.rtt-btn{padding:3px 8px;background:#fff;border:1px solid #E2E8F0;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;min-width:28px;text-align:center;}
+.rich-text-toolbar{display:flex;gap:3px;padding:4px 6px;background:#F4F6F9;border:1px solid #E2E8F0;border-bottom:none;border-radius:6px 6px 0 0;flex-wrap:wrap;}
+.rtt-btn{padding:2px 6px;background:#fff;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;cursor:pointer;font-family:inherit;min-width:24px;text-align:center;}
 .rtt-btn:hover{background:#EBF3FB;border-color:#185FA5;}
-.rich-editor{min-height:80px;padding:8px 10px;border:1px solid #E2E8F0;border-radius:0 0 6px 6px;font-size:12px;color:#2D3748;font-family:inherit;outline:none;line-height:1.6;background:#fff;}
+.rich-editor{min-height:70px;max-width:100%;padding:8px 10px;border:1px solid #E2E8F0;border-radius:0 0 6px 6px;font-size:12px;color:#2D3748;font-family:inherit;outline:none;line-height:1.6;background:#fff;overflow-wrap:break-word;word-break:break-word;}
 .rich-editor:focus{border-color:#185FA5;}
 .rich-editor:empty:before{content:attr(data-placeholder);color:#8B9BB4;pointer-events:none;}
 .update-sub-tabs{display:flex;gap:0;border-bottom:2px solid #E2E8F0;margin-bottom:16px;}
@@ -2009,19 +2009,19 @@ function renderProject(p){
           </div>
         </div>
         <div style="overflow-x:auto;">
-          <table class="wbs-progress-table" id="wbs-progress-table-${p.id}">
+          <table class="wbs-progress-table" id="wbs-progress-table-${p.id}" style="table-layout:fixed;min-width:1200px;">
             <thead><tr>
-              <th style="width:60px">WBS</th>
-              <th style="min-width:160px">Task Name</th>
-              <th style="width:100px">Category</th>
-              <th style="width:65px;text-align:center">Days</th>
-              <th style="width:90px">Planned Start</th>
-              <th style="width:90px">Planned Finish</th>
-              <th style="width:110px">Responsible</th>
-              <th style="min-width:260px">Progress Update</th>
-              <th style="width:90px;text-align:center">% Complete</th>
+              <th style="width:55px">WBS</th>
+              <th style="width:160px">Task Name</th>
+              <th style="width:90px">Category</th>
+              <th style="width:48px;text-align:center">Days</th>
+              <th style="width:82px">Planned Start</th>
+              <th style="width:82px">Planned Finish</th>
+              <th style="width:100px">Responsible</th>
+              <th style="width:220px">Progress Update</th>
+              <th style="width:85px;text-align:center">% Complete</th>
               <th style="width:80px;text-align:center">Status</th>
-              <th style="min-width:140px">Deliverable / Notes</th>
+              <th style="width:160px">Deliverable / Notes</th>
             </tr></thead>
             <tbody id="wbs-progress-tbody-${p.id}"></tbody>
           </table>
@@ -6459,7 +6459,20 @@ function switchTab(tabId, projId) {
   if (tabId === 'risk')     renderRiskHeatMap(projId);
   if (tabId === 'finance')  setTimeout(()=>renderFinanceTable(projId), 50);
   if (tabId === 'wbs')      setTimeout(()=>renderWBSTable(projId), 50);
-  if (tabId === 'updates')  setTimeout(()=>renderWBSProgressTable(projId), 50);
+  if (tabId === 'updates') {
+    // Retry up to 3s if wbsTasks not yet loaded from Firebase
+    const tryRender = (attempts) => {
+      const proj = PROJECTS.find(x => x.id === projId);
+      if (proj && (proj.wbsTasks||[]).length > 0) {
+        renderWBSProgressTable(projId);
+      } else if (attempts > 0) {
+        setTimeout(() => tryRender(attempts - 1), 500);
+      } else {
+        renderWBSProgressTable(projId); // render anyway — will show "no tasks" message
+      }
+    };
+    setTimeout(() => tryRender(6), 100); // try up to 6 times × 500ms = 3s
+  }
   if (tabId === 'raci')     setTimeout(()=>renderRaciTable(projId), 50);
   if (tabId === 'ncr')      setTimeout(()=>renderNCRTable(projId), 50);
   if (tabId === 'docs')     setTimeout(()=>renderDocTable(projId), 50);
@@ -6881,6 +6894,10 @@ async function loadFromFirebase() {
     buildSidebar();
     renderMain();
     setCloudStatus('saved', '● Cloud synced');
+    // If user is already viewing a project's updates tab, re-render now data is loaded
+    if (currentView !== 'portfolio' && _activeTab === 'updates') {
+      setTimeout(() => renderWBSProgressTable(currentView), 150);
+    }
 
   } catch(e) {
     setCloudStatus('error', '● Sync error');
@@ -7050,7 +7067,7 @@ function switchUpdateSubTab(tabId, projId) {
     if (el)  el.style.display  = t===tabId ? '' : 'none';
     if (btn) btn.classList.toggle('active', t===tabId);
   });
-  if (tabId === 'wbs') renderWBSProgressTable(projId);
+  if (tabId === 'wbs') renderWBSProgressTable(projId); // sub-tab wbs within updates
 }
 
 // ── RICH TEXT TOOLBAR ─────────────────────────────────────────────────────────
@@ -7081,8 +7098,15 @@ function renderWBSProgressTable(projId) {
 
   const tasks = p.wbsTasks || [];
   if (!tasks.length) {
-    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#8B9BB4;padding:24px;">
-      No WBS tasks defined. Upload or add tasks in the WBS Tracker tab first.
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#8B9BB4;padding:32px;">
+      <div style="font-size:22px;margin-bottom:8px;">📋</div>
+      <div style="font-size:13px;font-weight:600;color:#0D1B3E;margin-bottom:6px;">No WBS tasks loaded yet</div>
+      <div style="font-size:12px;margin-bottom:12px;">Tasks may still be syncing from Firebase, or none have been added yet.</div>
+      <button onclick="loadFromFirebase().then(()=>renderWBSProgressTable('${projId}'))"
+        style="padding:8px 18px;background:#185FA5;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;">
+        ↻ Sync & Retry
+      </button>
+      <span style="display:block;margin-top:8px;font-size:11px;color:#8B9BB4;">Or go to the WBS Tracker tab to upload tasks first.</span>
     </td></tr>`;
     return;
   }
@@ -7133,8 +7157,8 @@ function renderWBSProgressTable(projId) {
 
     return `<tr id="wbs-prog-row-${taskId}">
       <td><strong style="font-size:11px">${t.code||''}</strong></td>
-      <td>
-        <div style="font-size:12px;font-weight:600;color:#0D1B3E;margin-bottom:4px;">${t.name}</div>
+      <td style="word-break:break-word;">
+        <div style="font-size:12px;font-weight:600;color:#0D1B3E;margin-bottom:4px;line-height:1.3;">${t.name}</div>
         ${logHtml}
         <!-- Rich text editor for new update -->
         <div style="margin-top:8px;" id="editor-wrap-${taskId}">
@@ -7170,7 +7194,7 @@ function renderWBSProgressTable(projId) {
       <td style="text-align:center;">
         <span class="wbs-status ${statusColors[stat]||'wbs-notstart'}" style="font-size:10px;">${statusText[stat]||stat}</span>
       </td>
-      <td style="font-size:11px;color:#4A5568;">${t.notes||'—'}</td>
+      <td style="font-size:11px;color:#4A5568;word-break:break-word;line-height:1.4;">${t.notes||'—'}</td>
     </tr>`;
   }).join('');
 }
