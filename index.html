@@ -865,7 +865,7 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
     <button class="admin-sync-btn" onclick="openBackupModal()" title="Backup & Restore data">💾 Backup</button>
     <button class="admin-sync-btn" onclick="openRolesModal()" title="Manage user roles & access">👥 Users</button>
     <button class="admin-sync-btn" onclick="generateWhatsAppAlert()" title="Send portfolio alert via WhatsApp">📱 Alert</button>
-    <button class="admin-sync-btn" onclick="loadFromFirebase()">↻ Sync</button>
+    <button class="admin-sync-btn" onclick="loadFromFirebase()">↻ Sync</button><button class="admin-sync-btn" onclick="clearAllTaskUpdateLogs()" style="background:rgba(155,28,28,.4);margin-left:6px;">🗑 Reset Update Logs</button>
     <button class="admin-logout-btn" onclick="doLogout()">Sign out</button>
   </div>
 </div>
@@ -1137,7 +1137,7 @@ document.getElementById("topdate").textContent = TODAY;
 // Direct Anthropic API call from browser. No proxy or Cloudflare Worker needed.
 // Optional: if you later deploy a Cloudflare Worker, paste its URL here and
 // callClaude() will route through it instead.
-const AI_PROXY_URL = ""; // optional — leave blank to use direct API
+const AI_PROXY_URL = "https://megawatts-pmo-proxy.lanreola713.workers.dev"; // Cloudflare Worker proxy
 
 async function callClaude(prompt, maxTokens) {
   // If a proxy URL is configured, route through it
@@ -6914,6 +6914,29 @@ async function loadFromFirebase() {
     _toast('⚠️ Firebase sync error: ' + e.message);
     console.error('Firebase load error:', e);
   }
+}
+
+// ── UTILITY: Clear all WBS task update logs across all projects ───────────────
+async function clearAllTaskUpdateLogs() {
+  if (!_isAdmin) { alert('Admin access required.'); return; }
+  const confirm1 = confirm('This will permanently delete ALL task update history across all projects in Firebase.\n\nThis cannot be undone. Continue?');
+  if (!confirm1) return;
+  const confirm2 = confirm('Are you absolutely sure? All progress update entries will be reset to zero.');
+  if (!confirm2) return;
+
+  let count = 0;
+  for (const p of PROJECTS) {
+    let changed = false;
+    if (p.updateLog && p.updateLog.length) { p.updateLog = []; changed = true; }
+    if (p.wbsTasks) {
+      p.wbsTasks.forEach(t => {
+        if (t.updateLog && t.updateLog.length) { t.updateLog = []; count++; changed = true; }
+      });
+    }
+    if (changed) await saveProjectToFirebase(p);
+  }
+  _toast('✅ All task update logs cleared (' + count + ' entries removed). Refreshing...');
+  setTimeout(() => loadFromFirebase(), 1000);
 }
 
 // ── FIRESTORE: Save one project ───────────────────────────────────────────────
