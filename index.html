@@ -6460,18 +6460,28 @@ function switchTab(tabId, projId) {
   if (tabId === 'finance')  setTimeout(()=>renderFinanceTable(projId), 50);
   if (tabId === 'wbs')      setTimeout(()=>renderWBSTable(projId), 50);
   if (tabId === 'updates') {
+    // Ensure WBS sub-tab is visible before rendering
+    const ensureVisible = () => {
+      const wbsSub = document.getElementById('usub-wbs-'+projId);
+      if (wbsSub) wbsSub.style.display = '';
+      const wbsBtn = document.getElementById('usub-btn-wbs-'+projId);
+      if (wbsBtn) wbsBtn.classList.add('active');
+      const genSub = document.getElementById('usub-general-'+projId);
+      if (genSub) genSub.style.display = 'none';
+    };
     // Retry up to 3s if wbsTasks not yet loaded from Firebase
     const tryRender = (attempts) => {
+      ensureVisible();
       const proj = PROJECTS.find(x => x.id === projId);
       if (proj && (proj.wbsTasks||[]).length > 0) {
         renderWBSProgressTable(projId);
       } else if (attempts > 0) {
         setTimeout(() => tryRender(attempts - 1), 500);
       } else {
-        renderWBSProgressTable(projId); // render anyway — will show "no tasks" message
+        renderWBSProgressTable(projId); // render anyway — shows sync button
       }
     };
-    setTimeout(() => tryRender(6), 100); // try up to 6 times × 500ms = 3s
+    setTimeout(() => tryRender(6), 100);
   }
   if (tabId === 'raci')     setTimeout(()=>renderRaciTable(projId), 50);
   if (tabId === 'ncr')      setTimeout(()=>renderNCRTable(projId), 50);
@@ -7067,7 +7077,7 @@ function switchUpdateSubTab(tabId, projId) {
     if (el)  el.style.display  = t===tabId ? '' : 'none';
     if (btn) btn.classList.toggle('active', t===tabId);
   });
-  if (tabId === 'wbs') renderWBSProgressTable(projId); // sub-tab wbs within updates
+  if (tabId === 'wbs') setTimeout(()=>renderWBSProgressTable(projId), 50);
 }
 
 // ── RICH TEXT TOOLBAR ─────────────────────────────────────────────────────────
@@ -7092,9 +7102,20 @@ function buildRichToolbar(taskId) {
 // ── RENDER WBS PROGRESS TABLE ─────────────────────────────────────────────────
 function renderWBSProgressTable(projId) {
   const p = PROJECTS.find(x => x.id === projId);
-  if (!p) return;
-  const tbody = document.getElementById('wbs-progress-tbody-'+projId);
-  if (!tbody) return;
+  if (!p) { console.warn('renderWBSProgressTable: project not found', projId); return; }
+
+  // Try to find tbody — if not found, the tab may not be active yet, so activate it
+  let tbody = document.getElementById('wbs-progress-tbody-'+projId);
+  if (!tbody) {
+    // Ensure the updates tab is active
+    const tabContent = document.getElementById('tab-updates');
+    if (tabContent) tabContent.classList.add('active');
+    // Ensure the wbs sub-tab is visible
+    const wbsSub = document.getElementById('usub-wbs-'+projId);
+    if (wbsSub) wbsSub.style.display = '';
+    tbody = document.getElementById('wbs-progress-tbody-'+projId);
+  }
+  if (!tbody) { console.warn('renderWBSProgressTable: tbody not found for', projId); return; };
 
   const tasks = p.wbsTasks || [];
   if (!tasks.length) {
