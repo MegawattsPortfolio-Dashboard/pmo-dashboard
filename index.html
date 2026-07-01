@@ -7143,6 +7143,7 @@ function renderWBSProgressTable(projId) {
     const pct     = Math.round((t.pct||0)*100);
     const stat    = t.status || 'notstarted';
     const taskLog = (t.updateLog||[]);
+    const taskId  = projId+'-'+i;   // declared early — used in logHtml and editor below
 
     // Access control: show task if PMO, or if responsible matches current user
     const responsible = (t.responsible||'').toLowerCase();
@@ -7173,8 +7174,6 @@ function renderWBSProgressTable(projId) {
         </div>`
       : `<div style="font-size:11px;color:#8B9BB4;font-style:italic;padding:4px 0;">No updates yet.</div>`)
       + '</div>';
-
-    const taskId = projId+'-'+i;
 
     return `<tr id="wbs-prog-row-${taskId}">
       <td><strong style="font-size:11px">${t.code||''}</strong></td>
