@@ -295,6 +295,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;ba
 .update-log-text{font-size:12px;color:#2D3748;margin-top:4px;line-height:1.5;}
 .update-log-changes{font-size:11px;color:#1E6B2E;margin-top:4px;font-weight:500;}
 
+/* ── WBS PROGRESS UPDATES ── */
+.wbs-progress-table{width:100%;border-collapse:collapse;font-size:12px;}
+.wbs-progress-table th{background:#0D1B3E;color:rgba(255,255,255,.85);font-weight:600;font-size:11px;text-align:left;padding:9px 10px;white-space:nowrap;}
+.wbs-progress-table td{padding:8px 10px;border-bottom:1px solid #F4F6F9;vertical-align:top;}
+.wbs-progress-table tr:nth-child(even) td{background:#F9FAFC;}
+.wbs-progress-table tr:hover td{background:#EBF3FB;}
+.task-update-log{max-height:160px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;margin-top:6px;}
+.task-update-entry{background:#F4F6F9;border-radius:4px;padding:6px 8px;border-left:2px solid #E2E8F0;}
+.task-update-entry.mine{border-left-color:#185FA5;}
+.task-update-meta{font-size:10px;color:#8B9BB4;margin-bottom:3px;}
+.task-update-text{font-size:12px;color:#2D3748;line-height:1.5;}
+.task-update-pct{font-size:11px;color:#1E6B2E;font-weight:600;margin-top:3px;}
+.rich-text-toolbar{display:flex;gap:4px;padding:6px 8px;background:#F4F6F9;border:1px solid #E2E8F0;border-bottom:none;border-radius:6px 6px 0 0;flex-wrap:wrap;}
+.rtt-btn{padding:3px 8px;background:#fff;border:1px solid #E2E8F0;border-radius:4px;font-size:12px;cursor:pointer;font-family:inherit;min-width:28px;text-align:center;}
+.rtt-btn:hover{background:#EBF3FB;border-color:#185FA5;}
+.rich-editor{min-height:80px;padding:8px 10px;border:1px solid #E2E8F0;border-radius:0 0 6px 6px;font-size:12px;color:#2D3748;font-family:inherit;outline:none;line-height:1.6;background:#fff;}
+.rich-editor:focus{border-color:#185FA5;}
+.rich-editor:empty:before{content:attr(data-placeholder);color:#8B9BB4;pointer-events:none;}
+.update-sub-tabs{display:flex;gap:0;border-bottom:2px solid #E2E8F0;margin-bottom:16px;}
+.update-sub-tab{padding:8px 16px;font-size:13px;font-weight:500;color:#8B9BB4;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.update-sub-tab:hover{color:#0D1B3E;}
+.update-sub-tab.active{color:#185FA5;border-bottom-color:#185FA5;font-weight:600;}
+.access-badge{display:inline-block;padding:2px 6px;border-radius:8px;font-size:9px;font-weight:700;background:#DDEEFF;color:#185FA5;}
+.access-badge.pmo{background:#E2EFDA;color:#1E6B2E;}
+.pct-suggest-btn{padding:3px 8px;background:#185FA5;border:none;border-radius:4px;color:#fff;font-size:10px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.pct-suggest-btn:hover{background:#0D1B3E;}
+.pct-suggest-btn:disabled{opacity:.5;cursor:not-allowed;}
+
 /* ── FINANCE LOG ── */
 .finance-form{background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:18px;margin-bottom:16px;}
 .finance-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
@@ -1939,57 +1967,96 @@ function renderProject(p){
 
     <!-- TAB: PROGRESS UPDATES -->
     <div class="tab-content" id="tab-updates">
-      <div class="update-form">
-        <div class="update-form-title">📝 Submit Progress Update</div>
-        <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap;">
-          <select class="update-period-sel" id="update-period-${p.id}">
-            <option>Daily Update</option>
-            <option>Weekly Report</option>
-            <option>Monthly Summary</option>
-          </select>
-          <input type="date" class="finance-input" id="update-date-${p.id}" style="width:160px"
-            value="${new Date().toISOString().slice(0,10)}">
-          <span style="font-size:12px;color:#8B9BB4;">Submitted by:</span>
-          <input class="finance-input" id="update-by-${p.id}" placeholder="PM / Site Manager name" style="width:180px">
+
+      <!-- Sub-tab switcher -->
+      <div class="update-sub-tabs">
+        <div class="update-sub-tab active" id="usub-btn-wbs-${p.id}"
+          onclick="switchUpdateSubTab('wbs','${p.id}')">📋 WBS Progress</div>
+        <div class="update-sub-tab" id="usub-btn-general-${p.id}"
+          onclick="switchUpdateSubTab('general','${p.id}')">📝 General Updates</div>
+      </div>
+
+      <!-- ── SUB-TAB: WBS PROGRESS ── -->
+      <div id="usub-wbs-${p.id}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="font-size:13px;color:#4A5568;">
+            Each task below shows its update history. Submit a new update per task — AI reads all previous entries and suggests cumulative % completion.
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:11px;color:#8B9BB4;">Submitted by:</span>
+            <input class="finance-input" id="wbs-update-by-${p.id}" placeholder="Your name / role"
+              value="${_currentUser?_currentUser.email:''}" style="width:180px;padding:6px 10px;">
+          </div>
         </div>
-
-        <!-- File Upload Option -->
-        <div id="update-file-preview-${p.id}"></div>
-        <div class="upload-zone" id="update-upload-zone-${p.id}"
-          ondragover="event.preventDefault();this.classList.add('dragover')"
-          ondragleave="this.classList.remove('dragover')"
-          ondrop="handleUpdateFileDrop(event,'${p.id}')">
-          <input type="file" accept=".pdf,.doc,.docx,.txt" onchange="handleUpdateFile(this,'${p.id}')">
-          <div class="upload-zone-icon">📄</div>
-          <div class="upload-zone-label">Upload Report Document</div>
-          <div class="upload-zone-sub">PDF, Word (.doc/.docx) or Text file · AI will extract and analyse the content</div>
-        </div>
-
-        <div class="upload-or-divider">or type / paste directly</div>
-
-        <textarea class="update-textarea" id="update-text-${p.id}"
-          placeholder="Paste the progress update here...&#10;&#10;Example:&#10;Ductwork installation on floors 7-9 completed today. 85% of main duct runs are now installed. Chiller connections progressing well — approximately 60% complete. No major issues on site. Materials for floor 10 delivered and ready for installation tomorrow."></textarea>
-        <div class="update-actions">
-          <button class="btn-analyse" onclick="analyseUpdate('${p.id}')" id="analyse-btn-${p.id}">
-            🤖 Analyse with AI → Suggest WBS Updates
-          </button>
-          <span style="font-size:11px;color:#8B9BB4;">AI reads the document or text and suggests % completion changes for your review</span>
+        <div style="overflow-x:auto;">
+          <table class="wbs-progress-table" id="wbs-progress-table-${p.id}">
+            <thead><tr>
+              <th style="width:60px">WBS</th>
+              <th style="min-width:160px">Task Name</th>
+              <th style="width:100px">Category</th>
+              <th style="width:65px;text-align:center">Days</th>
+              <th style="width:90px">Planned Start</th>
+              <th style="width:90px">Planned Finish</th>
+              <th style="width:110px">Responsible</th>
+              <th style="min-width:260px">Progress Update</th>
+              <th style="width:90px;text-align:center">% Complete</th>
+              <th style="width:80px;text-align:center">Status</th>
+              <th style="min-width:140px">Deliverable / Notes</th>
+            </tr></thead>
+            <tbody id="wbs-progress-tbody-${p.id}"></tbody>
+          </table>
         </div>
       </div>
 
-      <div id="ai-result-${p.id}"></div>
-
-      <div class="sec-label">Update History</div>
-      <div class="update-log" id="update-log-${p.id}">
-        ${(p.updateLog||[]).length===0
-          ? '<div style="font-size:13px;color:#8B9BB4;padding:8px 0">No updates submitted yet.</div>'
-          : (p.updateLog||[]).slice().reverse().map(u=>`
-            <div class="update-log-item">
-              <div class="update-log-date">${u.date} — ${u.period} — Submitted by: ${u.by||'Unknown'}</div>
-              <div class="update-log-text">${u.text.substring(0,300)}${u.text.length>300?'...':''}</div>
-              ${u.changes&&u.changes.length?`<div class="update-log-changes">✅ Applied: ${u.changes.join(' · ')}</div>`:''}
-            </div>`).join('')}
+      <!-- ── SUB-TAB: GENERAL UPDATES ── -->
+      <div id="usub-general-${p.id}" style="display:none;">
+        <div class="update-form">
+          <div class="update-form-title">📝 Submit General Progress Update</div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap;">
+            <select class="update-period-sel" id="update-period-${p.id}">
+              <option>Daily Update</option>
+              <option>Weekly Report</option>
+              <option>Monthly Summary</option>
+            </select>
+            <input type="date" class="finance-input" id="update-date-${p.id}" style="width:160px"
+              value="${new Date().toISOString().slice(0,10)}">
+            <span style="font-size:12px;color:#8B9BB4;">Submitted by:</span>
+            <input class="finance-input" id="update-by-${p.id}" placeholder="PM / Site Manager name" style="width:180px">
+          </div>
+          <div id="update-file-preview-${p.id}"></div>
+          <div class="upload-zone" id="update-upload-zone-${p.id}"
+            ondragover="event.preventDefault();this.classList.add('dragover')"
+            ondragleave="this.classList.remove('dragover')"
+            ondrop="handleUpdateFileDrop(event,'${p.id}')">
+            <input type="file" accept=".pdf,.doc,.docx,.txt" onchange="handleUpdateFile(this,'${p.id}')">
+            <div class="upload-zone-icon">📄</div>
+            <div class="upload-zone-label">Upload Report Document</div>
+            <div class="upload-zone-sub">PDF, Word (.doc/.docx) or Text file</div>
+          </div>
+          <div class="upload-or-divider">or type / paste directly</div>
+          <textarea class="update-textarea" id="update-text-${p.id}"
+            placeholder="Paste the progress update here..."></textarea>
+          <div class="update-actions">
+            <button class="btn-analyse" onclick="analyseUpdate('${p.id}')" id="analyse-btn-${p.id}">
+              🤖 Analyse with AI → Suggest WBS Updates
+            </button>
+            <span style="font-size:11px;color:#8B9BB4;">AI reads the text and suggests % completion changes</span>
+          </div>
+        </div>
+        <div id="ai-result-${p.id}"></div>
+        <div class="sec-label">General Update History</div>
+        <div class="update-log" id="update-log-${p.id}">
+          ${(p.updateLog||[]).length===0
+            ? '<div style="font-size:13px;color:#8B9BB4;padding:8px 0">No general updates submitted yet.</div>'
+            : (p.updateLog||[]).slice().reverse().map(u=>`
+              <div class="update-log-item">
+                <div class="update-log-date">${u.date} — ${u.period} — Submitted by: ${u.by||'Unknown'}</div>
+                <div class="update-log-text">${u.text.substring(0,300)}${u.text.length>300?'...':''}</div>
+                ${u.changes&&u.changes.length?`<div class="update-log-changes">✅ Applied: ${u.changes.join(' · ')}</div>`:''}
+              </div>`).join('')}
+        </div>
       </div>
+
     </div>
 
     <!-- TAB: FINANCE LOG -->
@@ -6372,6 +6439,7 @@ function switchTab(tabId, projId) {
   if (tabId === 'risk')     renderRiskHeatMap(projId);
   if (tabId === 'finance')  setTimeout(()=>renderFinanceTable(projId), 50);
   if (tabId === 'wbs')      setTimeout(()=>renderWBSTable(projId), 50);
+  if (tabId === 'updates')  setTimeout(()=>renderWBSProgressTable(projId), 50);
   if (tabId === 'raci')     setTimeout(()=>renderRaciTable(projId), 50);
   if (tabId === 'ncr')      setTimeout(()=>renderNCRTable(projId), 50);
   if (tabId === 'docs')     setTimeout(()=>renderDocTable(projId), 50);
@@ -6952,6 +7020,265 @@ window.addEventListener('load', () => {
     }
   }, 1000);
 });
+
+// ── WBS PROGRESS UPDATES SYSTEM ─────────────────────────────────────────────
+
+function switchUpdateSubTab(tabId, projId) {
+  ['wbs','general'].forEach(t => {
+    const el = document.getElementById('usub-'+t+'-'+projId);
+    const btn = document.getElementById('usub-btn-'+t+'-'+projId);
+    if (el)  el.style.display  = t===tabId ? '' : 'none';
+    if (btn) btn.classList.toggle('active', t===tabId);
+  });
+  if (tabId === 'wbs') renderWBSProgressTable(projId);
+}
+
+// ── RICH TEXT TOOLBAR ─────────────────────────────────────────────────────────
+function rtExec(cmd, val) {
+  document.execCommand(cmd, false, val||null);
+}
+
+function buildRichToolbar(taskId) {
+  return `<div class="rich-text-toolbar">
+    <button class="rtt-btn" onclick="rtExec('bold')"           title="Bold"><b>B</b></button>
+    <button class="rtt-btn" onclick="rtExec('italic')"         title="Italic"><i>I</i></button>
+    <button class="rtt-btn" onclick="rtExec('underline')"      title="Underline"><u>U</u></button>
+    <button class="rtt-btn" onclick="rtExec('insertUnorderedList')" title="Bullet list">• List</button>
+    <button class="rtt-btn" onclick="rtExec('insertOrderedList')"   title="Numbered list">1. List</button>
+    <button class="rtt-btn" onclick="rtExec('removeFormat')"   title="Clear formatting">✕ Clear</button>
+  </div>
+  <div class="rich-editor" id="rich-editor-${taskId}" contenteditable="true"
+    data-placeholder="Describe progress on this task... What was done? How much is complete? Any issues?"
+    style="min-height:70px;"></div>`;
+}
+
+// ── RENDER WBS PROGRESS TABLE ─────────────────────────────────────────────────
+function renderWBSProgressTable(projId) {
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p) return;
+  const tbody = document.getElementById('wbs-progress-tbody-'+projId);
+  if (!tbody) return;
+
+  const tasks = p.wbsTasks || [];
+  if (!tasks.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;color:#8B9BB4;padding:24px;">
+      No WBS tasks defined. Upload or add tasks in the WBS Tracker tab first.
+    </td></tr>`;
+    return;
+  }
+
+  // Determine current user for access control
+  const currentUserEmail = _currentUser ? _currentUser.email.toLowerCase() : '';
+  const isPMO = _isAdmin; // PMO Lead has overriding access to all tasks
+
+  const statusColors = {complete:'wbs-complete',inprogress:'wbs-inprog',notstarted:'wbs-notstart',delayed:'wbs-delayed'};
+  const statusText   = {complete:'✅ Complete',inprogress:'🔄 In Progress',notstarted:'⏳ Not Started',delayed:'⚠️ Delayed'};
+
+  tbody.innerHTML = tasks.map((t, i) => {
+    const pct     = Math.round((t.pct||0)*100);
+    const stat    = t.status || 'notstarted';
+    const taskLog = (t.updateLog||[]);
+
+    // Access control: show task if PMO, or if responsible matches current user
+    const responsible = (t.responsible||'').toLowerCase();
+    const canAccess   = isPMO || !currentUserEmail ||
+                        responsible.includes(currentUserEmail.split('@')[0]) ||
+                        currentUserEmail.includes(responsible.split(' ')[0]);
+
+    if (!canAccess) {
+      return `<tr>
+        <td><strong>${t.code||''}</strong></td>
+        <td style="color:#8B9BB4;font-style:italic">— Restricted —</td>
+        <td colspan="9" style="color:#8B9BB4;font-size:11px">This task is assigned to another team member.</td>
+      </tr>`;
+    }
+
+    // Build update log display
+    const logHtml = taskLog.length
+      ? `<div class="task-update-log">
+          ${taskLog.slice().reverse().map(u => `
+            <div class="task-update-entry">
+              <div class="task-update-meta">${u.date} · ${u.by||'Unknown'}</div>
+              <div class="task-update-text">${u.html
+                ? u.html
+                : (u.text||'').substring(0,200)+(u.text||'').length>200?'...':''}</div>
+              ${u.suggestedPct!=null?`<div class="task-update-pct">AI suggested: ${u.suggestedPct}% → Actual: ${Math.round((t.pct||0)*100)}%</div>`:''}
+            </div>`).join('')}
+        </div>`
+      : `<div style="font-size:11px;color:#8B9BB4;font-style:italic;padding:4px 0;">No updates yet.</div>`;
+
+    const taskId = projId+'-'+i;
+
+    return `<tr id="wbs-prog-row-${taskId}">
+      <td><strong style="font-size:11px">${t.code||''}</strong></td>
+      <td>
+        <div style="font-size:12px;font-weight:600;color:#0D1B3E;margin-bottom:4px;">${t.name}</div>
+        ${logHtml}
+        <!-- Rich text editor for new update -->
+        <div style="margin-top:8px;" id="editor-wrap-${taskId}">
+          ${buildRichToolbar(taskId)}
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
+          <button class="pct-suggest-btn" id="ai-btn-${taskId}"
+            onclick="submitTaskUpdate('${projId}',${i})"
+            ${!AI_PROXY_URL?'disabled title="AI proxy not configured"':''}>
+            🤖 Submit & Ask AI
+          </button>
+          <button style="padding:3px 10px;background:none;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;color:#4A5568;cursor:pointer;"
+            onclick="submitTaskUpdateNoAI('${projId}',${i})">
+            💾 Save update
+          </button>
+          <span id="ai-inline-result-${taskId}" style="font-size:11px;color:#8B9BB4;"></span>
+        </div>
+      </td>
+      <td style="font-size:11px;color:#4A5568;">${t.category||'—'}</td>
+      <td style="text-align:center;font-size:11px;">${t.duration||'—'}</td>
+      <td style="font-size:11px;">${t.start||'—'}</td>
+      <td style="font-size:11px;">${t.end||'—'}</td>
+      <td style="font-size:12px;">
+        ${t.responsible||'—'}
+        ${isPMO?`<span class="access-badge pmo" style="display:block;margin-top:3px;">PMO Access</span>`:''}
+      </td>
+      <td style="text-align:center;">
+        <div style="font-size:16px;font-weight:700;color:${pct>=100?'#1E6B2E':pct>0?'#C9901A':'#8B9BB4'}">${pct}%</div>
+        <div style="height:5px;background:#EEF2F8;border-radius:3px;margin-top:4px;overflow:hidden;">
+          <div style="height:100%;width:${pct}%;background:${pct>=100?'#1E6B2E':pct>0?'#C9901A':'#CBD5E0'};border-radius:3px;"></div>
+        </div>
+      </td>
+      <td style="text-align:center;">
+        <span class="wbs-status ${statusColors[stat]||'wbs-notstart'}" style="font-size:10px;">${statusText[stat]||stat}</span>
+      </td>
+      <td style="font-size:11px;color:#4A5568;">${t.notes||'—'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SUBMIT TASK UPDATE WITHOUT AI ─────────────────────────────────────────────
+function submitTaskUpdateNoAI(projId, taskIdx) {
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
+
+  const taskId  = projId+'-'+taskIdx;
+  const editor  = document.getElementById('rich-editor-'+taskId);
+  const byInput = document.getElementById('wbs-update-by-'+projId);
+  if (!editor) return;
+
+  const html = editor.innerHTML.trim();
+  const text = editor.innerText.trim();
+  if (!text) { alert('Please enter an update before saving.'); return; }
+
+  const by   = (byInput ? byInput.value.trim() : '') || (_currentUser ? _currentUser.email : 'Unknown');
+  const date = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  if (!p.wbsTasks[taskIdx].updateLog) p.wbsTasks[taskIdx].updateLog = [];
+  p.wbsTasks[taskIdx].updateLog.push({ date, by, text, html, suggestedPct: null, timestamp: Date.now() });
+
+  saveProjectToFirebase(p);
+  editor.innerHTML = '';
+  renderWBSProgressTable(projId);
+  _toast('✅ Update saved for task ' + (p.wbsTasks[taskIdx].code||taskIdx));
+}
+
+// ── SUBMIT TASK UPDATE WITH AI ANALYSIS ──────────────────────────────────────
+async function submitTaskUpdate(projId, taskIdx) {
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
+
+  const t       = p.wbsTasks[taskIdx];
+  const taskId  = projId+'-'+taskIdx;
+  const editor  = document.getElementById('rich-editor-'+taskId);
+  const byInput = document.getElementById('wbs-update-by-'+projId);
+  const aiBtn   = document.getElementById('ai-btn-'+taskId);
+  const resultEl= document.getElementById('ai-inline-result-'+taskId);
+  if (!editor) return;
+
+  const html = editor.innerHTML.trim();
+  const text = editor.innerText.trim();
+  if (!text) { alert('Please enter an update before submitting.'); return; }
+
+  const by   = (byInput ? byInput.value.trim() : '') || (_currentUser ? _currentUser.email : 'Unknown');
+  const date = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+
+  // Save the update first
+  if (!t.updateLog) t.updateLog = [];
+  const newEntry = { date, by, text, html, suggestedPct: null, timestamp: Date.now() };
+  t.updateLog.push(newEntry);
+
+  // Disable button and show loading
+  if (aiBtn) { aiBtn.disabled = true; aiBtn.textContent = '⏳ Analysing...'; }
+  if (resultEl) resultEl.innerHTML = '<span style="color:#92400E">🤖 AI is reading all updates...</span>';
+
+  // Build cumulative history for AI context
+  const history = (t.updateLog||[]).map((u,i) =>
+    `Update ${i+1} (${u.date} by ${u.by}): ${u.text}`
+  ).join('\n\n');
+
+  const prompt = `You are a PMO analyst reviewing cumulative progress updates for a construction/MEP project task.
+
+TASK DETAILS:
+- WBS Code: ${t.code||'—'}
+- Task Name: ${t.name}
+- Category: ${t.category||'—'}
+- Duration: ${t.duration||'—'} days
+- Planned Start: ${t.start||'—'}
+- Planned Finish: ${t.end||'—'}
+- Responsible: ${t.responsible||'—'}
+- Deliverable / Notes: ${t.notes||'—'}
+- Current % Complete (in system): ${Math.round((t.pct||0)*100)}%
+
+CUMULATIVE UPDATE HISTORY (all updates from day 1 to now):
+${history}
+
+Based on ALL updates cumulatively (not just the latest one), what is your best estimate of the CURRENT overall % completion for this task?
+
+Consider:
+- How much of the deliverable has been described as done across all updates?
+- Is work being added to previous progress, or restarted?
+- The final update is the most recent state.
+
+Respond ONLY with a JSON object — no preamble, no explanation outside JSON:
+{"suggestedPct": 65, "reasoning": "One sentence explaining why", "confidence": "high|medium|low"}`;
+
+  try {
+    const raw = await callClaude(prompt, 300);
+    const jsonStr = raw.replace(/\`\`\`json|\`\`\`/g,'').trim();
+    const result  = JSON.parse(jsonStr);
+    const sugPct  = Math.max(0, Math.min(100, parseInt(result.suggestedPct)||0));
+
+    // Store suggestion on the entry
+    newEntry.suggestedPct = sugPct;
+
+    // Show inline result with accept/reject
+    if (resultEl) resultEl.innerHTML = `
+      <span style="color:#185FA5;font-weight:600">AI suggests: ${sugPct}%</span>
+      <span style="color:#8B9BB4;font-size:10px;margin-left:4px">(${result.confidence||'medium'} confidence — ${result.reasoning||''})</span>
+      <button onclick="acceptTaskPct('${projId}',${taskIdx},${sugPct})"
+        style="margin-left:8px;padding:2px 8px;background:#1E6B2E;border:none;border-radius:4px;color:#fff;font-size:11px;cursor:pointer;">✓ Accept</button>
+      <button onclick="document.getElementById('ai-inline-result-${taskId}').innerHTML=''"
+        style="margin-left:4px;padding:2px 8px;background:none;border:1px solid #CBD5E0;border-radius:4px;font-size:11px;cursor:pointer;">✗ Dismiss</button>`;
+
+  } catch(err) {
+    if (resultEl) resultEl.innerHTML = `<span style="color:#9B1C1C">AI unavailable — update saved. ${AI_PROXY_URL?err.message:'Configure AI proxy first.'}</span>`;
+  }
+
+  // Save to Firebase and re-render
+  saveProjectToFirebase(p);
+  editor.innerHTML = '';
+  if (aiBtn) { aiBtn.disabled = false; aiBtn.textContent = '🤖 Submit & Ask AI'; }
+  renderWBSProgressTable(projId);
+}
+
+// ── ACCEPT AI SUGGESTED PCT ───────────────────────────────────────────────────
+function acceptTaskPct(projId, taskIdx, sugPct) {
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
+  p.wbsTasks[taskIdx].pct    = sugPct / 100;
+  p.wbsTasks[taskIdx].status = sugPct >= 100 ? 'complete' : sugPct > 0 ? 'inprogress' : 'notstarted';
+  syncProjectFromWBS(p);
+  saveProjectToFirebase(p);
+  refreshProjectKeepingTab(projId);
+  _toast('✅ Task ' + (p.wbsTasks[taskIdx].code||taskIdx) + ' updated to ' + sugPct + '%');
+}
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 buildSidebar();
