@@ -1133,27 +1133,47 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
 const TODAY = new Date().toLocaleDateString("en-GB",{day:"2-digit",month:"long",year:"numeric"});
 document.getElementById("topdate").textContent = TODAY;
 
-// ── AI PROXY CONFIG ───────────────────────────────────────────────────────────
-// The dashboard cannot call api.anthropic.com directly from the browser (no API
-// key is exposed client-side, and Anthropic blocks unauthenticated CORS requests).
-// Deploy the included megawatts-pmo-proxy-worker.js as a free Cloudflare Worker,
-// then paste your Worker URL below. AI features (WBS import parsing, progress
-// update analysis) will not work until this is set.
-const AI_PROXY_URL = ""; // e.g. "https://megawatts-pmo-proxy.yourname.workers.dev"
+// ── AI CONFIG ─────────────────────────────────────────────────────────────────
+// Direct Anthropic API call from browser. No proxy or Cloudflare Worker needed.
+// Optional: if you later deploy a Cloudflare Worker, paste its URL here and
+// callClaude() will route through it instead.
+const AI_PROXY_URL = ""; // optional — leave blank to use direct API
 
 async function callClaude(prompt, maxTokens) {
-  if (!AI_PROXY_URL) {
-    throw new Error('AI proxy not configured. See AI_PROXY_URL near the top of the dashboard script.');
+  // If a proxy URL is configured, route through it
+  if (AI_PROXY_URL) {
+    const response = await fetch(AI_PROXY_URL, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: maxTokens || 1000,
+        messages: [{role:'user', content: prompt}]
+      })
+    });
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error('Proxy request failed ('+response.status+'): '+errText.substring(0,200));
+    }
+    const data = await response.json();
+    return (data.content||[]).map(b => b.text||'').join('');
   }
-  const response = await fetch(AI_PROXY_URL, {
+
+  // Direct Anthropic API — works in Claude.ai artifact context and GitHub Pages
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
-    headers: {'Content-Type':'application/json'},
+    headers: {
+      'Content-Type':            'application/json',
+      'anthropic-version':       '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-6',
-      max_tokens: maxTokens || 2000,
-      messages: [{role:'user', content: prompt}]
+      model:      'claude-sonnet-4-6',
+      max_tokens: maxTokens || 1000,
+      messages:   [{role:'user', content: prompt}]
     })
   });
+
   if (!response.ok) {
     const errText = await response.text();
     throw new Error('AI request failed ('+response.status+'): '+errText.substring(0,200));
@@ -7093,8 +7113,9 @@ function renderWBSProgressTable(projId) {
       </tr>`;
     }
 
-    // Build update log display
-    const logHtml = taskLog.length
+    // Build update log display — wrapped in a named container so we can refresh it
+    // in-place without rebuilding the whole table (preserves scroll + editor state)
+    const logHtml = `<div id="task-log-${taskId}">` + (taskLog.length
       ? `<div class="task-update-log">
           ${taskLog.slice().reverse().map(u => `
             <div class="task-update-entry">
@@ -7105,7 +7126,8 @@ function renderWBSProgressTable(projId) {
               ${u.suggestedPct!=null?`<div class="task-update-pct">AI suggested: ${u.suggestedPct}% → Actual: ${Math.round((t.pct||0)*100)}%</div>`:''}
             </div>`).join('')}
         </div>`
-      : `<div style="font-size:11px;color:#8B9BB4;font-style:italic;padding:4px 0;">No updates yet.</div>`;
+      : `<div style="font-size:11px;color:#8B9BB4;font-style:italic;padding:4px 0;">No updates yet.</div>`)
+      + '</div>';
 
     const taskId = projId+'-'+i;
 
@@ -7121,7 +7143,7 @@ function renderWBSProgressTable(projId) {
         <div style="display:flex;gap:6px;margin-top:6px;align-items:center;flex-wrap:wrap;">
           <button class="pct-suggest-btn" id="ai-btn-${taskId}"
             onclick="submitTaskUpdate('${projId}',${i})"
-            ${!AI_PROXY_URL?'disabled title="AI proxy not configured"':''}>
+>
             🤖 Submit & Ask AI
           </button>
           <button style="padding:3px 10px;background:none;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;color:#4A5568;cursor:pointer;"
@@ -7154,6 +7176,32 @@ function renderWBSProgressTable(projId) {
 }
 
 // ── SUBMIT TASK UPDATE WITHOUT AI ─────────────────────────────────────────────
+// Refresh only the update log section of one row — avoids full table re-render
+// which loses scroll position and clears contenteditable editors.
+function refreshTaskLogSection(projId, taskIdx) {
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
+  const t       = p.wbsTasks[taskIdx];
+  const taskId  = projId+'-'+taskIdx;
+  const logEl   = document.getElementById('task-log-'+taskId);
+  if (!logEl) return;
+
+  const taskLog = (t.updateLog||[]);
+  if (!taskLog.length) {
+    logEl.innerHTML = '<div style="font-size:11px;color:#8B9BB4;font-style:italic;padding:4px 0;">No updates yet.</div>';
+    return;
+  }
+
+  logEl.innerHTML = `<div class="task-update-log">
+    ${taskLog.slice().reverse().map(u => `
+      <div class="task-update-entry">
+        <div class="task-update-meta">${u.date} · ${u.by||'Unknown'}</div>
+        <div class="task-update-text">${u.html ? u.html : (u.text||'').substring(0,200)}</div>
+        ${u.suggestedPct!=null?`<div class="task-update-pct">AI suggested: ${u.suggestedPct}%</div>`:''}
+      </div>`).join('')}
+  </div>`;
+}
+
 function submitTaskUpdateNoAI(projId, taskIdx) {
   const p = PROJECTS.find(x => x.id === projId);
   if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
@@ -7175,7 +7223,7 @@ function submitTaskUpdateNoAI(projId, taskIdx) {
 
   saveProjectToFirebase(p);
   editor.innerHTML = '';
-  renderWBSProgressTable(projId);
+  refreshTaskLogSection(projId, taskIdx); // update only this row's log — no full re-render
   _toast('✅ Update saved for task ' + (p.wbsTasks[taskIdx].code||taskIdx));
 }
 
@@ -7258,14 +7306,14 @@ Respond ONLY with a JSON object — no preamble, no explanation outside JSON:
         style="margin-left:4px;padding:2px 8px;background:none;border:1px solid #CBD5E0;border-radius:4px;font-size:11px;cursor:pointer;">✗ Dismiss</button>`;
 
   } catch(err) {
-    if (resultEl) resultEl.innerHTML = `<span style="color:#9B1C1C">AI unavailable — update saved. ${AI_PROXY_URL?err.message:'Configure AI proxy first.'}</span>`;
+    if (resultEl) resultEl.innerHTML = `<span style="color:#9B1C1C">AI unavailable — update saved. ${err.message}</span>`;
   }
 
-  // Save to Firebase and re-render
+  // Save to Firebase and refresh just this row's log
   saveProjectToFirebase(p);
   editor.innerHTML = '';
   if (aiBtn) { aiBtn.disabled = false; aiBtn.textContent = '🤖 Submit & Ask AI'; }
-  renderWBSProgressTable(projId);
+  refreshTaskLogSection(projId, taskIdx);
 }
 
 // ── ACCEPT AI SUGGESTED PCT ───────────────────────────────────────────────────
