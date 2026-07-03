@@ -1365,14 +1365,18 @@ function scoreClass(s){return s>=7?"rs-high":s>=4?"rs-med":"rs-low";}
 function evm(p){
   // SPI requires PV > 0 (planned % must be entered in WBS).
   // If PV = 0 return null so the scorecard shows — instead of misleading 0.000.
-  const spi = p.pv ? p.ev/p.pv : null;
-  const cpi = p.ac ? p.ev/p.ac : 0;
-  const eac = cpi ? p.bac/cpi : p.bac;
-  const vac = p.bac - eac;
-  const sv  = p.ev - p.pv;
-  const cv  = p.ev - p.ac;
+  const spi  = p.pv ? p.ev/p.pv : null;
+  const cpi  = p.ac ? p.ev/p.ac : 0;
+  const eac  = cpi ? p.bac/cpi : p.bac;
+  const vac  = p.bac - eac;
+  const sv   = p.ev - (p.pv||0);
+  const cv   = p.ev - p.ac;
+  const etc  = eac - p.ac;                          // Estimate to Complete: how much more to spend
+  const tcpi = (p.bac - p.ev) && (p.bac - p.ac)    // To-Complete Performance Index
+               ? (p.bac - p.ev) / (p.bac - p.ac)   // efficiency needed from today to finish on budget
+               : null;
   const bvpct = p.bac ? (p.bac-p.ac)/p.bac : 0;
-  return {spi,cpi,eac,vac,sv,cv,bvpct};
+  return {spi,cpi,eac,vac,sv,cv,etc,tcpi,bvpct};
 }
 
 let currentView = "portfolio";
@@ -1526,9 +1530,18 @@ function renderPortfolio(){
   const totalAc  = PROJECTS.reduce((s,p)=>s+p.ac,0);
   const totalEv  = PROJECTS.reduce((s,p)=>s+p.ev,0);
   const totalPv  = PROJECTS.reduce((s,p)=>s+p.pv,0);
-  const portSpi  = totalPv?totalEv/totalPv:0;
-  const portCpi  = totalAc?totalEv/totalAc:0;
-  const portEac  = portCpi?totalBac/portCpi:totalBac;
+  const portSpi  = totalPv ? totalEv/totalPv : null;
+  const portCpi  = totalAc ? totalEv/totalAc : 0;
+  const portEac  = portCpi ? totalBac/portCpi : totalBac;
+  const portEtc  = portEac - totalAc;
+  const portTcpi = (totalBac-totalEv) && (totalBac-totalAc)
+                   ? (totalBac-totalEv)/(totalBac-totalAc) : null;
+  const portAvgPlanPct   = PROJECTS.length
+                           ? Math.round(PROJECTS.reduce((s,p)=>s+(p.pct_plan||0),0)/PROJECTS.length)
+                           : 0;
+  const portAvgActualPct = PROJECTS.length
+                           ? Math.round(PROJECTS.reduce((s,p)=>s+(p.pct_actual||0),0)/PROJECTS.length)
+                           : 0;
   const onTrack  = PROJECTS.filter(p=>p.rag==="green"||p.rag==="complete").length;
   const atRisk   = PROJECTS.filter(p=>p.rag==="amber").length;
   const critical = PROJECTS.filter(p=>p.rag==="red").length;
@@ -1596,12 +1609,61 @@ function renderPortfolio(){
       <p>All ${PROJECTS.length} projects &nbsp;·&nbsp; ${TODAY}</p>
     </div>
 
-    <!-- Portfolio KPI tiles -->
-    <div class="port-tiles">
-      <div class="port-tile"><div class="port-tile-label">Total Contract Value</div><div class="port-tile-val">${NM(totalBac)}</div></div>
-      <div class="port-tile teal"><div class="port-tile-label">Portfolio SPI</div><div class="port-tile-val">${R(portSpi)}</div><div class="port-tile-note">ΣEV ÷ ΣPV</div></div>
-      <div class="port-tile blue"><div class="port-tile-label">Portfolio CPI</div><div class="port-tile-val">${R(portCpi)}</div><div class="port-tile-note">ΣEV ÷ ΣAC</div></div>
-      <div class="port-tile ${portCpi<0.9?"red":"teal"}"><div class="port-tile-label">Portfolio EAC</div><div class="port-tile-val">${NM(portEac)}</div><div class="port-tile-note">BAC ÷ CPI</div></div>
+    <!-- Portfolio KPI tiles — Row 1: Core EVM -->
+    <div class="port-tiles" style="grid-template-columns:repeat(4,1fr)">
+      <div class="port-tile">
+        <div class="port-tile-label">Total BAC</div>
+        <div class="port-tile-val">${NM(totalBac)}</div>
+        <div class="port-tile-note">Budget at Completion</div>
+      </div>
+      <div class="port-tile teal">
+        <div class="port-tile-label">Portfolio SPI</div>
+        <div class="port-tile-val">${R(portSpi)}</div>
+        <div class="port-tile-note">ΣEV ÷ ΣPV · ${portSpi===null?"No PV data":portSpi>=1?"On schedule":portSpi<0.85?"Behind — escalate":"At risk"}</div>
+      </div>
+      <div class="port-tile ${portCpi<0.9?"red":"blue"}">
+        <div class="port-tile-label">Portfolio CPI</div>
+        <div class="port-tile-val">${R(portCpi)}</div>
+        <div class="port-tile-note">ΣEV ÷ ΣAC · ${portCpi>=1?"Under budget":portCpi<0.9?"Overrun":"Watch"}</div>
+      </div>
+      <div class="port-tile ${portCpi<0.9?"red":"teal"}">
+        <div class="port-tile-label">Portfolio EAC</div>
+        <div class="port-tile-val">${NM(portEac)}</div>
+        <div class="port-tile-note">Forecast final cost</div>
+      </div>
+    </div>
+    <!-- Portfolio KPI tiles — Row 2: % Complete + Variances -->
+    <div class="port-tiles" style="grid-template-columns:repeat(6,1fr);margin-top:10px">
+      <div class="port-tile ${portAvgActualPct>=portAvgPlanPct?"green":"amber"}">
+        <div class="port-tile-label">Avg. % Planned</div>
+        <div class="port-tile-val">${portAvgPlanPct}%</div>
+        <div class="port-tile-note">Baseline schedule avg.</div>
+      </div>
+      <div class="port-tile ${portAvgActualPct>=portAvgPlanPct?"green":"amber"}">
+        <div class="port-tile-label">Avg. % Actual</div>
+        <div class="port-tile-val">${portAvgActualPct}%</div>
+        <div class="port-tile-note">${portAvgActualPct>=portAvgPlanPct?"On/ahead of plan":"Behind plan by "+((portAvgPlanPct-portAvgActualPct)+"% pts")}</div>
+      </div>
+      <div class="port-tile ${(totalEv-(totalPv||0))>=0?"green":"amber"}">
+        <div class="port-tile-label">SV — Sched. Variance</div>
+        <div class="port-tile-val">${NM(Math.round(totalEv-(totalPv||0)))}</div>
+        <div class="port-tile-note">ΣEV − ΣPV</div>
+      </div>
+      <div class="port-tile ${(totalEv-totalAc)>=0?"green":"red"}">
+        <div class="port-tile-label">CV — Cost Variance</div>
+        <div class="port-tile-val">${NM(Math.round(totalEv-totalAc))}</div>
+        <div class="port-tile-note">ΣEV − ΣAC</div>
+      </div>
+      <div class="port-tile ${(totalBac-portEac)>=0?"green":"red"}">
+        <div class="port-tile-label">VAC</div>
+        <div class="port-tile-val">${NM(Math.round(totalBac-portEac))}</div>
+        <div class="port-tile-note">${(totalBac-portEac)>=0?"Expected saving":"Expected overrun"}</div>
+      </div>
+      <div class="port-tile ${portTcpi===null?"":portTcpi<=1?"green":portTcpi<=1.1?"amber":"red"}">
+        <div class="port-tile-label">Portfolio TCPI</div>
+        <div class="port-tile-val">${portTcpi===null?"—":R(portTcpi)}</div>
+        <div class="port-tile-note">${portTcpi===null?"No data":portTcpi<=1?"Achievable":portTcpi<=1.1?"Stretch":portTcpi>1.2?"Rebaseline":""}</div>
+      </div>
     </div>
 
     <div class="kpi-grid kpi-grid-4" style="margin-bottom:20px">
@@ -1886,26 +1948,87 @@ function renderProject(p){
     <!-- TAB: OVERVIEW -->
     <div class="tab-content active" id="tab-overview">
       <div class="sec-label">EVM scorecard</div>
-      <div class="kpi-grid kpi-grid-3">
-        <div class="kpi-card accent"><div class="kpi-label">BAC — Budget at Completion</div><div class="kpi-val">${N(p.bac)}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Actual Cost (AC)</div><div class="kpi-val">${N(p.ac)}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Earned Value (EV)</div><div class="kpi-val">${N(p.ev)}</div></div>
+      <!-- Row 1: Core values -->
+      <div class="kpi-grid kpi-grid-3" style="margin-bottom:10px">
+        <div class="kpi-card accent">
+          <div class="kpi-label">BAC — Budget at Completion</div>
+          <div class="kpi-val">${N(p.bac)}</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">PV — Planned Value</div>
+          <div class="kpi-val">${N(p.pv||0)}</div>
+          <div class="kpi-note">Budgeted cost of scheduled work</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">EV — Earned Value</div>
+          <div class="kpi-val">${N(p.ev)}</div>
+          <div class="kpi-note">Budgeted cost of work done</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">AC — Actual Cost</div>
+          <div class="kpi-val">${N(p.ac)}</div>
+          <div class="kpi-note">Actual spend to date</div>
+        </div>
+        <div class="kpi-card ${p.pct_actual>=p.pct_plan?'good':'warn'}">
+          <div class="kpi-label">% Complete (Planned)</div>
+          <div class="kpi-val">${p.pct_plan||0}%</div>
+          <div class="kpi-note">Baseline schedule target</div>
+        </div>
+        <div class="kpi-card ${p.pct_actual>=p.pct_plan?'good':'warn'}">
+          <div class="kpi-label">% Complete (Actual)</div>
+          <div class="kpi-val">${p.pct_actual||0}%</div>
+          <div class="kpi-note">${p.pct_actual>=p.pct_plan?"Ahead of / on plan":"Behind plan by "+(((p.pct_plan||0)-(p.pct_actual||0))+"% pts")}</div>
+        </div>
+      </div>
+      <!-- Row 2: Performance indices -->
+      <div class="kpi-grid kpi-grid-4" style="margin-bottom:10px">
         <div class="kpi-card ${spiClass(e.spi)}">
-          <div class="kpi-label">SPI = EV ÷ PV</div><div class="kpi-val">${R(e.spi)}</div>
-          <div class="kpi-note">${e.spi===null?"Add task dates in WBS Tracker — Planned % auto-calculates from schedule":e.spi>=1?"On/ahead of schedule":e.spi<0.85?"Behind — escalate":"At risk"}</div>
+          <div class="kpi-label">SPI = EV ÷ PV</div>
+          <div class="kpi-val">${R(e.spi)}</div>
+          <div class="kpi-note">${e.spi===null?"Add task dates in WBS Tracker":e.spi>=1?"On/ahead of schedule":e.spi<0.85?"Behind — escalate":"At risk"}</div>
         </div>
         <div class="kpi-card ${cpiClass(e.cpi)}">
-          <div class="kpi-label">CPI = EV ÷ AC</div><div class="kpi-val">${R(e.cpi)}</div>
+          <div class="kpi-label">CPI = EV ÷ AC</div>
+          <div class="kpi-val">${R(e.cpi)}</div>
           <div class="kpi-note">${e.cpi>=1?"On/under budget":e.cpi<0.9?"Overrun — escalate":"Watch"}</div>
         </div>
+        <div class="kpi-card ${e.sv>=0?'good':'bad'}">
+          <div class="kpi-label">SV = EV − PV</div>
+          <div class="kpi-val">${N(Math.round(e.sv))}</div>
+          <div class="kpi-note">${e.sv>=0?"Ahead of schedule":"Behind schedule"}</div>
+        </div>
+        <div class="kpi-card ${e.cv>=0?'good':'bad'}">
+          <div class="kpi-label">CV = EV − AC</div>
+          <div class="kpi-val">${N(Math.round(e.cv))}</div>
+          <div class="kpi-note">${e.cv>=0?"Under budget":"Over budget"}</div>
+        </div>
+      </div>
+      <!-- Row 3: Forecasts -->
+      <div class="kpi-grid kpi-grid-4" style="margin-bottom:10px">
         <div class="kpi-card ${e.vac>=0?'good':'bad'}">
-          <div class="kpi-label">EAC = BAC ÷ CPI</div><div class="kpi-val">${N(Math.round(e.eac))}</div>
-          <div class="kpi-note">VAC: ${e.vac>=0?"+":""}${N(Math.round(e.vac))}</div>
+          <div class="kpi-label">EAC = BAC ÷ CPI</div>
+          <div class="kpi-val">${N(Math.round(e.eac))}</div>
+          <div class="kpi-note">Forecast final cost</div>
+        </div>
+        <div class="kpi-card ${e.vac>=0?'good':'bad'}">
+          <div class="kpi-label">VAC = BAC − EAC</div>
+          <div class="kpi-val">${e.vac>=0?"+":""}${N(Math.round(e.vac))}</div>
+          <div class="kpi-note">${e.vac>=0?"Expected saving":"Expected overrun"}</div>
+        </div>
+        <div class="kpi-card ${e.etc>0?'':'good'}">
+          <div class="kpi-label">ETC = EAC − AC</div>
+          <div class="kpi-val">${N(Math.round(e.etc))}</div>
+          <div class="kpi-note">Cost still needed to finish</div>
+        </div>
+        <div class="kpi-card ${e.tcpi===null?'':e.tcpi<=1?'good':e.tcpi<=1.1?'warn':'bad'}">
+          <div class="kpi-label">TCPI = (BAC−EV)÷(BAC−AC)</div>
+          <div class="kpi-val">${e.tcpi===null?"—":R(e.tcpi)}</div>
+          <div class="kpi-note">${e.tcpi===null?"Insufficient data":e.tcpi<=1?"Budget recovery achievable":e.tcpi<=1.1?"Stretch target":e.tcpi>1.2?"Budget unachievable — rebaseline":"Very difficult to recover"}</div>
         </div>
       </div>
       <div class="kpi-grid kpi-grid-4">
         <div class="kpi-card ${bvpct>=0?'good':'bad'}"><div class="kpi-label">Budget variance</div><div class="kpi-val">${Pct(bvpct)}</div></div>
-        <div class="kpi-card"><div class="kpi-label">Schedule %</div><div class="kpi-val">${p.pct_actual}%</div><div class="kpi-note">Plan: ${p.pct_plan}%</div></div>
+
         <div class="kpi-card ${p.ncrs_open===0?'good':'bad'}"><div class="kpi-label">Open NCRs</div><div class="kpi-val">${p.ncrs_open}</div><div class="kpi-note">${p.ncrs_closed} closed</div></div>
         <div class="kpi-card good"><div class="kpi-label">LTI count</div><div class="kpi-val">${p.lti}</div></div>
       </div>
