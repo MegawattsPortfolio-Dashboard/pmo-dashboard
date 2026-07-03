@@ -3562,7 +3562,11 @@ function calcPlannedPct(startStr, endStr) {
   const start = parseDate(startStr);
   const end   = parseDate(endStr);
   if (!start || !end) return null;
-  const today = new Date();
+  // DEMO MODE: use a simulated reporting date mid-project so Planned %
+  // reflects realistic in-progress values for testing and presentation.
+  // Change DEMO_DATE to null to revert to real today's date.
+  const DEMO_DATE = "2026-09-30";
+  const today = DEMO_DATE ? new Date(DEMO_DATE) : new Date();
   today.setHours(0,0,0,0);
   start.setHours(0,0,0,0);
   end.setHours(0,0,0,0);
