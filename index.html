@@ -1999,8 +1999,14 @@ function renderProject(p){
       <!-- ── SUB-TAB: WBS PROGRESS ── -->
       <div id="usub-wbs-${p.id}">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
-          <div style="font-size:13px;color:#4A5568;">
-            Each task below shows its update history. Submit a new update per task — AI reads all previous entries and suggests cumulative % completion.
+          <div>
+            <div style="font-size:13px;color:#4A5568;">
+              Each task below shows its update history. Submit a new update per task — AI reads all previous entries and suggests cumulative % completion.
+            </div>
+            <div style="background:#FEF3C7;border:1px solid #F59E0B;border-radius:6px;padding:7px 14px;font-size:11px;color:#92400E;margin-top:6px;">
+              <strong>⚠ Independence Rule:</strong> Updates here record <strong>field-reported %</strong> only — they do not affect EVM.
+              To certify % complete and update SPI/CPI/EV, use the <strong>WBS Tracker</strong> tab.
+            </div>
           </div>
           <div style="display:flex;align-items:center;gap:8px;">
             <span style="font-size:11px;color:#8B9BB4;">Submitted by:</span>
@@ -7187,12 +7193,21 @@ function renderWBSProgressTable(projId) {
     const logHtml = `<div id="task-log-${taskId}">` + (taskLog.length
       ? `<div class="task-update-log">
           ${taskLog.slice().reverse().map(u => `
-            <div class="task-update-entry">
-              <div class="task-update-meta">${u.date} · ${u.by||'Unknown'}</div>
+            <div class="task-update-entry" style="position:relative;">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                <div class="task-update-meta">${u.date} · ${u.by||'Unknown'}</div>
+                ${_isAdmin?`<button onclick="deleteTaskUpdateEntry('${projId}',${i},${taskLog.slice().reverse().indexOf(u)})"
+                  style="background:none;border:none;color:#CBD5E0;cursor:pointer;font-size:12px;padding:0 2px;line-height:1;"
+                  title="Delete this entry">✕</button>`:''}
+              </div>
               <div class="task-update-text">${u.html
                 ? u.html
                 : (u.text||'').substring(0,200)+(u.text||'').length>200?'...':''}</div>
-              ${u.suggestedPct!=null?`<div class="task-update-pct">AI suggested: ${u.suggestedPct}% → Actual: ${Math.round((t.pct||0)*100)}%</div>`:''}
+              ${u.suggestedPct!=null?`<div class="task-update-pct">
+                AI suggested: ${u.suggestedPct}%
+                ${t.pct_reported!==undefined?` | Reported: ${Math.round((t.pct_reported||0)*100)}%`:''}
+                | PMO Certified: ${Math.round((t.pct||0)*100)}%
+              </div>`:''}
             </div>`).join('')}
         </div>`
       : `<div style="font-size:11px;color:#8B9BB4;font-style:italic;padding:4px 0;">No updates yet.</div>`)
@@ -7229,10 +7244,16 @@ function renderWBSProgressTable(projId) {
         ${isPMO?`<span class="access-badge pmo" style="display:block;margin-top:3px;">PMO Access</span>`:''}
       </td>
       <td style="text-align:center;">
+        <div style="font-size:11px;color:#8B9BB4;margin-bottom:2px;">Certified (PMO)</div>
         <div style="font-size:16px;font-weight:700;color:${pct>=100?'#1E6B2E':pct>0?'#C9901A':'#8B9BB4'}">${pct}%</div>
-        <div style="height:5px;background:#EEF2F8;border-radius:3px;margin-top:4px;overflow:hidden;">
+        <div style="height:4px;background:#EEF2F8;border-radius:3px;margin-top:3px;overflow:hidden;">
           <div style="height:100%;width:${pct}%;background:${pct>=100?'#1E6B2E':pct>0?'#C9901A':'#CBD5E0'};border-radius:3px;"></div>
         </div>
+        ${(t.pct_reported !== undefined && t.pct_reported !== null)
+          ? `<div style="font-size:10px;color:#185FA5;margin-top:4px;">
+               Reported: ${Math.round((t.pct_reported||0)*100)}%
+             </div>`
+          : ''}
       </td>
       <td style="text-align:center;">
         <span class="wbs-status ${statusColors[stat]||'wbs-notstart'}" style="font-size:10px;">${statusText[stat]||stat}</span>
@@ -7245,6 +7266,23 @@ function renderWBSProgressTable(projId) {
 // ── SUBMIT TASK UPDATE WITHOUT AI ─────────────────────────────────────────────
 // Refresh only the update log section of one row — avoids full table re-render
 // which loses scroll position and clears contenteditable editors.
+function deleteTaskUpdateEntry(projId, taskIdx, reverseIdx) {
+  if (!_isAdmin) return;
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
+  const log = p.wbsTasks[taskIdx].updateLog || [];
+  if (!log.length) return;
+  // reverseIdx is index in the reversed array — convert to forward index
+  const forwardIdx = log.length - 1 - reverseIdx;
+  const entry = log[forwardIdx];
+  if (!confirm(`Delete this update entry?\n\n"${(entry.text||'').substring(0,80)}..."\n\nThis cannot be undone.`)) return;
+  log.splice(forwardIdx, 1);
+  p.wbsTasks[taskIdx].updateLog = log;
+  saveProjectToFirebase(p);
+  refreshTaskLogSection(projId, taskIdx);
+  _toast('Update entry deleted');
+}
+
 function refreshTaskLogSection(projId, taskIdx) {
   const p = PROJECTS.find(x => x.id === projId);
   if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
@@ -7260,9 +7298,14 @@ function refreshTaskLogSection(projId, taskIdx) {
   }
 
   logEl.innerHTML = `<div class="task-update-log">
-    ${taskLog.slice().reverse().map(u => `
-      <div class="task-update-entry">
-        <div class="task-update-meta">${u.date} · ${u.by||'Unknown'}</div>
+    ${taskLog.slice().reverse().map((u,ri) => `
+      <div class="task-update-entry" style="position:relative;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div class="task-update-meta">${u.date} · ${u.by||'Unknown'}</div>
+          ${_isAdmin?`<button onclick="deleteTaskUpdateEntry('${projId}',${taskIdx},${ri})"
+            style="background:none;border:none;color:#CBD5E0;cursor:pointer;font-size:12px;padding:0 2px;line-height:1;"
+            title="Delete this entry">✕</button>`:''}
+        </div>
         <div class="task-update-text">${u.html ? u.html : (u.text||'').substring(0,200)}</div>
         ${u.suggestedPct!=null?`<div class="task-update-pct">AI suggested: ${u.suggestedPct}%</div>`:''}
       </div>`).join('')}
@@ -7368,7 +7411,9 @@ Respond ONLY with a JSON object — no preamble, no explanation outside JSON:
       <span style="color:#185FA5;font-weight:600">AI suggests: ${sugPct}%</span>
       <span style="color:#8B9BB4;font-size:10px;margin-left:4px">(${result.confidence||'medium'} confidence — ${result.reasoning||''})</span>
       <button onclick="acceptTaskPct('${projId}',${taskIdx},${sugPct})"
-        style="margin-left:8px;padding:2px 8px;background:#1E6B2E;border:none;border-radius:4px;color:#fff;font-size:11px;cursor:pointer;">✓ Accept</button>
+        style="margin-left:8px;padding:2px 8px;background:#185FA5;border:none;border-radius:4px;color:#fff;font-size:11px;cursor:pointer;"
+        title="Records AI suggestion as field-reported %. Go to WBS Tracker to certify and apply to EVM.">
+        ✓ Note as Reported</button>
       <button onclick="document.getElementById('ai-inline-result-${taskId}').innerHTML=''"
         style="margin-left:4px;padding:2px 8px;background:none;border:1px solid #CBD5E0;border-radius:4px;font-size:11px;cursor:pointer;">✗ Dismiss</button>`;
 
@@ -7385,14 +7430,20 @@ Respond ONLY with a JSON object — no preamble, no explanation outside JSON:
 
 // ── ACCEPT AI SUGGESTED PCT ───────────────────────────────────────────────────
 function acceptTaskPct(projId, taskIdx, sugPct) {
+  // ── ARCHITECTURAL RULE ──────────────────────────────────────────────────────
+  // Progress Updates tab writes ONLY to pct_reported (field team's reported figure).
+  // pct (PMO-certified %) is EXCLUSIVELY updated through the WBS Tracker tab.
+  // pct_reported feeds the narrative log and AI suggestion history only.
+  // EVM (PV, EV, SPI, CPI) remains driven solely by pct via the WBS Tracker.
+  // ───────────────────────────────────────────────────────────────────────────
   const p = PROJECTS.find(x => x.id === projId);
   if (!p || !p.wbsTasks || !p.wbsTasks[taskIdx]) return;
-  p.wbsTasks[taskIdx].pct    = sugPct / 100;
-  p.wbsTasks[taskIdx].status = sugPct >= 100 ? 'complete' : sugPct > 0 ? 'inprogress' : 'notstarted';
-  syncProjectFromWBS(p);
+  p.wbsTasks[taskIdx].pct_reported = sugPct / 100;  // field-reported % only
+  // DO NOT touch t.pct — that is the PMO's certified figure, WBS Tracker only
   saveProjectToFirebase(p);
-  refreshProjectKeepingTab(projId);
-  _toast('✅ Task ' + (p.wbsTasks[taskIdx].code||taskIdx) + ' updated to ' + sugPct + '%');
+  refreshTaskLogSection(projId, taskIdx);
+  _toast('✅ Reported progress for task ' + (p.wbsTasks[taskIdx].code||taskIdx) +
+         ' noted as ' + sugPct + '% — update WBS Tracker to certify and apply to EVM');
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
