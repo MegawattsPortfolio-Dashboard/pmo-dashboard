@@ -1362,6 +1362,108 @@ function Pct(n){return (n*100).toFixed(1)+"%";}
 function spiClass(v){if(v===null||v===undefined)return ""; return v>=1?"good":v<0.85?"bad":"warn";}
 function cpiClass(v){return v>=1?"good":v<0.9?"bad":"warn";}
 function scoreClass(s){return s>=7?"rs-high":s>=4?"rs-med":"rs-low";}
+// ── EVM NARRATIVE: converts raw metrics into a plain-English story ────────────
+function evmStory(p, e) {
+  const parts = [];
+  const pctBehind = (p.pct_plan||0) - (p.pct_actual||0);
+
+  // Schedule story
+  if (e.spi === null) {
+    parts.push("Schedule performance cannot be assessed yet — add task dates in the WBS Tracker to enable SPI tracking.");
+  } else if (e.spi >= 1.05) {
+    parts.push(`The project is <b>ahead of schedule</b> (SPI ${R(e.spi)}) — ${p.pct_actual}% complete against a ${p.pct_plan||0}% plan. The team is delivering faster than the baseline.`);
+  } else if (e.spi >= 0.95) {
+    parts.push(`Schedule performance is <b>on track</b> (SPI ${R(e.spi)}) — ${p.pct_actual}% complete vs ${p.pct_plan||0}% planned. Minor variance; no intervention needed.`);
+  } else if (e.spi >= 0.85) {
+    parts.push(`The project is <b>running behind schedule</b> (SPI ${R(e.spi)}) — only ${p.pct_actual}% complete against a ${p.pct_plan||0}% plan, a gap of ${pctBehind}%. Accelerate critical path activities.`);
+  } else {
+    parts.push(`<b>Schedule is critical</b> (SPI ${R(e.spi)}) — ${p.pct_actual}% complete versus ${p.pct_plan||0}% planned, ${pctBehind}% pts behind. Immediate recovery plan and Director escalation required.`);
+  }
+
+  // Cost story
+  if (!p.ac) {
+    parts.push("Cost performance cannot be assessed — log actual spend in the WBS Tracker.");
+  } else if (e.cpi >= 1.05) {
+    parts.push(`Cost efficiency is <b>strong</b> (CPI ${R(e.cpi)}) — the project is earning ${N(Math.round(e.cv))} more value than it is spending. Current spend-to-earn ratio is healthy.`);
+  } else if (e.cpi >= 0.95) {
+    parts.push(`Cost performance is <b>on budget</b> (CPI ${R(e.cpi)}) with a cost variance of ${N(Math.round(e.cv))}. Maintain current cost controls.`);
+  } else if (e.cpi >= 0.85) {
+    parts.push(`The project is <b>overspending</b> (CPI ${R(e.cpi)}) — ${N(Math.round(Math.abs(e.cv)))} more has been spent than the value earned. Review cost codes and challenge upcoming commitments.`);
+  } else {
+    parts.push(`<b>Cost performance is critical</b> (CPI ${R(e.cpi)}) — spending is significantly outpacing earned value by ${N(Math.round(Math.abs(e.cv)))}. Immediate cost audit and spend freeze required.`);
+  }
+
+  // Forecast story
+  if (e.vac < 0) {
+    parts.push(`At current efficiency, the project is forecast to <b>overrun by ${N(Math.round(Math.abs(e.vac)))} </b>(EAC ${N(Math.round(e.eac))} vs BAC ${N(p.bac)}). ${e.etc ? N(Math.round(e.etc)) + " is still required to complete." : ""}`);
+  } else {
+    parts.push(`The project is forecast to <b>finish within budget</b> with a saving of ${N(Math.round(e.vac))} (EAC ${N(Math.round(e.eac))} vs BAC ${N(p.bac)}). ${e.etc ? N(Math.round(e.etc)) + " remaining to complete." : ""}`);
+  }
+
+  // TCPI story
+  if (e.tcpi !== null) {
+    if (e.tcpi <= 1.0) {
+      parts.push(`Budget recovery is <b>achievable</b> — the team needs to maintain a TCPI of ${R(e.tcpi)}, which is at or below current CPI. Stay the course.`);
+    } else if (e.tcpi <= 1.1) {
+      parts.push(`Finishing on budget requires a <b>stretch performance</b> of TCPI ${R(e.tcpi)} — higher than the current CPI of ${R(e.cpi)}. Tighten cost controls immediately.`);
+    } else {
+      parts.push(`The original budget is <b>no longer achievable</b> at TCPI ${R(e.tcpi)} — this is ${Math.round((e.tcpi/e.cpi-1)*100)}% more efficient than current performance. A rebaseline conversation with the client is recommended.`);
+    }
+  }
+
+  return parts.join(" ");
+}
+
+// ── PORTFOLIO NARRATIVE ───────────────────────────────────────────────────────
+function portfolioStory(totalBac, totalPv, totalEv, totalAc, portSpi, portCpi,
+                         portEac, portTcpi, portAvgPlanPct, portAvgActualPct) {
+  const parts = [];
+  const pctGap  = portAvgPlanPct - portAvgActualPct;
+  const sv      = totalEv - (totalPv||0);
+  const cv      = totalEv - totalAc;
+  const vac     = totalBac - portEac;
+
+  // Schedule
+  if (portSpi === null) {
+    parts.push("Portfolio schedule performance cannot be assessed — planned % must be entered in the WBS Tracker for each project.");
+  } else if (portSpi >= 1) {
+    parts.push(`The portfolio is <b>ahead of schedule</b> overall (SPI ${R(portSpi)}) — averaging ${portAvgActualPct}% complete against a ${portAvgPlanPct}% plan.`);
+  } else if (portSpi >= 0.9) {
+    parts.push(`Portfolio schedule performance is <b>broadly on track</b> (SPI ${R(portSpi)}) — ${portAvgActualPct}% complete vs ${portAvgPlanPct}% planned. Monitor closely.`);
+  } else {
+    parts.push(`The portfolio is <b>behind schedule</b> (SPI ${R(portSpi)}) — only ${portAvgActualPct}% complete against a ${portAvgPlanPct}% plan, a gap of ${pctGap}% pts. ${sv<0?"Schedule variance is "+NM(Math.round(sv))+".":""} Recovery actions are required across delayed projects.`);
+  }
+
+  // Cost
+  if (!totalAc) {
+    parts.push("Portfolio cost performance cannot be assessed — log actual spend in the WBS Tracker.");
+  } else if (portCpi >= 1) {
+    parts.push(`Cost efficiency is <b>positive</b> portfolio-wide (CPI ${R(portCpi)}) with a favourable cost variance of ${NM(Math.round(cv))}.`);
+  } else if (portCpi >= 0.9) {
+    parts.push(`Portfolio cost performance is <b>under pressure</b> (CPI ${R(portCpi)}) — spending is outpacing earned value by ${NM(Math.round(Math.abs(cv)))}. Cost discipline must be reinforced across all projects.`);
+  } else {
+    parts.push(`Portfolio cost performance is <b>critical</b> (CPI ${R(portCpi)}) — ${NM(Math.round(Math.abs(cv)))} more has been spent than the value delivered. An immediate portfolio-wide cost audit is required.`);
+  }
+
+  // Forecast
+  if (vac < 0) {
+    parts.push(`At current performance, the portfolio is forecast to <b>overrun the combined budget by ${NM(Math.round(Math.abs(vac)))}</b> (EAC ${NM(Math.round(portEac))} vs BAC ${NM(totalBac)}).`);
+  } else {
+    parts.push(`The portfolio is currently forecast to <b>deliver within the combined budget</b>, with an expected saving of ${NM(Math.round(vac))} (EAC ${NM(Math.round(portEac))} vs BAC ${NM(totalBac)}).`);
+  }
+
+  // TCPI
+  if (portTcpi !== null) {
+    if (portTcpi > 1.1) {
+      parts.push(`Budget recovery across the portfolio requires a TCPI of ${R(portTcpi)} — significantly above current CPI. A rebaseline review with the board is recommended.`);
+    } else if (portTcpi > 1.0) {
+      parts.push(`Finishing on combined budget requires sustained improvement — TCPI of ${R(portTcpi)} against a current CPI of ${R(portCpi)}. Tighten cost controls now.`);
+    }
+  }
+
+  return parts.join(" ");
+}
+
 function evm(p){
   // SPI requires PV > 0 (planned % must be entered in WBS).
   // If PV = 0 return null so the scorecard shows — instead of misleading 0.000.
@@ -1666,6 +1768,14 @@ function renderPortfolio(){
       </div>
     </div>
 
+    <!-- Portfolio narrative banner -->
+    <div style="background:#F0F7FF;border-left:4px solid #185FA5;border-radius:0 8px 8px 0;
+                padding:12px 16px;margin-bottom:16px;font-size:12px;color:#2D3748;line-height:1.7;">
+      <span style="font-size:10px;font-weight:700;color:#185FA5;letter-spacing:.06em;
+                   text-transform:uppercase;display:block;margin-bottom:4px;">📖 Portfolio story</span>
+      ${portfolioStory(totalBac,totalPv,totalEv,totalAc,portSpi,portCpi,
+                       portEac,portTcpi,portAvgPlanPct,portAvgActualPct)}
+    </div>
     <div class="kpi-grid kpi-grid-4" style="margin-bottom:20px">
       <div class="kpi-card good"><div class="kpi-label">On track / complete</div><div class="kpi-val">${onTrack}</div></div>
       <div class="kpi-card warn"><div class="kpi-label">At risk (Amber)</div><div class="kpi-val">${atRisk}</div></div>
@@ -2025,6 +2135,13 @@ function renderProject(p){
           <div class="kpi-val">${e.tcpi===null?"—":R(e.tcpi)}</div>
           <div class="kpi-note">${e.tcpi===null?"Insufficient data":e.tcpi<=1?"Budget recovery achievable":e.tcpi<=1.1?"Stretch target":e.tcpi>1.2?"Budget unachievable — rebaseline":"Very difficult to recover"}</div>
         </div>
+      </div>
+      <!-- Narrative story banner -->
+      <div style="background:#F0F7FF;border-left:4px solid #185FA5;border-radius:0 8px 8px 0;
+                  padding:12px 16px;margin-bottom:12px;font-size:12px;color:#2D3748;line-height:1.7;">
+        <span style="font-size:10px;font-weight:700;color:#185FA5;letter-spacing:.06em;
+                     text-transform:uppercase;display:block;margin-bottom:4px;">📖 What the metrics are saying</span>
+        ${evmStory(p, e)}
       </div>
       <div class="kpi-grid kpi-grid-4">
         <div class="kpi-card ${bvpct>=0?'good':'bad'}"><div class="kpi-label">Budget variance</div><div class="kpi-val">${Pct(bvpct)}</div></div>
