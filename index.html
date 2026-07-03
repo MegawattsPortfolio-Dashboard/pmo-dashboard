@@ -1786,6 +1786,7 @@ function renderPortfolio(){
     <!-- PORTFOLIO TABS -->
     <div class="proj-tabs">
       <div class="proj-tab active" id="ptab-btn-overview"  onclick="switchPortTab('overview')">📊 Overview</div>
+      <div class="proj-tab" id="ptab-btn-execsummary" onclick="switchPortTab('execsummary')">📄 Executive Summary</div>
       <div class="proj-tab" id="ptab-btn-scurve"   onclick="switchPortTab('scurve')">📈 Portfolio S-Curve</div>
       <div class="proj-tab" id="ptab-btn-trend"    onclick="switchPortTab('trend')">📉 SPI/CPI Trend</div>
       <div class="proj-tab" id="ptab-btn-risk"     onclick="switchPortTab('risk')">🎯 Risk Register</div>
@@ -1793,6 +1794,10 @@ function renderPortfolio(){
     </div>
 
     <!-- TAB: OVERVIEW -->
+    <!-- TAB: PORTFOLIO EXECUTIVE SUMMARY -->
+    <div class="tab-content" id="ptab-execsummary" style="max-width:860px;margin:0 auto;">
+    </div>
+
     <div class="tab-content active" id="ptab-overview">
       <div id="portfolio-alerts">${renderPortfolioAlerts()}</div>
       <div class="sec-label">Project status — click any card to open
@@ -2040,6 +2045,7 @@ function renderProject(p){
     <!-- TAB NAV -->
     <div class="proj-tabs">
       <div class="proj-tab active" id="tab-btn-overview" onclick="switchTab('overview','${p.id}')">📊 Overview</div>
+      <div class="proj-tab" id="tab-btn-execsummary" onclick="switchTab('execsummary','${p.id}')">📄 Executive Summary</div>
       <div class="proj-tab" id="tab-btn-scurve"   onclick="switchTab('scurve','${p.id}')">📈 S-Curve</div>
       <div class="proj-tab" id="tab-btn-trend"    onclick="switchTab('trend','${p.id}')">📉 SPI/CPI Trend</div>
       <div class="proj-tab" id="tab-btn-gantt"    onclick="switchTab('gantt','${p.id}')">📅 Gantt</div>
@@ -2053,6 +2059,10 @@ function renderProject(p){
       <div class="proj-tab" id="tab-btn-docs"      onclick="switchTab('docs','${p.id}')">📁 Documents</div>
       <div class="proj-tab" id="tab-btn-resources" onclick="switchTab('resources','${p.id}')">👷 Resources</div>
       <div class="proj-tab" id="tab-btn-comments"  onclick="switchTab('comments','${p.id}')">💬 Notes</div>
+    </div>
+
+    <!-- TAB: EXECUTIVE SUMMARY -->
+    <div class="tab-content" id="tab-execsummary" style="max-width:860px;margin:0 auto;">
     </div>
 
     <!-- TAB: OVERVIEW -->
@@ -6449,6 +6459,7 @@ function switchPortTab(tabId) {
   if(content) content.classList.add('active');
 
   setTimeout(()=>{
+    if(tabId==='execsummary') renderPortfolioExecSummary();
     if(tabId==='scurve')   renderPortfolioSCurve();
     if(tabId==='trend')    renderPortfolioTrend();
     if(tabId==='risk')     renderPortfolioRiskMap();
@@ -6741,8 +6752,9 @@ function switchTab(tabId, projId) {
   if (tabId === 'ncr')      setTimeout(()=>renderNCRTable(projId), 50);
   if (tabId === 'docs')     setTimeout(()=>renderDocTable(projId), 50);
   if (tabId === 'resources') setTimeout(()=>renderResourceTable(projId), 50);
-  if (tabId === 'comments') setTimeout(()=>renderComments(projId), 50);
-  if (tabId === 'gantt')    setTimeout(()=>renderGanttFull(projId), 50);
+  if (tabId === 'comments')     setTimeout(()=>renderComments(projId), 50);
+  if (tabId === 'gantt')        setTimeout(()=>renderGanttFull(projId), 50);
+  if (tabId === 'execsummary')  setTimeout(()=>renderProjectExecSummary(projId), 50);
 }
 
 // ── TIER 1A: S-CURVE ──────────────────────────────────────────────────────────
@@ -7352,6 +7364,338 @@ window.addEventListener('load', () => {
     }
   }, 1000);
 });
+
+// ── EXECUTIVE SUMMARY RENDERER — PORTFOLIO ───────────────────────────────────
+function renderPortfolioExecSummary() {
+  const el = document.getElementById('ptab-execsummary');
+  if (!el) return;
+
+  const totalBac = PROJECTS.reduce((s,p)=>s+p.bac,0);
+  const totalAc  = PROJECTS.reduce((s,p)=>s+p.ac,0);
+  const totalEv  = PROJECTS.reduce((s,p)=>s+p.ev,0);
+  const totalPv  = PROJECTS.reduce((s,p)=>s+(p.pv||0),0);
+  const portSpi  = totalPv ? totalEv/totalPv : null;
+  const portCpi  = totalAc ? totalEv/totalAc : 0;
+  const portEac  = portCpi ? totalBac/portCpi : totalBac;
+  const portVac  = totalBac - portEac;
+  const portEtc  = portEac - totalAc;
+  const portTcpi = (totalBac-totalEv)&&(totalBac-totalAc) ? (totalBac-totalEv)/(totalBac-totalAc) : null;
+  const portAvgPlan   = PROJECTS.length ? Math.round(PROJECTS.reduce((s,p)=>s+(p.pct_plan||0),0)/PROJECTS.length) : 0;
+  const portAvgActual = PROJECTS.length ? Math.round(PROJECTS.reduce((s,p)=>s+(p.pct_actual||0),0)/PROJECTS.length) : 0;
+  const sv   = totalEv - totalPv;
+  const cv   = totalEv - totalAc;
+  const onTrack  = PROJECTS.filter(p=>p.rag==='green').length;
+  const atRisk   = PROJECTS.filter(p=>p.rag==='amber').length;
+  const critical = PROJECTS.filter(p=>p.rag==='red').length;
+  const totalNcr = PROJECTS.reduce((s,p)=>s+(p.ncrs_open||0),0);
+
+  // RAG colour helper
+  const kpiRag = (val, g, a) => val>=g?'#1E6B2E':val>=a?'#92400E':'#9B1C1C';
+  const kpiBg  = (val, g, a) => val>=g?'#E2EFDA':val>=a?'#FFF3CC':'#FFDCDC';
+
+  const story = portfolioStory(totalBac,totalPv,totalEv,totalAc,portSpi,portCpi,
+                                portEac,portTcpi,portAvgPlan,portAvgActual);
+
+  // Top issues — auto-ranked
+  const issues = [];
+  if (portCpi < 0.9)  issues.push({ n:'01', title:'Margin Erosion', color:'#9B1C1C', bg:'#FFDCDC',
+    body:`Current CPI of ${R(portCpi)} signals the portfolio is spending more than it is earning. Cost variance is ${NM(Math.round(cv))}. Immediate cost-code discipline and VO conversion required.`});
+  if (portSpi!==null && portSpi<0.9) issues.push({ n:'02', title:'Schedule Slippage', color:'#9B1C1C', bg:'#FFDCDC',
+    body:`Portfolio SPI of ${R(portSpi)} — only ${portAvgActual}% complete against ${portAvgPlan}% planned. Schedule variance is ${NM(Math.round(sv))}. ${critical} project(s) in critical status.`});
+  if (totalAc > 0 && (totalAc/totalBac) > 0.7 && portEac > totalBac) issues.push({ n:'03', title:'Cash Flow Risk', color:'#92400E', bg:'#FFF3CC',
+    body:`Portfolio EAC of ${NM(Math.round(portEac))} exceeds BAC of ${NM(totalBac)} — forecast overrun of ${NM(Math.round(Math.abs(portVac)))}. ETC of ${NM(Math.round(portEtc))} still required.`});
+  if (portTcpi && portTcpi > 1.1) issues.push({ n:'04', title:'Budget Recovery at Risk', color:'#92400E', bg:'#FFF3CC',
+    body:`TCPI of ${R(portTcpi)} means the portfolio must perform ${Math.round((portTcpi-1)*100)}% more efficiently than today to finish on budget. Rebaseline review recommended.`});
+  if (totalNcr > 0) issues.push({ n:'05', title:'Quality & Compliance', color:'#64748B', bg:'#F4F6F9',
+    body:`${totalNcr} open NCR(s) across the portfolio. Unresolved NCRs risk client relationship, milestone certification, and retention release.`});
+  while (issues.length < 5) {
+    const n = String(issues.length+1).padStart(2,'0');
+    issues.push({ n, title:'Resource Utilisation', color:'#64748B', bg:'#F4F6F9',
+      body:'Portfolio resource deployment requires monitoring. Ensure skills are matched to current project phase demands and that engineers are not double-deployed.'});
+  }
+
+  el.innerHTML = `
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #C0272D;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">Megawatts Nigeria Limited</div>
+        <div style="font-size:20px;font-weight:700;color:#0D1B3E;line-height:1.2;">PMO Portfolio Executive Summary</div>
+        <div style="font-size:12px;color:#8B9BB4;margin-top:4px;">Reporting Date: ${TODAY} &nbsp;·&nbsp; ${PROJECTS.length} Active Projects &nbsp;·&nbsp; BAC: ${NM(totalBac)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px;color:#8B9BB4;">PMO Lead</div>
+        <div style="font-size:13px;font-weight:600;color:#0D1B3E;">Toyib Salam Olanrewaju, PMP</div>
+      </div>
+    </div>
+
+    <!-- Situation -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">Portfolio Situation</div>
+      <p style="font-size:13px;color:#2D3748;line-height:1.7;margin:0;">${story}</p>
+    </div>
+
+    <!-- KPI Table -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Performance at a Glance</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#0D1B3E;color:#fff;">
+            <th style="padding:8px 12px;text-align:left;font-weight:600;">KPI</th>
+            <th style="padding:8px 12px;text-align:center;font-weight:600;">Current</th>
+            <th style="padding:8px 12px;text-align:center;font-weight:600;">Target</th>
+            <th style="padding:8px 12px;text-align:left;font-weight:600;">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${[
+            ['Gross Margin (CPI proxy)', R(portCpi), '≥ 1.000', portCpi>=1?'🟢 On budget':portCpi>=0.9?'🟡 At risk':'🔴 Critical'],
+            ['Schedule Performance (SPI)', portSpi===null?'—':R(portSpi), '≥ 1.000', portSpi===null?'⚪ No PV data':portSpi>=1?'🟢 On schedule':portSpi>=0.85?'🟡 At risk':'🔴 Critical'],
+            ['Avg % Complete (Planned)', portAvgPlan+'%', '—', '—'],
+            ['Avg % Complete (Actual)', portAvgActual+'%', '≥ Planned', portAvgActual>=portAvgPlan?'🟢 On/ahead':'🟡 Behind plan'],
+            ['Schedule Variance (SV)', NM(Math.round(sv)), '≥ 0', sv>=0?'🟢 Positive':'🔴 Negative'],
+            ['Cost Variance (CV)', NM(Math.round(cv)), '≥ 0', cv>=0?'🟢 Positive':'🔴 Negative'],
+            ['Estimate at Completion (EAC)', NM(Math.round(portEac)), NM(totalBac), portEac<=totalBac?'🟢 Within budget':'🔴 Overrun forecast'],
+            ['Variance at Completion (VAC)', NM(Math.round(portVac)), '> 0', portVac>=0?'🟢 Saving expected':'🔴 Overrun expected'],
+            ['Estimate to Complete (ETC)', NM(Math.round(portEtc)), '—', '—'],
+            ['To-Complete Perf. Index (TCPI)', portTcpi===null?'—':R(portTcpi), '≤ 1.100', portTcpi===null?'⚪':portTcpi<=1?'🟢 Achievable':portTcpi<=1.1?'🟡 Stretch':'🔴 Rebaseline'],
+          ].map(([kpi,cur,tgt,sts],i)=>`
+            <tr style="background:${i%2===0?'#F4F6F9':'#fff'};">
+              <td style="padding:7px 12px;color:#2D3748;font-weight:500;">${kpi}</td>
+              <td style="padding:7px 12px;text-align:center;font-weight:700;color:#0D1B3E;">${cur}</td>
+              <td style="padding:7px 12px;text-align:center;color:#8B9BB4;">${tgt}</td>
+              <td style="padding:7px 12px;color:#2D3748;">${sts}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Top 5 Issues -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Top 5 Critical Issues</div>
+      ${issues.slice(0,5).map(iss=>`
+        <div style="display:flex;gap:12px;padding:10px 12px;background:${iss.bg};border-radius:6px;margin-bottom:6px;border-left:3px solid ${iss.color};">
+          <div style="font-size:13px;font-weight:800;color:${iss.color};min-width:24px;">${iss.n}</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#0D1B3E;margin-bottom:2px;">${iss.title}</div>
+            <div style="font-size:11.5px;color:#4A5568;line-height:1.5;">${iss.body}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- Recovery Snapshot -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Recovery Recommendations</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#0D1B3E;color:#fff;">
+            <th style="padding:7px 12px;text-align:left;font-weight:600;width:22%">Workstream</th>
+            <th style="padding:7px 12px;text-align:left;font-weight:600;">Action</th>
+            <th style="padding:7px 12px;text-align:left;font-weight:600;width:22%">Target Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${[
+            ['Schedule Recovery','Triage delayed projects. Reset baselines. Fast-track parallel activities. Redeploy resources from ahead-of-schedule projects. SPI below 0.85 = same-day escalation.','50%+ slippage in 8 weeks'],
+            ['Margin Recovery','Convert VO pipeline within 5 days of instruction. WBS cost-code discipline. Frame procurement agreements (8–12% savings). Pay subs on certified progress only.','+8 to +12% gross margin'],
+            ['Cash Flow','Invoice same day as milestone. Receivables > 45 days → MD. Milestone-linked sub payments. 13-week rolling forecast weekly.','80%+ collection efficiency'],
+            ['Resource','Portfolio levelling redeploys engineers to critical-path. 2-week cross-training programme. Pre-qualified subs for demand gaps.','85% utilisation'],
+            ['PMO Governance','Controlling PMO. Daily/Weekly/Monthly reporting cadence. Live dashboard as single source of truth.','Full visibility from Day 1'],
+          ].map(([ws,action,tgt],i)=>`
+            <tr style="background:${i%2===0?'#F4F6F9':'#fff'};">
+              <td style="padding:7px 12px;font-weight:700;color:#0D1B3E;">${ws}</td>
+              <td style="padding:7px 12px;color:#4A5568;">${action}</td>
+              <td style="padding:7px 12px;font-weight:600;color:#1E6B2E;">${tgt}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Project RAG Summary -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Project Status Summary</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#0D1B3E;color:#fff;">
+            <th style="padding:7px 12px;text-align:left;font-weight:600;">Project</th>
+            <th style="padding:7px 12px;text-align:center;font-weight:600;">RAG</th>
+            <th style="padding:7px 12px;text-align:center;font-weight:600;">% Done</th>
+            <th style="padding:7px 12px;text-align:center;font-weight:600;">CPI</th>
+            <th style="padding:7px 12px;text-align:center;font-weight:600;">SPI</th>
+            <th style="padding:7px 12px;text-align:right;font-weight:600;">EAC</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${PROJECTS.map((p,i)=>{
+            const ep = evm(p);
+            const ragDot = p.rag==='green'?'🟢':p.rag==='amber'?'🟡':'🔴';
+            return `<tr style="background:${i%2===0?'#F4F6F9':'#fff'};">
+              <td style="padding:7px 12px;font-weight:600;color:#0D1B3E;">${p.id} — ${p.name}</td>
+              <td style="padding:7px 12px;text-align:center;">${ragDot}</td>
+              <td style="padding:7px 12px;text-align:center;">${p.pct_actual||0}%</td>
+              <td style="padding:7px 12px;text-align:center;font-weight:600;color:${ep.cpi>=1?'#1E6B2E':ep.cpi<0.9?'#9B1C1C':'#92400E'}">${R(ep.cpi)}</td>
+              <td style="padding:7px 12px;text-align:center;font-weight:600;color:${ep.spi===null?'#8B9BB4':ep.spi>=1?'#1E6B2E':ep.spi<0.85?'#9B1C1C':'#92400E'}">${ep.spi===null?'—':R(ep.spi)}</td>
+              <td style="padding:7px 12px;text-align:right;">${NM(Math.round(ep.eac))}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Conclusion -->
+    <div style="background:#F0F4FF;border-left:4px solid #0D1B3E;border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:700;color:#0D1B3E;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;">Business Decision</div>
+      <p style="font-size:12.5px;color:#2D3748;line-height:1.7;margin:0;">
+        The portfolio does not need new contracts to return to health — it needs PMO discipline applied consistently
+        to work already won and already invoiced. The margin gap, outstanding receivables, and VO pipeline represent
+        value already earned but not yet captured. All recovery targets are achievable within 90 days through better
+        utilisation of what is already in place.
+        <em>The money is in the portfolio. The framework to capture it is here.</em>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top:1px solid #E2E8F0;padding-top:8px;text-align:center;font-size:11px;color:#8B9BB4;">
+      Toyib Salam Olanrewaju, PMP &nbsp;|&nbsp; PMO Engineer Assessment &nbsp;|&nbsp; Megawatts Nigeria Limited &nbsp;|&nbsp; ${TODAY}
+    </div>`;
+}
+
+// ── EXECUTIVE SUMMARY RENDERER — INDIVIDUAL PROJECT ───────────────────────────
+function renderProjectExecSummary(projId) {
+  const el = document.getElementById('tab-execsummary');
+  if (!el) return;
+  const p = PROJECTS.find(x => x.id === projId);
+  if (!p) return;
+  const e = evm(p);
+  const story = evmStory(p, e);
+  const pctBehind = (p.pct_plan||0) - (p.pct_actual||0);
+  const ragDot  = p.rag==='green'?'🟢 On Track':p.rag==='amber'?'🟡 At Risk':'🔴 Critical';
+  const ragCol  = p.rag==='green'?'#1E6B2E':p.rag==='amber'?'#92400E':'#9B1C1C';
+  const ragBg   = p.rag==='green'?'#E2EFDA':p.rag==='amber'?'#FFF3CC':'#FFDCDC';
+
+  // Auto-generate top issues for this project
+  const issues = [];
+  if (e.cpi < 0.9) issues.push({ n:'01', title:'Cost Overrun', color:'#9B1C1C', bg:'#FFDCDC',
+    body:`CPI of ${R(e.cpi)} — ${NM(Math.round(Math.abs(e.cv)))} more spent than value earned. EAC is ${NM(Math.round(e.eac))} against BAC of ${NM(p.bac)}.`});
+  if (e.spi !== null && e.spi < 0.9) issues.push({ n:'02', title:'Schedule Behind Plan', color:'#9B1C1C', bg:'#FFDCDC',
+    body:`SPI of ${R(e.spi)} — ${p.pct_actual}% complete vs ${p.pct_plan||0}% planned. ${pctBehind > 0 ? pctBehind+'% pts behind schedule.' : ''} Schedule variance: ${NM(Math.round(e.sv))}.`});
+  if (e.vac < 0) issues.push({ n:'03', title:'Forecast Overrun', color:'#92400E', bg:'#FFF3CC',
+    body:`Project forecast to overrun by ${NM(Math.round(Math.abs(e.vac)))}. ETC of ${NM(Math.round(e.etc))} still required to complete.`});
+  if (e.tcpi && e.tcpi > 1.1) issues.push({ n:'04', title:'Budget Recovery Risk', color:'#92400E', bg:'#FFF3CC',
+    body:`TCPI of ${R(e.tcpi)} requires ${Math.round((e.tcpi-1)*100)}% more efficiency than current CPI of ${R(e.cpi)}. Consider rebaselining.`});
+  if (p.ncrs_open > 0) issues.push({ n:'05', title:'Open NCRs', color:'#64748B', bg:'#F4F6F9',
+    body:`${p.ncrs_open} open NCR(s) on this project. Unresolved NCRs may delay milestone certification and retention release.`});
+  if (issues.length === 0) issues.push({ n:'01', title:'No Critical Issues', color:'#1E6B2E', bg:'#E2EFDA',
+    body:'This project is performing well across all EVM metrics. Maintain current controls and keep monitoring lead indicators.'});
+
+  el.innerHTML = `
+    <!-- Header -->
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #C0272D;">
+      <div>
+        <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;">${p.id} &nbsp;·&nbsp; ${p.type} &nbsp;·&nbsp; ${p.client}</div>
+        <div style="font-size:20px;font-weight:700;color:#0D1B3E;line-height:1.2;">${p.fullname}</div>
+        <div style="font-size:12px;color:#8B9BB4;margin-top:4px;">PM: ${p.pm} &nbsp;·&nbsp; ${p.start} → ${p.end} &nbsp;·&nbsp; BAC: ${NM(p.bac)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="display:inline-block;padding:5px 14px;background:${ragBg};color:${ragCol};
+          border-radius:20px;font-size:12px;font-weight:700;">${ragDot}</div>
+        <div style="font-size:11px;color:#8B9BB4;margin-top:6px;">${TODAY}</div>
+      </div>
+    </div>
+
+    <!-- Situation -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;">Project Situation</div>
+      <p style="font-size:13px;color:#2D3748;line-height:1.7;margin:0;">${story}</p>
+    </div>
+
+    <!-- KPI Table -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Performance Metrics</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:#0D1B3E;color:#fff;">
+            <th style="padding:7px 12px;text-align:left;font-weight:600;">Metric</th>
+            <th style="padding:7px 12px;text-align:center;font-weight:600;">Value</th>
+            <th style="padding:7px 12px;text-align:left;font-weight:600;">Interpretation</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${[
+            ['BAC — Budget at Completion', NM(p.bac), 'Original approved budget'],
+            ['PV — Planned Value', NM(p.pv||0), 'Budgeted cost of work scheduled to date'],
+            ['EV — Earned Value', NM(p.ev), 'Budgeted cost of work actually completed'],
+            ['AC — Actual Cost', NM(p.ac), 'Actual money spent to date'],
+            ['% Complete (Planned)', (p.pct_plan||0)+'%', 'What the baseline says should be done today'],
+            ['% Complete (Actual)', (p.pct_actual||0)+'%', pctBehind>0?`Behind plan by ${pctBehind}% pts`:'On or ahead of plan'],
+            ['SPI — Schedule Performance', e.spi===null?'—':R(e.spi), e.spi===null?'Add task dates to WBS Tracker':e.spi>=1?'Ahead of / on schedule':e.spi<0.85?'Critical — escalate now':'Behind schedule — monitor'],
+            ['CPI — Cost Performance', R(e.cpi), e.cpi>=1?'Earning more than spending — under budget':e.cpi<0.9?'Critical overrun — cost audit required':'Spending slightly ahead of value'],
+            ['SV — Schedule Variance', NM(Math.round(e.sv)), e.sv>=0?'Ahead of schedule in value terms':'Behind schedule in value terms'],
+            ['CV — Cost Variance', NM(Math.round(e.cv)), e.cv>=0?'Under budget in value terms':'Over budget in value terms'],
+            ['EAC — Estimate at Completion', NM(Math.round(e.eac)), `Forecast final cost at current CPI`],
+            ['VAC — Variance at Completion', (e.vac>=0?'+':'')+NM(Math.round(e.vac)), e.vac>=0?'Expected saving at completion':'Expected overrun at completion'],
+            ['ETC — Estimate to Complete', NM(Math.round(e.etc)), 'Additional spend required to finish'],
+            ['TCPI — To-Complete Perf. Index', e.tcpi===null?'—':R(e.tcpi), e.tcpi===null?'Insufficient data':e.tcpi<=1?'Budget recovery achievable at current pace':e.tcpi<=1.1?'Stretch — tighten cost controls now':e.tcpi>1.2?'Original budget unachievable — rebaseline':'Very difficult to recover'],
+          ].map(([metric,val,interp],i)=>`
+            <tr style="background:${i%2===0?'#F4F6F9':'#fff'};">
+              <td style="padding:7px 12px;font-weight:500;color:#2D3748;">${metric}</td>
+              <td style="padding:7px 12px;text-align:center;font-weight:700;color:#0D1B3E;">${val}</td>
+              <td style="padding:7px 12px;color:#4A5568;">${interp}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Issues -->
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Key Issues & Risks</div>
+      ${issues.map(iss=>`
+        <div style="display:flex;gap:12px;padding:10px 12px;background:${iss.bg};border-radius:6px;margin-bottom:6px;border-left:3px solid ${iss.color};">
+          <div style="font-size:13px;font-weight:800;color:${iss.color};min-width:24px;">${iss.n}</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:#0D1B3E;margin-bottom:2px;">${iss.title}</div>
+            <div style="font-size:11.5px;color:#4A5568;line-height:1.5;">${iss.body}</div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- Milestone Summary -->
+    ${(p.milestones||[]).length ? `
+    <div style="margin-bottom:18px;">
+      <div style="font-size:10px;font-weight:700;color:#C0272D;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;">Milestone Status</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#0D1B3E;color:#fff;">
+          <th style="padding:7px 12px;text-align:left;font-weight:600;">Milestone</th>
+          <th style="padding:7px 12px;text-align:center;font-weight:600;">Planned Date</th>
+          <th style="padding:7px 12px;text-align:center;font-weight:600;">Progress</th>
+          <th style="padding:7px 12px;text-align:left;font-weight:600;">Status</th>
+        </tr></thead>
+        <tbody>
+          ${p.milestones.map((m,i)=>`
+            <tr style="background:${i%2===0?'#F4F6F9':'#fff'};">
+              <td style="padding:7px 12px;font-weight:500;color:#2D3748;">${m.name}</td>
+              <td style="padding:7px 12px;text-align:center;color:#8B9BB4;">${m.date||'—'}</td>
+              <td style="padding:7px 12px;text-align:center;font-weight:700;color:#0D1B3E;">${Math.round((m.pct||0)*100)}%</td>
+              <td style="padding:7px 12px;color:${(m.pct||0)>=1?'#1E6B2E':(m.pct||0)>0?'#92400E':'#8B9BB4'}">${(m.pct||0)>=1?'✅ Complete':(m.pct||0)>0?'🔄 In Progress':'⏳ Not Started'}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>` : ''}
+
+    <!-- Conclusion -->
+    <div style="background:#F0F4FF;border-left:4px solid #0D1B3E;border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:16px;">
+      <div style="font-size:10px;font-weight:700;color:#0D1B3E;letter-spacing:.06em;text-transform:uppercase;margin-bottom:5px;">PMO Assessment</div>
+      <p style="font-size:12.5px;color:#2D3748;line-height:1.7;margin:0;">${
+        e.cpi >= 1 && (e.spi===null||e.spi>=1)
+          ? `${p.name} is performing well against plan. Maintain current controls, continue milestone tracking, and ensure all variation orders are submitted within 5 days of client instruction.`
+          : `${p.name} requires structured intervention. Priority actions: ${e.cpi<0.9?'cost audit and spend controls;':''} ${e.spi!==null&&e.spi<0.85?'schedule recovery plan and resource redeployment;':''} ${e.tcpi&&e.tcpi>1.1?'rebaseline conversation with client.':''} PMO review recommended at next bi-weekly Director meeting.`
+      }</p>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top:1px solid #E2E8F0;padding-top:8px;text-align:center;font-size:11px;color:#8B9BB4;">
+      Toyib Salam Olanrewaju, PMP &nbsp;|&nbsp; PMO Engineer &nbsp;|&nbsp; Megawatts Nigeria Limited &nbsp;|&nbsp; ${TODAY}
+    </div>`;
+}
 
 // ── WBS PROGRESS UPDATES SYSTEM ─────────────────────────────────────────────
 
