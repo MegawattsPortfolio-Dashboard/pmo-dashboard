@@ -678,7 +678,11 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator:hover{opacity:1
     <button id="ceo-report-btn" onclick="generateCEOReport()" style="padding:7px 14px;background:#1E6B2E;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:none;" title="Generate CEO Executive Report (5 slides)">📊 CEO Report</button>
     <button id="pmo-report-btn" onclick="generatePMOReport()" style="padding:7px 14px;background:#185FA5;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:none;" title="Generate Head of PMO Detailed Report">📋 PMO Report</button>
     <button id="client-report-btn" onclick="generateClientReport()" style="padding:7px 14px;background:#0D7377;border:none;border-radius:6px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:none;" title="Generate Client Progress Report">📨 Client Report</button>
-    <button class="topbar-admin-btn" id="admin-login-btn" onclick="openLogin()">🔐 Admin Login</button>
+    <span id="guest-badge" style="font-size:11px;padding:4px 12px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);border-radius:6px;color:rgba(255,255,255,.7);">
+  👁 View Only — <a onclick="openLogin()" style="color:#C9901A;cursor:pointer;text-decoration:underline">Admin Login</a>
+</span>
+<button class="topbar-admin-btn" id="admin-login-btn" onclick="openLogin()" style="display:none">🔐 Admin Login</button>
   </div>
 </div>
 
@@ -6760,6 +6764,7 @@ function onPeriodChange(projId, val) {
 
 // ── FIREBASE AUTH & DATABASE ─────────────────────────────────────────────────
 let _isAdmin = false;
+let _isGuest = true;  // Everyone is a guest by default — can view, cannot edit
 let _currentUser = null;
 
 function openLogin() {
@@ -6792,6 +6797,7 @@ function doLogin() {
     .then(cred => {
       _currentUser = cred.user;
       _isAdmin = true;
+      _isGuest = false;
       closeLogin();
       onAdminLoggedIn();
     })
@@ -6806,15 +6812,19 @@ function doLogin() {
 function doLogout() {
   const { signOut } = window._fbFns;
   signOut(window._fbAuth).then(() => {
-    _isAdmin = false; _currentUser = null;
+    _isAdmin = false; _isGuest = true; _currentUser = null;
     document.getElementById('admin-bar').classList.remove('visible');
-    document.getElementById('admin-login-btn').style.display = '';
+    document.getElementById('admin-login-btn').style.display = 'none';
+    const gb = document.getElementById('guest-badge');
+    if (gb) gb.style.display = '';
 
     // Hide admin-only controls
     const addBtn  = document.getElementById('add-proj-btn');
     const saveBtn = document.getElementById('save-local-btn');
     if (addBtn)  addBtn.style.display  = 'none';
     if (saveBtn) saveBtn.style.display = 'none';
+    // Restore sidebar to guest view
+    buildSidebar();
 
     // Hide all edit buttons
     document.querySelectorAll('.edit-proj-btn').forEach(btn => btn.style.display = 'none');
@@ -6828,6 +6838,8 @@ function doLogout() {
 function onAdminLoggedIn() {
   document.getElementById('admin-bar').classList.add('visible');
   document.getElementById('admin-login-btn').style.display = 'none';
+  const gb = document.getElementById('guest-badge');
+  if (gb) gb.style.display = 'none';
 
   // Show admin-only controls
   const addBtn      = document.getElementById('add-proj-btn');
@@ -7089,7 +7101,7 @@ window.addEventListener('load', () => {
       const { onAuthStateChanged } = window._fbFns;
       onAuthStateChanged(window._fbAuth, user => {
         if (user) {
-          _currentUser = user; _isAdmin = true;
+          _currentUser = user; _isAdmin = true; _isGuest = false;
           onAdminLoggedIn();
         }
       });
@@ -7447,6 +7459,9 @@ function acceptTaskPct(projId, taskIdx, sugPct) {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
+// Load Firebase data for guests — so visitors can view the full portfolio
+// without logging in. _isGuest = true prevents any write operations.
+loadFromFirebase().catch(() => {});
 buildSidebar();
 renderMain();
 
