@@ -1,397 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Megawatts Nigeria — Project Live Status</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>MEGAWATTS PMO – Portfolio Analysis</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:#F0F4F8;color:#2D3748;min-height:100vh;}
-
-/* ── TOPBAR ── */
-.topbar{background:#0D7377;padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.15);}
-.topbar-brand{display:flex;flex-direction:column;}
-.topbar-company{font-size:13px;font-weight:700;color:#fff;letter-spacing:.04em;}
-.topbar-sub{font-size:11px;color:rgba(255,255,255,.7);}
-.topbar-right{display:flex;align-items:center;gap:12px;}
-.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.15);padding:5px 12px;border-radius:20px;font-size:11px;color:#fff;font-weight:600;}
-.live-dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;animation:pulse 2s infinite;}
-@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
-.topbar-date{font-size:11px;color:rgba(255,255,255,.7);}
-
-/* ── PROJECT SELECTOR ── */
-.proj-selector{background:#fff;border-bottom:1px solid #E2E8F0;padding:10px 20px;display:flex;align-items:center;gap:12px;overflow-x:auto;}
-.proj-btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:2px solid #E2E8F0;background:#fff;color:#4A5568;white-space:nowrap;transition:all .15s;}
-.proj-btn.active{background:#0D7377;color:#fff;border-color:#0D7377;}
-.proj-btn:hover:not(.active){border-color:#0D7377;color:#0D7377;}
-
-/* ── MAIN ── */
-.main{max-width:1100px;margin:0 auto;padding:20px 16px;}
-
-/* ── PROJECT HEADER ── */
-.proj-header{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.proj-header-top{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;}
-.proj-id{font-size:11px;font-weight:700;color:#0D7377;letter-spacing:.05em;text-transform:uppercase;}
-.proj-title{font-size:22px;font-weight:700;color:#0D1B3E;margin:4px 0;}
-.proj-meta{font-size:13px;color:#8B9BB4;}
-.rag-pill{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.04em;}
-.rag-green{background:#E2EFDA;color:#1E6B2E;}
-.rag-amber{background:#FFF3CC;color:#92400E;}
-.rag-red{background:#FFDCDC;color:#9B1C1C;}
-.rag-complete{background:#DDEEFF;color:#185FA5;}
-
-/* ── PROGRESS BAR ── */
-.progress-section{margin-top:16px;}
-.progress-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;}
-.progress-label-left{font-weight:600;color:#0D1B3E;}
-.progress-label-right{color:#8B9BB4;}
-.progress-track{height:12px;background:#EEF2F8;border-radius:6px;overflow:hidden;}
-.progress-fill{height:100%;border-radius:6px;transition:width .6s ease;}
-
-/* ── KPI TILES ── */
-.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px;}
-.kpi-tile{background:#fff;border-radius:10px;padding:14px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.kpi-tile-label{font-size:11px;font-weight:600;color:#8B9BB4;text-transform:uppercase;letter-spacing:.05em;}
-.kpi-tile-val{font-size:22px;font-weight:700;color:#0D1B3E;margin-top:4px;}
-.kpi-tile-sub{font-size:11px;color:#8B9BB4;margin-top:2px;}
-
-/* ── SECTION CARDS ── */
-.section-card{background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
-.section-title{font-size:13px;font-weight:700;color:#0D1B3E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.section-title::after{content:"";flex:1;height:1px;background:#EEF2F8;}
-
-/* ── MILESTONE LIST ── */
-.milestone-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F4F6F9;}
-.milestone-item:last-child{border-bottom:none;}
-.ms-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
-.ms-icon-complete{background:#E2EFDA;}
-.ms-icon-inprog{background:#FFF3CC;}
-.ms-icon-pending{background:#F4F6F9;}
-.ms-icon-outstanding{background:#FFDCDC;}
-.ms-info{flex:1;}
-.ms-name{font-size:13px;font-weight:600;color:#0D1B3E;}
-.ms-date{font-size:11px;color:#8B9BB4;margin-top:2px;}
-.ms-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;white-space:nowrap;}
-.ms-status-complete{background:#E2EFDA;color:#1E6B2E;}
-.ms-status-inprog{background:#FFF3CC;color:#92400E;}
-.ms-status-pending{background:#F4F6F9;color:#8B9BB4;}
-.ms-status-outstanding{background:#FFDCDC;color:#9B1C1C;}
-.ms-pct{font-size:12px;font-weight:700;color:#0D1B3E;width:36px;text-align:right;}
-
-/* ── TASKS ── */
-.task-item{padding:10px 0;border-bottom:1px solid #F4F6F9;}
-.task-item:last-child{border-bottom:none;}
-.task-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
-.task-name{font-size:13px;font-weight:500;color:#2D3748;}
-.task-pct{font-size:12px;font-weight:700;}
-.task-bar-track{height:6px;background:#EEF2F8;border-radius:3px;overflow:hidden;}
-.task-bar-fill{height:100%;border-radius:3px;}
-
-/* ── UPDATE LOG ── */
-.update-item{padding:12px;background:#F9FAFC;border-radius:8px;margin-bottom:8px;border-left:3px solid #0D7377;}
-.update-meta{font-size:11px;color:#8B9BB4;margin-bottom:4px;}
-.update-text{font-size:13px;color:#2D3748;line-height:1.5;}
-
-/* ── FOOTER ── */
-.footer{text-align:center;padding:24px 16px;font-size:11px;color:#8B9BB4;}
-.footer strong{color:#0D7377;}
-
-/* ── LOADING / ERROR ── */
-.loading{text-align:center;padding:60px 20px;}
-.loading-spinner{width:40px;height:40px;border:3px solid #EEF2F8;border-top-color:#0D7377;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.error-box{background:#FFDCDC;border-radius:10px;padding:20px;text-align:center;color:#9B1C1C;margin:40px auto;max-width:400px;}
-
-/* ── RESPONSIVE ── */
-@media(max-width:600px){
-  .main{padding:12px 10px;}
-  .proj-title{font-size:18px;}
-  .kpi-tile-val{font-size:18px;}
-}
-</style>
-</head>
-<body>
-
-<div class="topbar">
-  <div class="topbar-brand">
-    <div class="topbar-company">Megawatts Nigeria Limited</div>
-    <div class="topbar-sub">Live Project Status Portal</div>
-  </div>
-  <div class="topbar-right">
-    <div class="live-badge"><span class="live-dot"></span>LIVE</div>
-    <div class="topbar-date" id="portal-date"></div>
-  </div>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2430;--mu:#647084;--bd:#e2e6ec;--g:#1a9d5c;--a:#e0a100;--r:#d64545;--b:#2f6fdd;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161c;--card:#1b212a;--tx:#e8ecf2;--mu:#93a0b3;--bd:#2b3441}}
+:root[data-theme="dark"]{--bg:#12161c;--card:#1b212a;--tx:#e8ecf2;--mu:#93a0b3;--bd:#2b3441}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.5 Arial,Helvetica,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 40px}h1{font-size:22px;margin:0}h2{font-size:15px;margin:0 0 4px}
+.sub{color:var(--mu);font-size:12px;margin:2px 0 16px}
+.k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px 14px}
+.k .c b{display:block;font-size:22px}.k .c span{color:var(--mu);font-size:11px;text-transform:uppercase;letter-spacing:.04em}.k .c i{font-style:normal;font-size:11px;color:var(--mu)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px;margin-bottom:12px}
+.w{position:relative;height:270px}.note{color:var(--mu);font-size:12px;margin:0 0 8px}
+ul{margin:6px 0 0;padding-left:18px}li{margin:3px 0}
+.sc{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}
+th,td{padding:5px 8px;border-bottom:1px solid var(--bd);text-align:right}th:nth-child(-n+3),td:nth-child(-n+3){text-align:left}th{color:var(--mu);font-weight:600}
+.p{padding:1px 8px;border-radius:9px;color:#fff;font-size:11px}.Green,.GREEN,.Yes{background:var(--g)}.Amber,.AMBER,.Partial{background:var(--a)}.Red,.RED,.No{background:var(--r)}
+.hm td{padding:3px;text-align:center}.hm td span{display:block;width:22px;height:16px;border-radius:3px;margin:auto}
+.bad{color:var(--r);font-weight:700}.ok{color:var(--g);font-weight:700}
+</style></head><body><main>
+<h1>MEGAWATTS PMO — Portfolio Analysis</h1>
+<p class="sub">20 projects · cut-off 31-Aug-2026 · values in ₦ (currency assumed; not stated in the file) · source: Megawatts_Master_Project_Portfolio_Register_UPDATED_.xlsx (marked illustrative / test data)</p>
+<div class="k" id="kpi"></div>
+<div class="c" style="margin-bottom:12px"><h2>Key findings</h2><ul id="ins"></ul></div>
+<div class="grid">
+<div class="c"><h2>Schedule vs cost performance (SPI × CPI)</h2><p class="note">Bubble size = BAC. Top-right = ahead and under budget.</p><div class="w"><canvas id="c1"></canvas></div></div>
+<div class="c"><h2>Variance at completion by project (₦m)</h2><p class="note">BAC − EAC (CPI-based). Negative = forecast overrun.</p><div class="w"><canvas id="c2"></canvas></div></div>
+<div class="c"><h2>PV vs EV vs AC by project (₦m)</h2><p class="note">Planned, earned and actual cost at cut-off.</p><div class="w"><canvas id="c3"></canvas></div></div>
+<div class="c"><h2>Planned vs actual progress</h2><p class="note">Percent complete at cut-off.</p><div class="w"><canvas id="c4"></canvas></div></div>
+<div class="c"><h2>Contract value: initial + variations (₦m)</h2><p class="note">Variation growth is concentrated in a handful of awards.</p><div class="w"><canvas id="c5"></canvas></div></div>
+<div class="c"><h2>Reported RAG vs EVM health</h2><p class="note">Number of projects in each status.</p><div class="w"><canvas id="c6"></canvas></div></div>
+<div class="c"><h2>SPI / CPI by discipline</h2><p class="note">Cost-weighted (ΣEV/ΣPV, ΣEV/ΣAC).</p><div class="w"><canvas id="c7"></canvas></div></div>
+<div class="c"><h2>Health assessment: red / amber / green by dimension</h2><p class="note">From the new Project Health Assessment sheet (20 projects).</p><div class="w"><canvas id="c9"></canvas></div></div>
+<div class="c"><h2>Open RFIs, NCRs and variations</h2><p class="note">Workload of unresolved items per project.</p><div class="w"><canvas id="c8"></canvas></div></div>
 </div>
-
-<div class="proj-selector" id="proj-selector" style="display:none"></div>
-
-<div class="main" id="portal-main">
-  <div class="loading">
-    <div class="loading-spinner"></div>
-    <div style="font-size:14px;color:#8B9BB4">Loading project data...</div>
-  </div>
-</div>
-
-<div class="footer">
-  <strong>Megawatts Nigeria Limited</strong> &nbsp;·&nbsp; PMO Portfolio System &nbsp;·&nbsp;
-  Data updates in real time &nbsp;·&nbsp; PMO Lead: Toyib Salam Olanrewaju, PMP
-</div>
-
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, doc, getDoc, onSnapshot }
-    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDRfBRxxHbzRYXK8t3l8utsFDCyLTO-JbE",
-    authDomain: "megawatts-pmo.firebaseapp.com",
-    projectId: "megawatts-pmo",
-    storageBucket: "megawatts-pmo.firebasestorage.app",
-    messagingSenderId: "671522879332",
-    appId: "1:671522879332:web:9d9e082978a49b974aac71"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db  = getFirestore(app);
-
-  // ── Read URL parameters ──────────────────────────────────────────────────
-  const params   = new URLSearchParams(window.location.search);
-  const projParam = params.get('project'); // e.g. ?project=PRJ-001
-  const clientKey = params.get('key');     // optional security key
-
-  // ── Update date ──────────────────────────────────────────────────────────
-  document.getElementById('portal-date').textContent =
-    new Date().toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short',year:'numeric'});
-
-  // ── Load projects from Firebase ──────────────────────────────────────────
-  let _projects = [];
-  let _activeId = projParam || null;
-
-  async function loadProjects() {
-    try {
-      const snap = await getDocs(collection(db, 'projects'));
-      _projects = [];
-      snap.forEach(d => {
-        const p = d.data();
-        // Restore arrays
-        if (Array.isArray(p.milestones)) p.milestones = p.milestones.map(m=>
-          Array.isArray(m)?m:{...m});
-        if (Array.isArray(p.risks)) p.risks = p.risks.map(r=>
-          Array.isArray(r)?r:{...r});
-        _projects.push(p);
-      });
-      _projects.sort((a,b)=>a.id.localeCompare(b.id));
-
-      // Filter to specific project if URL param set
-      const displayProjects = projParam
-        ? _projects.filter(p=>p.id===projParam)
-        : _projects.filter(p=>p.rag!=='complete');
-
-      if (!displayProjects.length) {
-        document.getElementById('portal-main').innerHTML =
-          '<div class="error-box">Project not found. Please check the link provided to you.</div>';
-        return;
-      }
-
-      if (!_activeId) _activeId = displayProjects[0].id;
-
-      buildSelector(displayProjects);
-      renderProject(_activeId);
-      setupRealtimeListener();
-
-    } catch(err) {
-      document.getElementById('portal-main').innerHTML =
-        '<div class="error-box">Unable to load project data. Please try again later.<br><small>'+err.message+'</small></div>';
-    }
-  }
-
-  function buildSelector(projects) {
-    if (projects.length <= 1) return; // hide selector if only one project
-    const sel = document.getElementById('proj-selector');
-    sel.style.display = 'flex';
-    sel.innerHTML = projects.map(p=>
-      `<button class="proj-btn${p.id===_activeId?' active':''}"
-         onclick="window._switchProject('${p.id}')">${p.id} — ${p.name}</button>`
-    ).join('');
-  }
-
-  window._switchProject = function(id) {
-    _activeId = id;
-    document.querySelectorAll('.proj-btn').forEach(b=>{
-      b.classList.toggle('active', b.textContent.startsWith(id));
-    });
-    renderProject(id);
-  };
-
-  function renderProject(projId) {
-    const p = _projects.find(x=>x.id===projId);
-    if (!p) return;
-
-    const pct    = p.pct_actual||0;
-    const ragClass = p.rag==='green'?'rag-green':p.rag==='red'?'rag-red':p.rag==='amber'?'rag-amber':'rag-complete';
-    const ragLabel = p.rag==='green'?'On Track':p.rag==='red'?'Needs Attention':p.rag==='amber'?'Under Review':'Completed';
-    const ragColor = p.rag==='green'?'#1E6B2E':p.rag==='red'?'#9B1C1C':p.rag==='amber'?'#C9901A':'#185FA5';
-    const planPct  = p.pct_plan||pct;
-
-    // Milestones
-    const ms = (p.milestones||[]);
-    const msComplete = ms.filter(m=>{const mp=Array.isArray(m)?m[4]:m.pct; return mp===1;}).length;
-    const msTotal    = ms.length;
-
-    // WBS tasks
-    const tasks = (p.wbsTasks||[]);
-    const tasksDone = tasks.filter(t=>(t.pct||0)>=1).length;
-
-    // Update log
-    const updates = (p.updateLog||[]).slice().reverse().slice(0,3);
-
-    const html = `
-      <!-- Project Header -->
-      <div class="proj-header">
-        <div class="proj-header-top">
-          <div>
-            <div class="proj-id">${p.id} &nbsp;·&nbsp; ${p.type}</div>
-            <div class="proj-title">${p.fullname}</div>
-            <div class="proj-meta">Client: ${p.client} &nbsp;·&nbsp; PM: ${p.pm||'TBC'} &nbsp;·&nbsp; ${p.start||'TBC'} → ${p.end||'TBC'}</div>
-          </div>
-          <span class="rag-pill ${ragClass}">${ragLabel}</span>
-        </div>
-        <div class="progress-section">
-          <div class="progress-label">
-            <span class="progress-label-left">Overall Completion</span>
-            <span class="progress-label-right">Planned: ${planPct}% &nbsp;·&nbsp; Actual: ${pct}%</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" style="width:${pct}%;background:${ragColor}"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- KPI Tiles -->
-      <div class="kpi-row">
-        <div class="kpi-tile">
-          <div class="kpi-tile-label">Contract Value</div>
-          <div class="kpi-tile-val">₦${Math.round((p.contract||p.bac||0)/1e6)}M</div>
-          <div class="kpi-tile-sub">Approved contract</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile-label">% Complete</div>
-          <div class="kpi-tile-val" style="color:${ragColor}">${pct}%</div>
-          <div class="kpi-tile-sub">Plan: ${planPct}%</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile-label">Milestones</div>
-          <div class="kpi-tile-val">${msComplete}/${msTotal}</div>
-          <div class="kpi-tile-sub">Achieved of total</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile-label">HSE Performance</div>
-          <div class="kpi-tile-val" style="color:${(p.hse||1)>=0.95?'#1E6B2E':'#C9901A'}">${Math.round((p.hse||1)*100)}%</div>
-          <div class="kpi-tile-sub">LTI: ${p.lti||0}</div>
-        </div>
-        <div class="kpi-tile">
-          <div class="kpi-tile-label">Programme</div>
-          <div class="kpi-tile-val" style="color:${ragColor}">${ragLabel}</div>
-          <div class="kpi-tile-sub">Current status</div>
-        </div>
-      </div>
-
-      <!-- Milestone Tracker -->
-      <div class="section-card">
-        <div class="section-title">📅 Milestone Tracker</div>
-        ${ms.length ? ms.map(m=>{
-          const ref     = Array.isArray(m)?m[0]:m.ref;
-          const name    = Array.isArray(m)?m[1]:m.name;
-          const planned = Array.isArray(m)?m[2]:m.planned;
-          const actual  = Array.isArray(m)?m[3]:m.actual;
-          const mpct    = Array.isArray(m)?m[4]:m.pct;
-          const isComp  = mpct===1;
-          const isOut   = actual==='OUTSTANDING';
-          const isInProg= mpct>0&&mpct<1;
-          const icon    = isComp?'✅':isOut?'⚠️':isInProg?'🔄':'⏳';
-          const iconClass= isComp?'ms-icon-complete':isOut?'ms-icon-outstanding':isInProg?'ms-icon-inprog':'ms-icon-pending';
-          const statusClass= isComp?'ms-status-complete':isOut?'ms-status-outstanding':isInProg?'ms-status-inprog':'ms-status-pending';
-          const statusLabel= isComp?'Complete':isOut?'Outstanding':isInProg?'In Progress':'Pending';
-          const dateLabel= isComp&&actual&&actual!=='OUTSTANDING'
-            ? 'Achieved: '+actual
-            : 'Planned: '+(planned||'TBC');
-          return `<div class="milestone-item">
-            <div class="ms-icon ${iconClass}">${icon}</div>
-            <div class="ms-info">
-              <div class="ms-name">${name}</div>
-              <div class="ms-date">${dateLabel}</div>
-            </div>
-            <span class="ms-status ${statusClass}">${statusLabel}</span>
-            <div class="ms-pct">${Math.round((mpct||0)*100)}%</div>
-          </div>`;
-        }).join('') : '<div style="color:#8B9BB4;font-size:13px">No milestones recorded yet.</div>'}
-      </div>
-
-      <!-- Tasks Executed -->
-      ${tasks.length ? `<div class="section-card">
-        <div class="section-title">🔨 Tasks Executed</div>
-        ${tasks.filter(t=>(t.pct||0)>0).slice(0,10).map(t=>{
-          const pctVal = Math.round((t.pct||0)*100);
-          const isComp = pctVal>=100;
-          const col    = isComp?'#1E6B2E':pctVal>50?'#0D7377':'#C9901A';
-          return `<div class="task-item">
-            <div class="task-header">
-              <span class="task-name">${t.code?t.code+' — ':''}${t.name}</span>
-              <span class="task-pct" style="color:${col}">${pctVal}%</span>
-            </div>
-            <div class="task-bar-track">
-              <div class="task-bar-fill" style="width:${pctVal}%;background:${col}"></div>
-            </div>
-          </div>`;
-        }).join('')}
-        ${tasks.filter(t=>(t.pct||0)>0).length>10?`<div style="font-size:12px;color:#8B9BB4;margin-top:8px">+${tasks.filter(t=>(t.pct||0)>0).length-10} more tasks in progress</div>`:''}
-      </div>` : ''}
-
-      <!-- Recent Site Updates -->
-      ${updates.length ? `<div class="section-card">
-        <div class="section-title">📋 Recent Site Updates</div>
-        ${updates.map(u=>`
-          <div class="update-item">
-            <div class="update-meta">${u.date||''} &nbsp;·&nbsp; ${u.period||''} ${u.by?'· '+u.by:''}</div>
-            <div class="update-text">${(u.text||'').substring(0,300)}${(u.text||'').length>300?'...':''}</div>
-          </div>`).join('')}
-      </div>` : ''}
-
-      <!-- Open Actions (client-facing only) -->
-      ${(p.decisions||[]).filter(d=>(Array.isArray(d)?d[3]:d.urg)==='red').length ? `
-      <div class="section-card" style="border-left:4px solid #9B1C1C;">
-        <div class="section-title">⚡ Items Requiring Your Attention</div>
-        ${(p.decisions||[]).filter(d=>(Array.isArray(d)?d[3]:d.urg)==='red').map(d=>`
-          <div style="padding:10px;background:#FFF5F5;border-radius:6px;margin-bottom:8px;">
-            <div style="font-size:13px;font-weight:600;color:#9B1C1C;margin-bottom:3px;">
-              ${Array.isArray(d)?d[0]:d.text}
-            </div>
-            <div style="font-size:11px;color:#8B9BB4">
-              Required from: ${Array.isArray(d)?d[1]:d.owner} &nbsp;·&nbsp; By: ${Array.isArray(d)?d[2]:d.deadline}
-            </div>
-          </div>`).join('')}
-      </div>` : ''}
-    `;
-
-    document.getElementById('portal-main').innerHTML = html;
-  }
-
-  // ── Real-time listener — auto-refresh when data changes ─────────────────
-  function setupRealtimeListener() {
-    onSnapshot(collection(db, 'projects'), snap => {
-      _projects = [];
-      snap.forEach(d => {
-        const p = d.data();
-        if (Array.isArray(p.milestones)) p.milestones = p.milestones.map(m=>Array.isArray(m)?m:{...m});
-        _projects.push(p);
-      });
-      _projects.sort((a,b)=>a.id.localeCompare(b.id));
-      if (_activeId) renderProject(_activeId);
-    });
-  }
-
-  loadProjects();
-</script>
-</body>
-</html>
+<div class="c" style="margin-bottom:12px"><h2>What changed in the updated workbook</h2><ul id="chg"></ul></div>
+<div class="c" style="margin-bottom:12px"><h2>Project scorecard</h2><div class="sc"><table id="tb"></table></div></div>
+<div class="grid"><div class="c"><h2>Governance documents &amp; health scores</h2><p class="note">Documents: green = in place · amber = partial · red = missing. Health: 100 / 70 / 40 per dimension, then weighted score.</p><div class="sc"><table class="hm" id="hm"></table></div></div>
+<div class="c"><h2>Data-quality &amp; model issues found in the workbook</h2><ul id="dq"></ul></div></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
+<script>
+const D=[{"id":"MW-001","n":"Lagos Central Bank Security Upgrade","t":"ELV / Security","s":"Execution - 1st Fix","fin":951.5,"ini":933.0,"var":18.5,"rev":824.3,"ar":20.1,"bac":761.2,"pv":418.66,"ev":654.632,"ac":304.53073,"eac":354.1055,"vac":407.0945,"spi":1.563636364,"cpi":2.149641844,"pl":0.55,"ac_":0.86,"h":"GREEN","rag":"Green","comp":0.62,"esc":"No","rfi":0,"ncr":0,"ov":0,"d":["Y","Y","Y","Y","Y","Y","Y","Y"],"hd":[100,100,100,100,100,100,100],"hs":100,"hf":"Green"},{"id":"MW-002","n":"Abuja Corporate Office MEP Fit-Out","t":"MEP","s":"Execution - 2nd Fix","fin":509.75,"ini":467.0,"var":42.75,"rev":261.8,"ar":7.3,"bac":407.8,"pv":289.538,"ev":207.978,"ac":178.72728,"eac":350.44564710000003,"vac":57.35435294,"spi":0.7183098592,"cpi":1.163661194,"pl":0.71,"ac_":0.51,"h":"RED","rag":"Red","comp":0.91,"esc":"No","rfi":6,"ncr":1,"ov":4,"d":["Y","P","Y","Y","P","P","Y","Y"],"hd":[70,40,100,40,40,70,40],"hs":56.5,"hf":"Red"},{"id":"MW-003","n":"Lekki Commercial Complex Electrical Works","t":"Electrical","s":"Execution - 1st Fix","fin":1659.2,"ini":1592.0,"var":67.2,"rev":1348.5,"ar":1.4,"bac":1327.36,"pv":743.3216,"ev":1061.888,"ac":574.54124,"eac":718.17655,"vac":609.18345,"spi":1.428571429,"cpi":1.848236342,"pl":0.56,"ac_":0.8,"h":"GREEN","rag":"Red","comp":0.83,"esc":"No","rfi":8,"ncr":3,"ov":4,"d":["P","Y","Y","Y","Y","Y","P","Y"],"hd":[70,100,100,40,40,70,40],"hs":68.5,"hf":"Red"},{"id":"MW-004","n":"Victoria Island Office HVAC Upgrade","t":"HVAC","s":"Execution - 2nd Fix","fin":1457.4,"ini":1362.0,"var":95.4,"rev":951.6,"ar":7.0,"bac":1165.92,"pv":956.0544,"ev":769.5072,"ac":469.03067,"eac":710.6525303,"vac":455.2674697,"spi":0.8048780488,"cpi":1.64063301,"pl":0.82,"ac_":0.66,"h":"RED","rag":"Red","comp":0.87,"esc":"No","rfi":3,"ncr":2,"ov":3,"d":["Y","N","Y","N","Y","P","N","Y"],"hd":[40,40,100,70,40,40,40],"hs":53.5,"hf":"Red"},{"id":"MW-005","n":"Gbagada Healthcare Facility ELV Works","t":"ELV / Security","s":"In Progress","fin":1675.6,"ini":1552.0,"var":123.6,"rev":1176.4,"ar":14.9,"bac":1340.48,"pv":831.0976,"ev":951.7408,"ac":677.35457,"eac":954.0205211,"vac":386.45947889999997,"spi":1.14516129,"cpi":1.40508508,"pl":0.62,"ac_":0.71,"h":"GREEN","rag":"Red","comp":0.67,"esc":"No","rfi":9,"ncr":2,"ov":1,"d":["P","Y","Y","Y","Y","P","Y","Y"],"hd":[70,40,100,100,40,70,40],"hs":65.5,"hf":"Red"},{"id":"MW-006","n":"Ikeja Data Centre Fire Protection","t":"Fire & Life Safety","s":"Planning","fin":1025.9,"ini":987.0,"var":38.9,"rev":247.8,"ar":12.2,"bac":820.72,"pv":566.2968,"ev":205.18,"ac":166.12961,"eac":664.51844,"vac":156.20156,"spi":0.3623188406,"cpi":1.235059783,"pl":0.69,"ac_":0.25,"h":"RED","rag":"Red","comp":0.89,"esc":"Yes","rfi":6,"ncr":4,"ov":2,"d":["Y","P","N","Y","Y","P","N","Y"],"hd":[40,40,100,70,70,40,40],"hs":56.5,"hf":"Red"},{"id":"MW-007","n":"Port Harcourt Industrial MEP Package","t":"MEP","s":"Execution - 1st Fix","fin":931.75,"ini":775.0,"var":156.75,"rev":438.6,"ar":2.8,"bac":745.4,"pv":275.798,"ev":350.338,"ac":155.95017,"eac":331.8088723,"vac":413.5911277,"spi":1.27027027,"cpi":2.246473986,"pl":0.37,"ac_":0.47,"h":"GREEN","rag":"Red","comp":0.91,"esc":"No","rfi":2,"ncr":1,"ov":3,"d":["N","Y","Y","P","N","Y","P","Y"],"hd":[40,40,100,70,40,70,40],"hs":56.5,"hf":"Red"},{"id":"MW-008","n":"Ibadan Residential Estate Electrical Works","t":"Electrical","s":"Execution - 2nd Fix","fin":960.3,"ini":886.0,"var":74.3,"rev":168.5,"ar":3.7,"bac":768.24,"pv":384.12,"ev":138.2832,"ac":246.65325,"eac":1370.295833,"vac":-602.0558332999999,"spi":0.36,"cpi":0.5606380617,"pl":0.5,"ac_":0.18,"h":"RED","rag":"Red","comp":0.93,"esc":"Yes","rfi":3,"ncr":2,"ov":3,"d":["Y","N","Y","Y","P","P","Y","Y"],"hd":[40,40,40,70,70,70,40],"hs":50.5,"hf":"Red"},{"id":"MW-009","n":"Abidjan Regional Office Security Systems","t":"ELV / Security","s":"Mobilising","fin":603.5,"ini":385.0,"var":218.5,"rev":493.7,"ar":12.4,"bac":482.8,"pv":226.916,"ev":391.068,"ac":636.2023,"eac":785.4349383,"vac":-302.6349383,"spi":1.723404255,"cpi":0.6146912704,"pl":0.47,"ac_":0.81,"h":"RED","rag":"Red","comp":0.9,"esc":"No","rfi":4,"ncr":2,"ov":5,"d":["Y","P","Y","Y","Y","Y","Y","P"],"hd":[70,40,40,40,40,70,40],"hs":47.5,"hf":"Red"},{"id":"MW-010","n":"Benin Solar Power Installation","t":"Electrical","s":"Execution - 1st Fix","fin":758.8,"ini":707.0,"var":51.8,"rev":571.2,"ar":4.8,"bac":607.04,"pv":455.28,"ev":455.28,"ac":230.77816,"eac":307.7042133,"vac":299.33578669999997,"spi":1.0,"cpi":1.972803666,"pl":0.75,"ac_":0.75,"h":"GREEN","rag":"Red","comp":0.69,"esc":"No","rfi":4,"ncr":1,"ov":3,"d":["Y","Y","Y","Y","Y","Y","N","N"],"hd":[100,40,100,100,40,40,40],"hs":67,"hf":"Red"},{"id":"MW-011","n":"Yaba Mixed-Use Development MEP","t":"MEP","s":"Tender","fin":953.4,"ini":821.0,"var":132.4,"rev":419.8,"ar":16.8,"bac":762.72,"pv":472.8864,"ev":472.8864,"ac":427.70818,"eac":689.8519032,"vac":72.86809677,"spi":1.0,"cpi":1.105628609,"pl":0.62,"ac_":0.62,"h":"GREEN","rag":"Red","comp":0.91,"esc":"Yes","rfi":5,"ncr":1,"ov":4,"d":["N","N","N","Y","Y","Y","P","N"],"hd":[40,40,100,100,70,40,40],"hs":61,"hf":"Red"},{"id":"MW-012","n":"Lekki Warehouse Fire & Life Safety","t":"Fire & Life Safety","s":"Award / Mobilisation","fin":1367.75,"ini":1081.0,"var":286.75,"rev":826.5,"ar":1.0,"bac":1094.2,"pv":711.23,"ev":656.52,"ac":467.52802,"eac":779.2133667,"vac":314.9866333,"spi":0.9230769231,"cpi":1.404236692,"pl":0.65,"ac_":0.6,"h":"AMBER","rag":"Red","comp":0.84,"esc":"Yes","rfi":5,"ncr":0,"ov":0,"d":["Y","Y","Y","Y","Y","Y","N","Y"],"hd":[100,40,100,70,100,40,40],"hs":68.5,"hf":"Red"},{"id":"MW-013","n":"Ajah Residential HVAC Installation","t":"HVAC","s":"Initiation","fin":1131.65,"ini":1048.0,"var":83.65,"rev":1021.8,"ar":11.0,"bac":905.32,"pv":488.8728,"ev":814.788,"ac":566.19299,"eac":629.1033222000001,"vac":276.2166778,"spi":1.666666667,"cpi":1.43906409,"pl":0.54,"ac_":0.9,"h":"GREEN","rag":"Red","comp":0.95,"esc":"No","rfi":0,"ncr":3,"ov":1,"d":["Y","P","Y","Y","N","Y","P","Y"],"hd":[70,40,100,40,40,70,40],"hs":56.5,"hf":"Red"},{"id":"MW-014","n":"Ilorin Government Office ELV Upgrade","t":"ELV / Security","s":"Planning","fin":1970.2,"ini":1796.0,"var":174.2,"rev":574.6,"ar":0.8,"bac":1576.16,"pv":409.8016,"ev":457.0864,"ac":241.69104,"eac":833.4173793,"vac":742.7426207000001,"spi":1.115384615,"cpi":1.891201263,"pl":0.26,"ac_":0.29,"h":"GREEN","rag":"Red","comp":0.78,"esc":"Yes","rfi":0,"ncr":4,"ov":5,"d":["N","Y","Y","P","Y","Y","Y","Y"],"hd":[40,40,100,70,70,70,40],"hs":59.5,"hf":"Red"},{"id":"MW-015","n":"Apapa Logistics Hub Mechanical Works","t":"Mechanical","s":"Execution - 1st Fix","fin":1553.5,"ini":1224.0,"var":329.5,"rev":1342.7,"ar":13.9,"bac":1242.8,"pv":981.812,"ev":1068.808,"ac":926.3039,"eac":1077.097558,"vac":165.7024419,"spi":1.088607595,"cpi":1.153841628,"pl":0.79,"ac_":0.86,"h":"GREEN","rag":"Red","comp":0.8,"esc":"No","rfi":3,"ncr":1,"ov":5,"d":["N","Y","Y","Y","Y","Y","Y","Y"],"hd":[40,40,100,100,40,70,40],"hs":61,"hf":"Red"},{"id":"MW-016","n":"Maryland Retail Centre Plumbing Package","t":"Plumbing","s":"Execution - 2nd Fix","fin":613.7,"ini":567.0,"var":46.7,"rev":396.9,"ar":14.5,"bac":490.96,"pv":319.124,"ev":314.2144,"ac":277.2515,"eac":433.2054688,"vac":57.75453125,"spi":0.9846153846,"cpi":1.133319026,"pl":0.65,"ac_":0.64,"h":"AMBER","rag":"Red","comp":0.82,"esc":"No","rfi":7,"ncr":3,"ov":2,"d":["Y","Y","Y","N","Y","Y","Y","Y"],"hd":[40,40,100,70,40,70,40],"hs":56.5,"hf":"Red"},{"id":"MW-017","n":"Ikoyi Premium Apartments Electrical","t":"Electrical","s":"In Progress","fin":845.85,"ini":650.0,"var":195.85,"rev":301.7,"ar":6.2,"bac":676.68,"pv":541.344,"ev":236.838,"ac":672.0416,"eac":1920.118857,"vac":-1243.438857,"spi":0.4375,"cpi":0.3524156838,"pl":0.8,"ac_":0.35,"h":"RED","rag":"Red","comp":0.79,"esc":"No","rfi":3,"ncr":0,"ov":5,"d":["Y","P","Y","Y","N","Y","Y","P"],"hd":[70,40,40,100,40,100,40],"hs":59.5,"hf":"Red"},{"id":"MW-018","n":"Abeokuta Manufacturing Plant MEP","t":"MEP","s":"Execution - 1st Fix","fin":713.3,"ini":601.0,"var":112.3,"rev":319.8,"ar":13.5,"bac":570.64,"pv":159.7792,"ev":256.788,"ac":310.82817,"eac":690.7292667,"vac":-120.0892667,"spi":1.607142857,"cpi":0.8261413372,"pl":0.28,"ac_":0.45,"h":"RED","rag":"Red","comp":0.86,"esc":"No","rfi":0,"ncr":4,"ov":5,"d":["N","Y","Y","Y","Y","Y","Y","P"],"hd":[40,40,40,40,40,70,40],"hs":43,"hf":"Red"},{"id":"MW-019","n":"Lagos HQ Access Control Expansion","t":"ELV / Security","s":"Execution - 2nd Fix","fin":620.6,"ini":363.0,"var":257.6,"rev":248.5,"ar":18.4,"bac":496.48,"pv":243.2752,"ev":203.5568,"ac":476.41037,"eac":1161.976512,"vac":-665.4965122000001,"spi":0.8367346939,"cpi":0.4272719756,"pl":0.49,"ac_":0.41,"h":"RED","rag":"Red","comp":0.89,"esc":"No","rfi":8,"ncr":3,"ov":2,"d":["P","N","Y","Y","Y","Y","Y","Y"],"hd":[40,40,40,100,40,70,40],"hs":52,"hf":"Red"},{"id":"MW-020","n":"Calabar Hospitality Development MEP","t":"MEP","s":"Mobilising","fin":1782.4,"ini":1417.0,"var":365.4,"rev":637.2,"ar":2.9,"bac":1425.92,"pv":698.7008,"ev":712.96,"ac":361.49744,"eac":722.99488,"vac":702.92512,"spi":1.020408163,"cpi":1.972240799,"pl":0.49,"ac_":0.5,"h":"GREEN","rag":"Green","comp":0.72,"esc":"No","rfi":0,"ncr":0,"ov":0,"d":["Y","Y","Y","Y","Y","Y","Y","Y"],"hd":[100,100,100,100,100,100,100],"hs":100,"hf":"Green"}];const hn=['Gov','Sched','Cost','Risk','Scope','Q&HSE','Rpt&Data'];
+const S=(a,f)=>a.reduce((s,x)=>s+f(x),0),f1=(x,d=2)=>x.toLocaleString('en',{maximumFractionDigits:d}),bn=x=>'₦'+f1(x/1000)+'bn';
+const T={bac:S(D,x=>x.bac),pv:S(D,x=>x.pv),ev:S(D,x=>x.ev),ac:S(D,x=>x.ac),eac:S(D,x=>x.eac),fin:S(D,x=>x.fin),ini:S(D,x=>x.ini),var:S(D,x=>x.var),rev:S(D,x=>x.rev),ar:S(D,x=>x.ar)};
+const spi=T.ev/T.pv,cpi=T.ev/T.ac,vac=T.bac-T.eac;
+const K=[['Portfolio value',bn(T.fin),'initial '+bn(T.ini)],['BAC (80% of award)',bn(T.bac),'workbook assumption'],['Earned value',bn(T.ev),f1(T.ev/T.bac*100,1)+'% of BAC'],['Actual cost',bn(T.ac),'PV '+bn(T.pv)],['SPI',f1(spi),'portfolio'],['CPI',f1(cpi),'portfolio'],['Forecast VAC',bn(vac),'EAC '+bn(T.eac)],['Revenue recognised',bn(T.rev),f1(T.rev/T.fin*100,1)+'% of award'],['Receivables',bn(T.ar),'cash ≈ revenue']];
+kpi.innerHTML=K.map(k=>`<div class="c"><span>${k[0]}</span><b>${k[1]}</b><i>${k[2]}</i></div>`).join('');
+const neg=D.filter(x=>x.vac<0),lowS=D.filter(x=>x.spi<0.85),both=D.filter(x=>x.spi<1&&x.cpi<1);
+ins.innerHTML=[
+`<b>On average the portfolio looks healthy:</b> SPI ${f1(spi)}, CPI ${f1(cpi)}, and a forecast underrun (VAC) of ${bn(vac)} against BAC.`,
+`<b>That average hides real trouble:</b> ${neg.length} projects (${neg.map(x=>x.id).join(', ')}) forecast overruns totalling ${bn(-S(neg,x=>x.vac))}, offset by large underruns elsewhere. ${both.length} projects (${both.map(x=>x.id).join(', ')}) are behind schedule <i>and</i> over cost.`,
+`<b>Worst performers:</b> MW-017 (CPI 0.35, SPI 0.44) and MW-019 (CPI 0.43) burn cost far faster than they earn value; MW-006 (SPI 0.36) and MW-008 (SPI 0.36) are badly behind. ${lowS.length} projects have SPI below the 0.85 critical line.`,
+`<b>Disciplines:</b> Fire &amp; Life Safety (SPI 0.67) and Electrical (SPI 0.89) lag on schedule; HVAC and MEP are the most cost-efficient (CPI 1.53 and 1.39).`,
+`<b>Commercial:</b> variations add ${bn(T.var)} (${f1(T.var/T.ini*100,1)}% on initial value); MW-019 (+71%), MW-009 (+57%) and MW-017 (+30%) grew most. Collection is strong: receivables are only ${bn(T.ar)}, and billed revenue is 98.5% collected.`,
+`<b>Health assessment agrees with the Red picture, but for process reasons:</b> 18 of 20 projects score Red (weighted score 43–100, average 62). Reporting &amp; Data is Red on 18 (only 2 have an evidence link) and Schedule is Red on 17 — 11 of those because forecast finish is later than revised finish even though SPI is at or above 0.85. Cost is Red only on the 5 overrun projects.`,
+`<b>EVM and forecast dates contradict each other:</b> MW-005, 007, 009, 013, 014, 015 and 018 are ahead of plan (SPI above 1) yet show 14–105 days of forecast slip. The slip values step up in near-regular multiples of 7 days from project to project, which looks like placeholder data.`,
+`<b>Reporting:</b> the register's report status now comes from the new reporting calendar. Its saved values show 3 projects Current, but that is a 21-Sep snapshot (it uses TODAY()); every report is due by 25-Sep, so all 20 are overdue as of today.`,
+`<b>Governance gaps:</b> ${D.filter(x=>x.d[0]!='Y').length} projects lack a full charter, ${D.filter(x=>x.d[1]!='Y').length} lack a full baseline schedule and ${D.filter(x=>x.d[6]!='Y').length} lack a full HSE plan; average PMO compliance is ${f1(S(D,x=>x.comp)/20*100,0)}%. There are ${S(D,x=>x.rfi)} open RFIs, ${S(D,x=>x.ncr)} NCRs and ${S(D,x=>x.ov)} variations.`].map(t=>`<li>${t}</li>`).join('');
+const cs=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const col={g:'#1a9d5c',a:'#e0a100',r:'#d64545',b:'#2f6fdd',p:'#8a6fdf',gr:'#9aa5b5'};
+function mk(id,type,data,opt={}){const tx=cs('--mu'),gd=cs('--bd');const sc=opt.noScale?{}:{x:{ticks:{color:tx,font:{size:10}},grid:{color:gd},...(opt.x||{})},y:{ticks:{color:tx,font:{size:10}},grid:{color:gd},...(opt.y||{})}};
+new Chart(document.getElementById(id),{type,data,plugins:opt.plugins||[],options:{responsive:true,maintainAspectRatio:false,indexAxis:opt.ax,scales:sc,plugins:{legend:{display:data.datasets.length>1,labels:{color:tx,boxWidth:10,font:{size:11}}},tooltip:opt.tt||{}},...(opt.o||{})}})}
+const ids=D.map(x=>x.id.slice(3)),ex=D.map(x=>x.id);
+const lab={id:'lab',afterDatasetsDraw(c){const x=c.ctx;x.fillStyle=cs('--tx');x.font='10px Arial';c.getDatasetMeta(0).data.forEach((p,i)=>{if(D[i].spi<0.85||D[i].cpi<0.85||D[i].spi>1.6||D[i].cpi>2)x.fillText(D[i].id.slice(3),p.x+8,p.y-6)})}};
+mk('c1','bubble',{datasets:[{data:D.map(x=>({x:x.spi,y:x.cpi,r:5+x.bac/150,id:x.id})),backgroundColor:D.map(x=>x.cpi<1&&x.spi<1?col.r+'cc':x.cpi<1||x.spi<1?col.a+'cc':col.g+'cc')}]},{x:{title:{display:true,text:'SPI',color:cs('--mu')},min:0,max:2},y:{title:{display:true,text:'CPI',color:cs('--mu')},min:0,max:2.4},plugins:[lab,{id:'q',beforeDraw(c){const{ctx:x,scales:{x:a,y:b}}=c;x.save();x.strokeStyle=cs('--mu');x.setLineDash([4,4]);x.beginPath();x.moveTo(a.getPixelForValue(1),b.top);x.lineTo(a.getPixelForValue(1),b.bottom);x.moveTo(a.left,b.getPixelForValue(1));x.lineTo(a.right,b.getPixelForValue(1));x.stroke();x.restore()}}],tt:{callbacks:{label:c=>`${c.raw.id}: SPI ${f1(c.raw.x)}, CPI ${f1(c.raw.y)}`}}});
+mk('c2','bar',{labels:ex,datasets:[{data:D.map(x=>Math.round(x.vac)),backgroundColor:D.map(x=>x.vac<0?col.r:col.g)}]},{x:{ticks:{color:cs('--mu'),font:{size:9},maxRotation:90}}});
+mk('c3','bar',{labels:ids,datasets:[{label:'PV',data:D.map(x=>Math.round(x.pv)),backgroundColor:col.gr},{label:'EV',data:D.map(x=>Math.round(x.ev)),backgroundColor:col.b},{label:'AC',data:D.map(x=>Math.round(x.ac)),backgroundColor:col.a}]});
+mk('c4','bar',{labels:ids,datasets:[{label:'Planned %',data:D.map(x=>x.pl*100),backgroundColor:col.gr},{label:'Actual %',data:D.map(x=>x.ac_*100),backgroundColor:col.b}]},{y:{max:100}});
+mk('c5','bar',{labels:ids,datasets:[{label:'Initial',data:D.map(x=>Math.round(x.ini)),backgroundColor:col.b},{label:'Variations',data:D.map(x=>Math.round(x.var)),backgroundColor:col.p}]},{x:{stacked:true},y:{stacked:true}});
+const cnt=(k,v)=>D.filter(x=>x[k]==v).length;
+mk('c6','bar',{labels:['Reported RAG','EVM health'],datasets:[['Green','GREEN',col.g],['Amber','AMBER',col.a],['Red','RED',col.r]].map(a=>({label:a[0],backgroundColor:a[2],data:[cnt('rag',a[0]),cnt('h',a[1])]}))},{ax:'y',x:{stacked:true},y:{stacked:true}});
+const ty=[...new Set(D.map(x=>x.t))].map(t=>{const a=D.filter(x=>x.t==t);return[t,S(a,x=>x.ev)/S(a,x=>x.pv),S(a,x=>x.ev)/S(a,x=>x.ac)]});
+mk('c7','bar',{labels:ty.map(a=>a[0]),datasets:[{label:'SPI',data:ty.map(a=>+a[1].toFixed(2)),backgroundColor:col.b},{label:'CPI',data:ty.map(a=>+a[2].toFixed(2)),backgroundColor:col.g}]},{x:{ticks:{color:cs('--mu'),font:{size:9}}}});
+mk('c8','bar',{labels:ids,datasets:[{label:'RFIs',data:D.map(x=>x.rfi),backgroundColor:col.b},{label:'NCRs',data:D.map(x=>x.ncr),backgroundColor:col.r},{label:'Variations',data:D.map(x=>x.ov),backgroundColor:col.p}]},{x:{stacked:true},y:{stacked:true}});
+mk('c9','bar',{labels:hn,datasets:[['Green',100,col.g],['Amber',70,col.a],['Red',40,col.r]].map(a=>({label:a[0],backgroundColor:a[2],data:hn.map((_,i)=>D.filter(x=>x.hd[i]==a[1]).length)}))},{ax:'y',x:{stacked:true},y:{stacked:true}});
+const cl=(v,t)=>`<td class="${v<0.85?'bad':v>=1?'ok':''}">${f1(v)}</td>`;
+tb.innerHTML='<tr><th>ID</th><th>Project</th><th>Type</th><th>Award ₦m</th><th>Plan %</th><th>Act %</th><th>SPI</th><th>CPI</th><th>VAC ₦m</th><th>EVM</th><th>RAG</th><th>Health</th><th>PMO %</th><th>Esc.</th></tr>'+D.map(x=>`<tr><td>${x.id}</td><td>${x.n}</td><td>${x.t}</td><td>${f1(x.fin,0)}</td><td>${f1(x.pl*100,0)}</td><td>${f1(x.ac_*100,0)}</td>${cl(x.spi)}${cl(x.cpi)}<td class="${x.vac<0?'bad':''}">${f1(x.vac,0)}</td><td><span class="p ${x.h}">${x.h}</span></td><td><span class="p ${x.rag}">${x.rag}</span></td><td><span class="p ${x.hf}">${f1(x.hs,0)}</span></td><td>${f1(x.comp*100,0)}</td><td>${x.esc}</td></tr>`).join('');
+const dn=['Charter','Base. sched.','Base. budget','Risk reg.','Procure.','Quality','HSE','Report'],cm={Y:'Yes',P:'Partial',N:'No'},hc=v=>v>=100?'Yes':v>=70?'Partial':'No';
+hm.innerHTML='<tr><th>Project</th>'+dn.concat(hn,['Score']).map(d=>`<th style="text-align:center;font-size:10px">${d}</th>`).join('')+'</tr>'+D.map(x=>`<tr><td>${x.id}</td>${x.d.map(v=>`<td><span class="${cm[v]}" title="${cm[v]}"></span></td>`).join('')}${x.hd.map(v=>`<td><span class="${hc(v)}" title="${v}"></span></td>`).join('')}<td>${f1(x.hs,0)}</td></tr>`).join('');
+dq.innerHTML=[
+'<b>Still not fixed — EVM block on the register</b> (rows 77–80): BAC sums PV, PV sums EV, EV sums PV and AC sums EV, so its SPI, CPI and EAC are wrong. The BI Dashboard sheet shows the correct BAC/PV/EV/AC, and this page recomputes everything from project rows.',
+'<b>Still not fixed — Average PMO Compliance shows 0.8%</b> on the BI Dashboard and Portfolio Summary (fractions divided by 100 again). Real average is 83%.',
+'<b>Still not fixed — register total row shows EVM health RED</b> because its SPI/CPI cells are blank, and register collection efficiency divides AC by revenue. The Commercial BI sheet has the correct 98.5%.',
+'<b>Still present — date logic:</b> revised planned finish is earlier than the original planned finish on all 20 rows and Actual Finish is filled on all 20 in-progress projects. The new schedule health score relies on these dates.',
+'<b>Health rule vs formula mismatch:</b> the rules sheet says EAC above BAC = Amber for cost, but the formula scores it Red, so amber cost is only reachable through CPI 0.85–0.99.',
+'<b>Classification not done:</b> 19 of 20 projects are "Not Assessed", so they stay Unclassified with a 0 score and are put on a weekly reporting cadence.',
+'<b>Placeholder-looking data:</b> cash collected equals recognised revenue on every row, approved variations equal open variation exposure, BAC is fixed at 80% of award, and Approved Budget, Forecast Cost, Priority, Sponsor and Benefits are empty.',
+'<b>Data status:</b> 14 rows tagged illustrative/test, 5 validated, 1 data-deficient, yet the summary Data Deficient count reads 0. The health weights and thresholds are marked as a controlled draft, not board-approved.'].map(t=>`<li>${t}</li>`).join('');
+chg.innerHTML=['<b>Project data is unchanged.</b> All 20 project rows match the earlier file except report status, so the earlier SPI, CPI, EAC and RAG findings still hold.','<b>New sheets:</b> BI Dashboard (with charts), Commercial BI, Classification Matrix, PMO Reporting Calendar, PMO RACI, Project Health Assessment, Health Assessment Rules, Register Control Map, plus instructions and a field guide.','<b>Commercial BI</b> confirms the figures here: revenue is 56.9% of award, billing 57.8%, collection 98.5%, receivables 1.5% of billing and variation exposure 13.0% of award.','<b>Report Status</b> (register column BG) is now calculated from the reporting calendar instead of typed in.'].map(t=>`<li>${t}</li>`).join('');
+</script></body></html>
